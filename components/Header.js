@@ -31,7 +31,6 @@ export default function Header({ onOpenCart }) {
           <div className="nav-links">
             <Link href="/">الرئيسية</Link>
             <Link href="/orders">طلباتي</Link>
-            <Link href="/admin">لوحة التحكم</Link>
           </div>
           <div className="nav-actions">
             <button className={`cart-btn ${bump ? "bump" : ""}`} onClick={onOpenCart} aria-label="سلة المشتريات">

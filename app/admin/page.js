@@ -37,7 +37,7 @@ export default function AdminPage() {
     <div className="admin-wrap">
       <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }}><h2>لوحة تحكم المنتجات</h2></div>
       <div className="admin-banner">
-        هذه لوحة تحكم تجريبية غير محمية — أي زائر يمكنه فتحها والتعديل. في موقع إنتاجي حقيقي يجب حمايتها بتسجيل دخول للمشرف يتم التحقق منه على خادم آمن قبل السماح بأي تعديل.
+        هذه الصفحة محمية بكلمة سر (Basic Auth) على مستوى الخادم. لا تشارك رابط أو كلمة سر لوحة التحكم مع أحد لا تثق فيه.
       </div>
       <form onSubmit={handleSubmit}>
         <div className="admin-grid">
