@@ -24,7 +24,11 @@ export default function ProductCard({ p }) {
   return (
     <Link href={`/product/${p.id}`} className="card" ref={ref} onMouseMove={onMove} onMouseLeave={onLeave}>
       <div className="card-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
-        <div className="icon-box"><IconSvg name={p.icon} /></div>
+        {p.image ? (
+          <img src={p.image} alt={p.name} loading="lazy" />
+        ) : (
+          <div className="icon-box"><IconSvg name={p.icon} /></div>
+        )}
         <div className="tag">{catLabel[p.cat]}</div>
       </div>
       <div className="card-body" style={{ "--c": `var(${catCssVar[p.cat]})` }}>

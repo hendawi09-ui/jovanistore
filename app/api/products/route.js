@@ -9,6 +9,7 @@ function toClient(row) {
     name: row.name,
     desc: row.description,
     price: Number(row.price),
+    image: row.image_url || null,
   };
 }
 
@@ -29,6 +30,7 @@ export async function POST(req) {
         name: body.name,
         description: body.desc,
         price: body.price,
+        image_url: body.image || null,
       },
     ])
     .select();

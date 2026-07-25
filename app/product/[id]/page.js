@@ -24,7 +24,11 @@ export default function ProductDetailPage() {
   return (
     <div className="pd">
       <div className="pd-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
-        <div className="icon-box"><IconSvg name={p.icon} /></div>
+        {p.image ? (
+          <img src={p.image} alt={p.name} />
+        ) : (
+          <div className="icon-box"><IconSvg name={p.icon} /></div>
+        )}
       </div>
       <div className="pd-info">
         <div className="breadcrumb"><Link href="/">الرئيسية</Link> / {catLabel[p.cat]}</div>

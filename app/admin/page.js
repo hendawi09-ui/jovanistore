@@ -7,7 +7,7 @@ import { showToast } from "@/components/Toast";
 
 export default function AdminPage() {
   const { products, addProduct, deleteProduct } = useStore();
-  const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "" });
+  const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "", image: "" });
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -21,10 +21,11 @@ export default function AdminPage() {
       name: form.name,
       desc: form.desc || "منتج جديد من Jovani Store.",
       price: Number(form.price),
+      image: form.image || null,
     }).then((ok) => {
       showToast(ok ? "تمت إضافة المنتج" : "حدث خطأ أثناء الحفظ");
     });
-    setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "" });
+    setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "", image: "" });
   }
 
   function handleDelete(id) {
@@ -58,13 +59,19 @@ export default function AdminPage() {
           </div>
         </div>
         <div className="field"><label>الوصف</label><textarea rows={2} name="desc" value={form.desc} onChange={handleChange} /></div>
+        <div className="field">
+          <label>رابط الصورة (اختياري — لو فاضي هتظهر أيقونة بدلًا منها)</label>
+          <input name="image" value={form.image} onChange={handleChange} placeholder="https://..." />
+        </div>
         <button type="submit" className="btn-primary">إضافة المنتج</button>
       </form>
 
       <div className="admin-list">
         {products.map((p) => (
           <div className="admin-row" key={p.id}>
-            <div className="icon-box" style={{ "--c": `var(${catCssVar[p.cat]})` }}><IconSvg name={p.icon} /></div>
+            <div className="icon-box" style={{ "--c": `var(${catCssVar[p.cat]})`, overflow: "hidden" }}>
+              {p.image ? <img src={p.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <IconSvg name={p.icon} />}
+            </div>
             <div className="ainfo"><h4>{p.name}</h4><span>{catLabel[p.cat]} · {p.price} ج.م</span></div>
             <button className="del-btn" onClick={() => handleDelete(p.id)}>حذف</button>
           </div>
