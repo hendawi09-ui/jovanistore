@@ -21,7 +21,7 @@ function HomeContent() {
     <>
       <section className="hero">
         <div>
-          <div className="hero-eyebrow">تشكيلة 2026 وصلت</div>
+          <div className="hero-eyebrow"><span className="pulse-dot"></span>تشكيلة 2026 وصلت</div>
           <h1>مرحبًا بك في<br /><span className="arc-word">Jovani Store</span></h1>
           <p>ملابس رجالية ونسائية في مكان واحد، بجودة نثق بها وأسعار عادلة — اختر أسلوبك اليوم.</p>
           <div className="hero-ctas">
@@ -31,8 +31,8 @@ function HomeContent() {
         </div>
         <div className="hero-art">
           <svg viewBox="0 0 600 340" preserveAspectRatio="xMidYMid meet">
-            <path className="arc-path" d="M 50 300 Q 300 40 550 300" pathLength="1000" stroke="#0D0D0D" strokeWidth="20" style={{ animationDelay: ".05s" }} />
-            <path className="arc-path" d="M 90 300 Q 300 100 510 300" pathLength="1000" stroke="#E31B23" strokeWidth="20" style={{ animationDelay: ".25s" }} />
+            <path className="arc-path" d="M 40 300 Q 300 20 560 300" pathLength="1000" stroke="#0D0D0D" strokeWidth="26" style={{ animationDelay: ".05s" }} />
+            <path className="arc-path" d="M 85 300 Q 300 90 515 300" pathLength="1000" stroke="#E31B23" strokeWidth="26" style={{ animationDelay: ".25s" }} />
           </svg>
         </div>
       </section>
