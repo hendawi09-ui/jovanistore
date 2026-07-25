@@ -21,14 +21,16 @@ export default function AdminPage() {
       name: form.name,
       desc: form.desc || "منتج جديد من Jovani Store.",
       price: Number(form.price),
+    }).then((ok) => {
+      showToast(ok ? "تمت إضافة المنتج" : "حدث خطأ أثناء الحفظ");
     });
     setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "" });
-    showToast("تمت إضافة المنتج");
   }
 
   function handleDelete(id) {
-    deleteProduct(id);
-    showToast("تم حذف المنتج");
+    deleteProduct(id).then((ok) => {
+      showToast(ok ? "تم حذف المنتج" : "حدث خطأ أثناء الحذف");
+    });
   }
 
   return (

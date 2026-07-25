@@ -25,13 +25,13 @@ export default function CheckoutPage() {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const items = ids.map((id) => {
       const p = products.find((x) => x.id == id);
       return { name: p.name, qty: cart[id], price: p.price };
     });
-    placeOrder(form, items, cartTotal);
+    await placeOrder(form, items, cartTotal);
     showToast("تم تأكيد طلبك بنجاح 🎉");
     router.push("/orders");
   }
