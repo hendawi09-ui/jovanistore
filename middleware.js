@@ -11,6 +11,11 @@ export function middleware(req) {
     return NextResponse.next();
   }
 
+  // إنشاء طلب جديد وعرض الطلبات لازم يفضلوا عموميين (يستخدمهم العميل من صفحة الدفع وطلباتي)
+  if (pathname.startsWith("/api/orders") && (req.method === "GET" || req.method === "POST")) {
+    return NextResponse.next();
+  }
+
   const auth = req.headers.get("authorization");
   if (auth) {
     const [scheme, encoded] = auth.split(" ");
@@ -36,7 +41,7 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/products/:path*", "/api/upload/:path*"],
+  matcher: ["/admin/:path*", "/api/products/:path*", "/api/upload/:path*", "/api/orders/:path*"],
 };
 
 

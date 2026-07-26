@@ -203,6 +203,10 @@ export default function AdminPage() {
 
   return (
     <div className="admin-wrap">
+      <div className="admin-tabs">
+        <span className="admin-tab active">المنتجات</span>
+        <a href="/admin/orders" className="admin-tab">طلبات الشراء</a>
+      </div>
       <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }} ref={formTopRef}>
         <h2>{editingId ? "تعديل منتج" : "إضافة منتج جديد"}</h2>
         {editingId && (
