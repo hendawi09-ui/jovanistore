@@ -1,15 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg, icons } from "@/lib/icons";
 import { catCssVar, catLabel } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
 export default function AdminPage() {
-  const { products, addProduct, deleteProduct, moveProduct } = useStore();
+  const { products, addProduct, deleteProduct, reorderProducts } = useStore();
   const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "" });
   const [images, setImages] = useState([]); // uploaded image URLs for the product being added
   const [uploading, setUploading] = useState(false);
+
+  const dragId = useRef(null);
+  const [dragOverId, setDragOverId] = useState(null);
+  const [reordering, setReordering] = useState(false);
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -64,10 +68,36 @@ export default function AdminPage() {
     });
   }
 
-  function handleMove(id, direction) {
-    moveProduct(id, direction).then((ok) => {
-      if (!ok) showToast("حدث خطأ أثناء إعادة الترتيب");
-    });
+  // ------- سحب وإفلات لإعادة الترتيب -------
+  function onDragStart(id) {
+    dragId.current = id;
+  }
+  function onDragOver(e, id) {
+    e.preventDefault();
+    if (id !== dragId.current) setDragOverId(id);
+  }
+  function onDragLeave() {
+    setDragOverId(null);
+  }
+  async function onDrop(e, targetId) {
+    e.preventDefault();
+    setDragOverId(null);
+    const sourceId = dragId.current;
+    dragId.current = null;
+    if (!sourceId || sourceId === targetId) return;
+
+    const ids = products.map((p) => p.id);
+    const from = ids.indexOf(sourceId);
+    const to = ids.indexOf(targetId);
+    if (from === -1 || to === -1) return;
+
+    ids.splice(from, 1);
+    ids.splice(to, 0, sourceId);
+
+    setReordering(true);
+    const ok = await reorderProducts(ids);
+    setReordering(false);
+    if (!ok) showToast("حدث خطأ أثناء إعادة الترتيب");
   }
 
   return (
@@ -115,32 +145,34 @@ export default function AdminPage() {
         <button type="submit" className="btn-primary" disabled={uploading}>إضافة المنتج</button>
       </form>
 
-      <div className="section-head" style={{ margin: "36px 0 4px", padding: 0 }}>
-        <span style={{ fontSize: "13px" }}>استخدم الأسهم لتغيير ترتيب ظهور المنتجات في الموقع</span>
+      <div className="section-head" style={{ margin: "40px 0 16px", padding: 0, alignItems: "center" }}>
+        <h2 style={{ fontSize: "20px" }}>ترتيب عرض المنتجات ({products.length})</h2>
+        <span style={{ fontSize: "12.5px" }}>اسحب أي بطاقة وأفلتها في المكان اللي تحبه</span>
       </div>
-      <div className="admin-list">
-        {products.map((p, i) => (
-          <div className="admin-row" key={p.id}>
-            <div className="reorder-arrows">
-              <button
-                className="reorder-btn"
-                onClick={() => handleMove(p.id, "up")}
-                disabled={i === 0}
-                aria-label="نقل لأعلى"
-              >▲</button>
-              <button
-                className="reorder-btn"
-                onClick={() => handleMove(p.id, "down")}
-                disabled={i === products.length - 1}
-                aria-label="نقل لأسفل"
-              >▼</button>
+
+      <div className="admin-product-grid">
+        {products.map((p) => (
+          <div
+            key={p.id}
+            draggable
+            onDragStart={() => onDragStart(p.id)}
+            onDragOver={(e) => onDragOver(e, p.id)}
+            onDragLeave={onDragLeave}
+            onDrop={(e) => onDrop(e, p.id)}
+            className={`admin-pcard ${dragOverId === p.id ? "drag-over" : ""} ${reordering ? "reordering" : ""}`}
+          >
+            <div className="admin-pcard-handle" title="اسحب لإعادة الترتيب">⠿⠿</div>
+            <div className="admin-pcard-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
+              {p.images && p.images[0] ? (
+                <img src={p.images[0]} alt="" />
+              ) : (
+                <div className="icon-box"><IconSvg name={p.icon} /></div>
+              )}
+              <span className="admin-pcard-tag">{catLabel[p.cat]}</span>
             </div>
-            <div className="icon-box" style={{ "--c": `var(${catCssVar[p.cat]})`, overflow: "hidden" }}>
-              {p.images && p.images[0] ? <img src={p.images[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <IconSvg name={p.icon} />}
-            </div>
-            <div className="ainfo">
+            <div className="admin-pcard-body">
               <h4>{p.name}</h4>
-              <span>{catLabel[p.cat]} · {p.price} ج.م{p.images && p.images.length > 1 ? ` · ${p.images.length} صور` : ""}</span>
+              <span>{p.price} ج.م{p.images && p.images.length > 1 ? ` · ${p.images.length} صور` : ""}</span>
             </div>
             <button className="del-btn" onClick={() => handleDelete(p.id)}>حذف</button>
           </div>
