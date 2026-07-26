@@ -7,7 +7,7 @@ import { showToast } from "@/components/Toast";
 
 export default function AdminPage() {
   const { products, addProduct, deleteProduct, reorderProducts } = useStore();
-  const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "" });
+  const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" });
   const [images, setImages] = useState([]); // uploaded image URLs for the product being added
   const [uploading, setUploading] = useState(false);
 
@@ -48,6 +48,8 @@ export default function AdminPage() {
 
   function handleSubmit(e) {
     e.preventDefault();
+    const colors = form.colors.split(",").map((s) => s.trim()).filter(Boolean);
+    const sizes = form.sizes.split(",").map((s) => s.trim()).filter(Boolean);
     addProduct({
       cat: form.cat,
       icon: form.icon,
@@ -55,10 +57,12 @@ export default function AdminPage() {
       desc: form.desc || "منتج جديد من Jovani Store.",
       price: Number(form.price),
       images,
+      colors,
+      sizes,
     }).then((ok) => {
       showToast(ok ? "تمت إضافة المنتج" : "حدث خطأ أثناء الحفظ");
     });
-    setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "" });
+    setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" });
     setImages([]);
   }
 
@@ -126,6 +130,17 @@ export default function AdminPage() {
         </div>
         <div className="field"><label>الوصف</label><textarea rows={2} name="desc" value={form.desc} onChange={handleChange} /></div>
 
+        <div className="admin-grid">
+          <div className="field">
+            <label>الألوان المتاحة (اختياري — افصل بينهم بفاصلة)</label>
+            <input name="colors" value={form.colors} onChange={handleChange} placeholder="أحمر, أسود, أزرق" />
+          </div>
+          <div className="field">
+            <label>المقاسات المتاحة (اختياري — افصل بينهم بفاصلة)</label>
+            <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="S, M, L, XL" />
+          </div>
+        </div>
+
         <div className="field">
           <label>صور المنتج (أول صورة بتبقى الرئيسية — تقدر تختار أكتر من صورة مرة واحدة)</label>
           <input type="file" accept="image/*" multiple onChange={handleFilesSelected} disabled={uploading} />
@@ -173,6 +188,12 @@ export default function AdminPage() {
             <div className="admin-pcard-body">
               <h4>{p.name}</h4>
               <span>{p.price} ج.م{p.images && p.images.length > 1 ? ` · ${p.images.length} صور` : ""}</span>
+              {(p.colors?.length > 0 || p.sizes?.length > 0) && (
+                <div className="admin-pcard-variants">
+                  {p.colors?.length > 0 && <span>{p.colors.length} ألوان</span>}
+                  {p.sizes?.length > 0 && <span>{p.sizes.length} مقاسات</span>}
+                </div>
+              )}
             </div>
             <button className="del-btn" onClick={() => handleDelete(p.id)}>حذف</button>
           </div>

@@ -17,6 +17,8 @@ function toClient(row) {
     price: Number(row.price),
     images,
     image: images[0] || null, // توافق مع أي كود قديم بيستخدم صورة واحدة
+    colors: Array.isArray(row.colors) ? row.colors.filter(Boolean) : [],
+    sizes: Array.isArray(row.sizes) ? row.sizes.filter(Boolean) : [],
   };
 }
 
@@ -33,6 +35,8 @@ export async function GET() {
 export async function POST(req) {
   const body = await req.json();
   const images = Array.isArray(body.images) ? body.images.filter(Boolean) : [];
+  const colors = Array.isArray(body.colors) ? body.colors.filter(Boolean) : [];
+  const sizes = Array.isArray(body.sizes) ? body.sizes.filter(Boolean) : [];
   const { data, error } = await supabase
     .from("products")
     .insert([
@@ -44,6 +48,8 @@ export async function POST(req) {
         price: body.price,
         image_urls: images.length > 0 ? images : null,
         image_url: images[0] || null,
+        colors: colors.length > 0 ? colors : null,
+        sizes: sizes.length > 0 ? sizes : null,
       },
     ])
     .select();

@@ -7,7 +7,7 @@ import { catCssVar } from "@/lib/products";
 export default function CartDrawer({ open, onClose }) {
   const { cart, products, cartTotal, changeQty, removeItem } = useStore();
   const router = useRouter();
-  const ids = Object.keys(cart).filter((id) => products.some((p) => p.id == id));
+  const entries = Object.entries(cart).filter(([, e]) => products.some((p) => p.id == e.id));
 
   return (
     <>
@@ -18,25 +18,31 @@ export default function CartDrawer({ open, onClose }) {
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
         <div className="drawer-items">
-          {ids.length === 0 ? (
+          {entries.length === 0 ? (
             <div className="cart-empty">سلتك فارغة حاليًا<br />ابدأ التسوّق واختر ما يعجبك</div>
           ) : (
-            ids.map((id) => {
-              const p = products.find((x) => x.id == id);
+            entries.map(([key, entry]) => {
+              const p = products.find((x) => x.id == entry.id);
+              const variantLabel = [entry.color, entry.size].filter(Boolean).join(" · ");
               return (
-                <div className="cart-item" key={id}>
-                  <div className="icon-box" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
-                    <IconSvg name={p.icon} />
-                  </div>
+                <div className="cart-item" key={key}>
+                  {p.images && p.images[0] ? (
+                    <img src={p.images[0]} alt="" className="cart-item-img" />
+                  ) : (
+                    <div className="icon-box" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
+                      <IconSvg name={p.icon} />
+                    </div>
+                  )}
                   <div className="cart-item-info">
                     <h4>{p.name}</h4>
+                    {variantLabel && <div className="cvariant">{variantLabel}</div>}
                     <div className="cprice">{p.price} ج.م</div>
                     <div className="qty-ctrl">
-                      <button onClick={() => changeQty(p.id, -1)}>−</button>
-                      <span>{cart[id]}</span>
-                      <button onClick={() => changeQty(p.id, 1)}>+</button>
+                      <button onClick={() => changeQty(key, -1)}>−</button>
+                      <span>{entry.qty}</span>
+                      <button onClick={() => changeQty(key, 1)}>+</button>
                     </div>
-                    <button className="rm-btn" onClick={() => removeItem(p.id)}>إزالة</button>
+                    <button className="rm-btn" onClick={() => removeItem(key)}>إزالة</button>
                   </div>
                 </div>
               );

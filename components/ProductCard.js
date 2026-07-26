@@ -92,12 +92,16 @@ export default function ProductCard({ p }) {
         <div className="desc">{p.desc}</div>
         <div className="card-foot">
           <div className="price">{p.price} ج.م</div>
-          <button
-            className="add-btn"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(p.id); showToast('أُضيف المنتج إلى سلتك ✓'); }}
-          >
-            أضف للسلة
-          </button>
+          {p.colors?.length > 0 || p.sizes?.length > 0 ? (
+            <span className="add-btn add-btn-link">اختر التفاصيل</span>
+          ) : (
+            <button
+              className="add-btn"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(p.id); showToast('أُضيف المنتج إلى سلتك ✓'); }}
+            >
+              أضف للسلة
+            </button>
+          )}
         </div>
       </div>
     </Link>

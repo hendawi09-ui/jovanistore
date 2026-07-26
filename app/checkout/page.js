@@ -10,9 +10,9 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", phone: "", city: "", address: "", pay: "cod" });
 
-  const ids = Object.keys(cart).filter((id) => products.some((p) => p.id == id));
+  const entries = Object.entries(cart).filter(([, e]) => products.some((p) => p.id == e.id));
 
-  if (ids.length === 0) {
+  if (entries.length === 0) {
     return (
       <div className="empty-state">
         سلتك فارغة، أضف بعض المنتجات أولًا.<br /><br />
@@ -27,9 +27,16 @@ export default function CheckoutPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const items = ids.map((id) => {
-      const p = products.find((x) => x.id == id);
-      return { name: p.name, qty: cart[id], price: p.price };
+    const items = entries.map(([, entry]) => {
+      const p = products.find((x) => x.id == entry.id);
+      const variantLabel = [entry.color, entry.size].filter(Boolean).join(" · ");
+      return {
+        name: variantLabel ? `${p.name} (${variantLabel})` : p.name,
+        qty: entry.qty,
+        price: p.price,
+        color: entry.color || null,
+        size: entry.size || null,
+      };
     });
     await placeOrder(form, items, cartTotal);
     showToast("تم تأكيد طلبك بنجاح 🎉");
@@ -58,12 +65,13 @@ export default function CheckoutPage() {
       </div>
       <div className="summary-card">
         <h2>ملخص الطلب</h2>
-        {ids.map((id) => {
-          const p = products.find((x) => x.id == id);
+        {entries.map(([key, entry]) => {
+          const p = products.find((x) => x.id == entry.id);
+          const variantLabel = [entry.color, entry.size].filter(Boolean).join(" · ");
           return (
-            <div className="summary-row" key={id}>
-              <span>{p.name} × {cart[id]}</span>
-              <span>{p.price * cart[id]} ج.م</span>
+            <div className="summary-row" key={key}>
+              <span>{p.name}{variantLabel ? ` (${variantLabel})` : ""} × {entry.qty}</span>
+              <span>{p.price * entry.qty} ج.م</span>
             </div>
           );
         })}
