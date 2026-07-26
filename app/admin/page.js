@@ -7,18 +7,43 @@ import { showToast } from "@/components/Toast";
 
 export default function AdminPage() {
   const { products, addProduct, deleteProduct } = useStore();
-  const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "", images: "" });
+  const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "" });
+  const [images, setImages] = useState([]); // uploaded image URLs for the product being added
+  const [uploading, setUploading] = useState(false);
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
 
+  async function handleFilesSelected(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setUploading(true);
+    for (const file of files) {
+      const fd = new FormData();
+      fd.append("file", file);
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        if (res.ok && data.url) {
+          setImages((prev) => [...prev, data.url]);
+        } else {
+          showToast(data.error || "فشل رفع صورة");
+        }
+      } catch {
+        showToast("فشل رفع صورة");
+      }
+    }
+    setUploading(false);
+    e.target.value = "";
+  }
+
+  function removeImage(idx) {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
-    const images = form.images
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
     addProduct({
       cat: form.cat,
       icon: form.icon,
@@ -29,7 +54,8 @@ export default function AdminPage() {
     }).then((ok) => {
       showToast(ok ? "تمت إضافة المنتج" : "حدث خطأ أثناء الحفظ");
     });
-    setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "", images: "" });
+    setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "" });
+    setImages([]);
   }
 
   function handleDelete(id) {
@@ -56,24 +82,31 @@ export default function AdminPage() {
             </select>
           </div>
           <div className="field">
-            <label>الأيقونة</label>
+            <label>الأيقونة (تظهر لو مفيش صور)</label>
             <select className="admin-select" name="icon" value={form.icon} onChange={handleChange}>
               {Object.keys(icons).map((k) => <option key={k} value={k}>{k}</option>)}
             </select>
           </div>
         </div>
         <div className="field"><label>الوصف</label><textarea rows={2} name="desc" value={form.desc} onChange={handleChange} /></div>
+
         <div className="field">
-          <label>روابط الصور (اختياري — حط كل رابط في سطر لوحده، أول رابط بيبقى الصورة الرئيسية)</label>
-          <textarea
-            rows={3}
-            name="images"
-            value={form.images}
-            onChange={handleChange}
-            placeholder={"https://example.com/1.jpg\nhttps://example.com/2.jpg"}
-          />
+          <label>صور المنتج (أول صورة بتبقى الرئيسية — تقدر تختار أكتر من صورة مرة واحدة)</label>
+          <input type="file" accept="image/*" multiple onChange={handleFilesSelected} disabled={uploading} />
+          {uploading && <div className="note-box" style={{ marginTop: 10 }}>جارِ رفع الصور...</div>}
+          {images.length > 0 && (
+            <div className="upload-preview">
+              {images.map((src, i) => (
+                <div className="upload-thumb" key={i}>
+                  <img src={src} alt="" />
+                  <button type="button" onClick={() => removeImage(i)}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <button type="submit" className="btn-primary">إضافة المنتج</button>
+
+        <button type="submit" className="btn-primary" disabled={uploading}>إضافة المنتج</button>
       </form>
 
       <div className="admin-list">
