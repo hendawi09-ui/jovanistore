@@ -5,11 +5,15 @@ import { IconSvg, icons } from "@/lib/icons";
 import { catCssVar, catLabel } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
+const emptyForm = { name: "", price: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" };
+
 export default function AdminPage() {
-  const { products, addProduct, deleteProduct, reorderProducts } = useStore();
-  const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" });
-  const [images, setImages] = useState([]); // uploaded image URLs for the product being added
+  const { products, addProduct, updateProduct, deleteProduct, reorderProducts } = useStore();
+  const [form, setForm] = useState(emptyForm);
+  const [images, setImages] = useState([]); // uploaded image URLs for the product being added/edited
   const [uploading, setUploading] = useState(false);
+  const [editingId, setEditingId] = useState(null); // null = وضع إضافة، غير null = وضع تعديل
+  const formTopRef = useRef(null);
 
   const dragId = useRef(null);
   const [dragOverId, setDragOverId] = useState(null);
@@ -46,11 +50,32 @@ export default function AdminPage() {
     setImages((prev) => prev.filter((_, i) => i !== idx));
   }
 
+  function startEdit(p) {
+    setEditingId(p.id);
+    setForm({
+      name: p.name || "",
+      price: String(p.price ?? ""),
+      cat: p.cat || "men",
+      icon: p.icon || "shirt",
+      desc: p.desc || "",
+      colors: (p.colors || []).join(", "),
+      sizes: (p.sizes || []).join(", "),
+    });
+    setImages(p.images || []);
+    formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setForm(emptyForm);
+    setImages([]);
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     const colors = form.colors.split(",").map((s) => s.trim()).filter(Boolean);
     const sizes = form.sizes.split(",").map((s) => s.trim()).filter(Boolean);
-    addProduct({
+    const payload = {
       cat: form.cat,
       icon: form.icon,
       name: form.name,
@@ -59,10 +84,20 @@ export default function AdminPage() {
       images,
       colors,
       sizes,
-    }).then((ok) => {
-      showToast(ok ? "تمت إضافة المنتج" : "حدث خطأ أثناء الحفظ");
-    });
-    setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" });
+    };
+
+    if (editingId) {
+      updateProduct(editingId, payload).then((ok) => {
+        showToast(ok ? "تم حفظ التعديلات" : "حدث خطأ أثناء الحفظ");
+      });
+    } else {
+      addProduct(payload).then((ok) => {
+        showToast(ok ? "تمت إضافة المنتج" : "حدث خطأ أثناء الحفظ");
+      });
+    }
+
+    setEditingId(null);
+    setForm(emptyForm);
     setImages([]);
   }
 
@@ -70,6 +105,7 @@ export default function AdminPage() {
     deleteProduct(id).then((ok) => {
       showToast(ok ? "تم حذف المنتج" : "حدث خطأ أثناء الحذف");
     });
+    if (editingId === id) cancelEdit();
   }
 
   // ------- سحب وإفلات لإعادة الترتيب -------
@@ -106,7 +142,12 @@ export default function AdminPage() {
 
   return (
     <div className="admin-wrap">
-      <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }}><h2>لوحة تحكم المنتجات</h2></div>
+      <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }} ref={formTopRef}>
+        <h2>{editingId ? "تعديل منتج" : "إضافة منتج جديد"}</h2>
+        {editingId && (
+          <button type="button" className="del-btn" onClick={cancelEdit}>إلغاء التعديل</button>
+        )}
+      </div>
       <div className="admin-banner">
         هذه الصفحة محمية بكلمة سر (Basic Auth) على مستوى الخادم. لا تشارك رابط أو كلمة سر لوحة التحكم مع أحد لا تثق فيه.
       </div>
@@ -157,7 +198,9 @@ export default function AdminPage() {
           )}
         </div>
 
-        <button type="submit" className="btn-primary" disabled={uploading}>إضافة المنتج</button>
+        <button type="submit" className="btn-primary" disabled={uploading}>
+          {editingId ? "حفظ التعديلات" : "إضافة المنتج"}
+        </button>
       </form>
 
       <div className="section-head" style={{ margin: "40px 0 16px", padding: 0, alignItems: "center" }}>
@@ -174,7 +217,7 @@ export default function AdminPage() {
             onDragOver={(e) => onDragOver(e, p.id)}
             onDragLeave={onDragLeave}
             onDrop={(e) => onDrop(e, p.id)}
-            className={`admin-pcard ${dragOverId === p.id ? "drag-over" : ""} ${reordering ? "reordering" : ""}`}
+            className={`admin-pcard ${dragOverId === p.id ? "drag-over" : ""} ${reordering ? "reordering" : ""} ${editingId === p.id ? "editing" : ""}`}
           >
             <div className="admin-pcard-handle" title="اسحب لإعادة الترتيب">⠿⠿</div>
             <div className="admin-pcard-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
@@ -195,7 +238,10 @@ export default function AdminPage() {
                 </div>
               )}
             </div>
-            <button className="del-btn" onClick={() => handleDelete(p.id)}>حذف</button>
+            <div className="admin-pcard-actions">
+              <button className="edit-btn" onClick={() => startEdit(p)}>تعديل</button>
+              <button className="del-btn" onClick={() => handleDelete(p.id)}>حذف</button>
+            </div>
           </div>
         ))}
       </div>
