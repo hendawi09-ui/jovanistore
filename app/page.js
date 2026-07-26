@@ -15,7 +15,7 @@ function HomeContent() {
     if (c) setActiveCat(c);
   }, [searchParams]);
 
-  const list = products.filter((p) => activeCat === "all" || p.cat === activeCat);
+  const list = products.filter((p) => p.published !== false && (activeCat === "all" || p.cat === activeCat));
 
   return (
     <>

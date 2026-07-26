@@ -14,7 +14,7 @@ export default function ProductDetailPage() {
   const [active, setActive] = useState(0);
   const [color, setColor] = useState("");
   const [size, setSize] = useState("");
-  const p = products.find((x) => x.id == id);
+  const p = products.find((x) => x.id == id && x.published !== false);
 
   // اختيار أول لون/مقاس تلقائيًا لما يتوفر المنتج
   useEffect(() => {

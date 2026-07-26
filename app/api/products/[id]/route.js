@@ -17,6 +17,7 @@ export async function PATCH(req, { params }) {
   if (typeof body.price !== "undefined") update.price = Number(body.price);
   if (typeof body.cat === "string") update.cat = body.cat;
   if (typeof body.icon === "string") update.icon = body.icon;
+  if (typeof body.published === "boolean") update.published = body.published;
 
   if (Array.isArray(body.images)) {
     const images = body.images.filter(Boolean);

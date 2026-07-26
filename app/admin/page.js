@@ -8,7 +8,7 @@ import { showToast } from "@/components/Toast";
 const emptyForm = { name: "", price: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" };
 
 export default function AdminPage() {
-  const { products, addProduct, updateProduct, deleteProduct, reorderProducts } = useStore();
+  const { products, addProduct, updateProduct, deleteProduct, togglePublish, reorderProducts } = useStore();
   const [form, setForm] = useState(emptyForm);
   const [images, setImages] = useState([]); // uploaded image URLs for the product being added/edited
   const [uploading, setUploading] = useState(false);
@@ -108,23 +108,36 @@ export default function AdminPage() {
     if (editingId === id) cancelEdit();
   }
 
-  // ------- سحب وإفلات لإعادة الترتيب -------
+  function handleTogglePublish(p) {
+    const next = !(p.published !== false);
+    togglePublish(p.id, next).then((ok) => {
+      showToast(ok ? (next ? "تم نشر المنتج" : "تم إخفاء المنتج") : "حدث خطأ");
+    });
+  }
+
+  // ------- سحب وإفلات لإعادة الترتيب (داخل نفس المجموعة بس: منشور مع منشور، وغير منشور مع غير منشور) -------
   function onDragStart(id) {
     dragId.current = id;
   }
-  function onDragOver(e, id) {
+  function onDragOver(e, id, group) {
     e.preventDefault();
-    if (id !== dragId.current) setDragOverId(id);
+    const sourceP = products.find((p) => p.id === dragId.current);
+    const sourceGroup = sourceP ? sourceP.published !== false : null;
+    if (id !== dragId.current && sourceGroup === group) setDragOverId(id);
   }
   function onDragLeave() {
     setDragOverId(null);
   }
-  async function onDrop(e, targetId) {
+  async function onDrop(e, targetId, group) {
     e.preventDefault();
     setDragOverId(null);
     const sourceId = dragId.current;
     dragId.current = null;
     if (!sourceId || sourceId === targetId) return;
+
+    const sourceP = products.find((p) => p.id === sourceId);
+    const sourceGroup = sourceP ? sourceP.published !== false : null;
+    if (!sourceP || sourceGroup !== group) return; // امنع السحب بين مجموعتين مختلفتين
 
     const ids = products.map((p) => p.id);
     const from = ids.indexOf(sourceId);
@@ -139,6 +152,54 @@ export default function AdminPage() {
     setReordering(false);
     if (!ok) showToast("حدث خطأ أثناء إعادة الترتيب");
   }
+
+  function renderCard(p, group) {
+    const isPublished = p.published !== false;
+    return (
+      <div
+        key={p.id}
+        draggable
+        onDragStart={() => onDragStart(p.id)}
+        onDragOver={(e) => onDragOver(e, p.id, group)}
+        onDragLeave={onDragLeave}
+        onDrop={(e) => onDrop(e, p.id, group)}
+        className={`admin-pcard ${dragOverId === p.id ? "drag-over" : ""} ${reordering ? "reordering" : ""} ${editingId === p.id ? "editing" : ""} ${!isPublished ? "unpublished" : ""}`}
+      >
+        <div className="admin-pcard-handle" title="اسحب لإعادة الترتيب">⠿⠿</div>
+        <div className="admin-pcard-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
+          {p.images && p.images[0] ? (
+            <img src={p.images[0]} alt="" />
+          ) : (
+            <div className="icon-box"><IconSvg name={p.icon} /></div>
+          )}
+          <span className="admin-pcard-tag">{catLabel[p.cat]}</span>
+          <span className={`pub-badge ${isPublished ? "pub-yes" : "pub-no"}`}>
+            {isPublished ? "منشور" : "غير منشور"}
+          </span>
+        </div>
+        <div className="admin-pcard-body">
+          <h4>{p.name}</h4>
+          <span>{p.price} ج.م{p.images && p.images.length > 1 ? ` · ${p.images.length} صور` : ""}</span>
+          {(p.colors?.length > 0 || p.sizes?.length > 0) && (
+            <div className="admin-pcard-variants">
+              {p.colors?.length > 0 && <span>{p.colors.length} ألوان</span>}
+              {p.sizes?.length > 0 && <span>{p.sizes.length} مقاسات</span>}
+            </div>
+          )}
+        </div>
+        <div className="admin-pcard-actions">
+          <button className="edit-btn" onClick={() => startEdit(p)}>تعديل</button>
+          <button className="pub-btn" onClick={() => handleTogglePublish(p)}>
+            {isPublished ? "إخفاء" : "نشر"}
+          </button>
+          <button className="del-btn" onClick={() => handleDelete(p.id)}>حذف</button>
+        </div>
+      </div>
+    );
+  }
+
+  const publishedList = products.filter((p) => p.published !== false);
+  const unpublishedList = products.filter((p) => p.published === false);
 
   return (
     <div className="admin-wrap">
@@ -204,46 +265,27 @@ export default function AdminPage() {
       </form>
 
       <div className="section-head" style={{ margin: "40px 0 16px", padding: 0, alignItems: "center" }}>
-        <h2 style={{ fontSize: "20px" }}>ترتيب عرض المنتجات ({products.length})</h2>
-        <span style={{ fontSize: "12.5px" }}>اسحب أي بطاقة وأفلتها في المكان اللي تحبه</span>
+        <h2 style={{ fontSize: "20px" }}>منشور ({publishedList.length})</h2>
+        <span style={{ fontSize: "12.5px" }}>ظاهر للعملاء الآن — اسحب لإعادة الترتيب</span>
+      </div>
+      <div className="admin-product-grid">
+        {publishedList.length === 0 ? (
+          <div className="note-box">لا يوجد منتجات منشورة حاليًا.</div>
+        ) : (
+          publishedList.map((p) => renderCard(p, true))
+        )}
       </div>
 
+      <div className="section-head" style={{ margin: "40px 0 16px", padding: 0, alignItems: "center" }}>
+        <h2 style={{ fontSize: "20px" }}>غير منشور ({unpublishedList.length})</h2>
+        <span style={{ fontSize: "12.5px" }}>مخفي عن العملاء</span>
+      </div>
       <div className="admin-product-grid">
-        {products.map((p) => (
-          <div
-            key={p.id}
-            draggable
-            onDragStart={() => onDragStart(p.id)}
-            onDragOver={(e) => onDragOver(e, p.id)}
-            onDragLeave={onDragLeave}
-            onDrop={(e) => onDrop(e, p.id)}
-            className={`admin-pcard ${dragOverId === p.id ? "drag-over" : ""} ${reordering ? "reordering" : ""} ${editingId === p.id ? "editing" : ""}`}
-          >
-            <div className="admin-pcard-handle" title="اسحب لإعادة الترتيب">⠿⠿</div>
-            <div className="admin-pcard-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
-              {p.images && p.images[0] ? (
-                <img src={p.images[0]} alt="" />
-              ) : (
-                <div className="icon-box"><IconSvg name={p.icon} /></div>
-              )}
-              <span className="admin-pcard-tag">{catLabel[p.cat]}</span>
-            </div>
-            <div className="admin-pcard-body">
-              <h4>{p.name}</h4>
-              <span>{p.price} ج.م{p.images && p.images.length > 1 ? ` · ${p.images.length} صور` : ""}</span>
-              {(p.colors?.length > 0 || p.sizes?.length > 0) && (
-                <div className="admin-pcard-variants">
-                  {p.colors?.length > 0 && <span>{p.colors.length} ألوان</span>}
-                  {p.sizes?.length > 0 && <span>{p.sizes.length} مقاسات</span>}
-                </div>
-              )}
-            </div>
-            <div className="admin-pcard-actions">
-              <button className="edit-btn" onClick={() => startEdit(p)}>تعديل</button>
-              <button className="del-btn" onClick={() => handleDelete(p.id)}>حذف</button>
-            </div>
-          </div>
-        ))}
+        {unpublishedList.length === 0 ? (
+          <div className="note-box">لا يوجد منتجات غير منشورة.</div>
+        ) : (
+          unpublishedList.map((p) => renderCard(p, false))
+        )}
       </div>
     </div>
   );

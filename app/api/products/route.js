@@ -19,6 +19,7 @@ function toClient(row) {
     image: images[0] || null, // توافق مع أي كود قديم بيستخدم صورة واحدة
     colors: Array.isArray(row.colors) ? row.colors.filter(Boolean) : [],
     sizes: Array.isArray(row.sizes) ? row.sizes.filter(Boolean) : [],
+    published: row.published !== false, // القيمة الافتراضية منشور، إلا لو اتحدد صراحة false
   };
 }
 
