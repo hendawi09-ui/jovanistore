@@ -21,7 +21,11 @@ function toClient(row) {
 }
 
 export async function GET() {
-  const { data, error } = await supabase.from("products").select("*").order("id");
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .order("sort_order", { ascending: true, nullsFirst: false })
+    .order("id", { ascending: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data.map(toClient));
 }

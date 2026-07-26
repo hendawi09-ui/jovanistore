@@ -6,7 +6,7 @@ import { catCssVar, catLabel } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
 export default function AdminPage() {
-  const { products, addProduct, deleteProduct } = useStore();
+  const { products, addProduct, deleteProduct, moveProduct } = useStore();
   const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "" });
   const [images, setImages] = useState([]); // uploaded image URLs for the product being added
   const [uploading, setUploading] = useState(false);
@@ -64,6 +64,12 @@ export default function AdminPage() {
     });
   }
 
+  function handleMove(id, direction) {
+    moveProduct(id, direction).then((ok) => {
+      if (!ok) showToast("حدث خطأ أثناء إعادة الترتيب");
+    });
+  }
+
   return (
     <div className="admin-wrap">
       <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }}><h2>لوحة تحكم المنتجات</h2></div>
@@ -109,9 +115,26 @@ export default function AdminPage() {
         <button type="submit" className="btn-primary" disabled={uploading}>إضافة المنتج</button>
       </form>
 
+      <div className="section-head" style={{ margin: "36px 0 4px", padding: 0 }}>
+        <span style={{ fontSize: "13px" }}>استخدم الأسهم لتغيير ترتيب ظهور المنتجات في الموقع</span>
+      </div>
       <div className="admin-list">
-        {products.map((p) => (
+        {products.map((p, i) => (
           <div className="admin-row" key={p.id}>
+            <div className="reorder-arrows">
+              <button
+                className="reorder-btn"
+                onClick={() => handleMove(p.id, "up")}
+                disabled={i === 0}
+                aria-label="نقل لأعلى"
+              >▲</button>
+              <button
+                className="reorder-btn"
+                onClick={() => handleMove(p.id, "down")}
+                disabled={i === products.length - 1}
+                aria-label="نقل لأسفل"
+              >▼</button>
+            </div>
             <div className="icon-box" style={{ "--c": `var(${catCssVar[p.cat]})`, overflow: "hidden" }}>
               {p.images && p.images[0] ? <img src={p.images[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <IconSvg name={p.icon} />}
             </div>
