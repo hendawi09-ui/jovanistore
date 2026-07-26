@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
@@ -14,6 +14,26 @@ export default function ProductDetailPage() {
   const [active, setActive] = useState(0);
   const p = products.find((x) => x.id == id);
 
+  const touchX = useRef(null);
+
+  function onTouchStart(e, len) {
+    if (len < 2) return;
+    touchX.current = e.touches[0].clientX;
+  }
+  function onTouchEnd(e, len) {
+    if (touchX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    const threshold = 35;
+    if (Math.abs(dx) > threshold) {
+      if (dx < 0) {
+        setActive((a) => (a + 1) % len);
+      } else {
+        setActive((a) => (a - 1 + len) % len);
+      }
+    }
+    touchX.current = null;
+  }
+
   if (!p) {
     return (
       <div className="empty-state">
@@ -27,7 +47,12 @@ export default function ProductDetailPage() {
   return (
     <div className="pd">
       <div>
-        <div className="pd-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
+        <div
+          className="pd-media"
+          style={{ "--c": `var(${catCssVar[p.cat]})` }}
+          onTouchStart={(e) => onTouchStart(e, images.length)}
+          onTouchEnd={(e) => onTouchEnd(e, images.length)}
+        >
           {images.length > 0 ? (
             <img src={images[active]} alt={p.name} />
           ) : (

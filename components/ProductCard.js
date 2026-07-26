@@ -12,6 +12,9 @@ export default function ProductCard({ p }) {
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
 
+  const touchX = useRef(null);
+  const swiped = useRef(false);
+
   function onMove(e) {
     const card = ref.current;
     const r = card.getBoundingClientRect();
@@ -23,9 +26,47 @@ export default function ProductCard({ p }) {
     ref.current.style.transform = "";
   }
 
+  function onTouchStart(e) {
+    if (images.length < 2) return;
+    touchX.current = e.touches[0].clientX;
+    swiped.current = false;
+  }
+  function onTouchMove(e) {
+    if (touchX.current === null) return;
+    const dx = e.touches[0].clientX - touchX.current;
+    if (Math.abs(dx) > 10) swiped.current = true;
+  }
+  function onTouchEnd(e) {
+    if (touchX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchX.current;
+    const threshold = 35;
+    if (Math.abs(dx) > threshold) {
+      e.preventDefault();
+      if (dx < 0) {
+        setActive((a) => (a + 1) % images.length);
+      } else {
+        setActive((a) => (a - 1 + images.length) % images.length);
+      }
+    }
+    touchX.current = null;
+  }
+  function onMediaClick(e) {
+    if (swiped.current) {
+      e.preventDefault();
+      swiped.current = false;
+    }
+  }
+
   return (
     <Link href={`/product/${p.id}`} className="card" ref={ref} onMouseMove={onMove} onMouseLeave={onLeave}>
-      <div className="card-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
+      <div
+        className="card-media"
+        style={{ "--c": `var(${catCssVar[p.cat]})` }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onClick={onMediaClick}
+      >
         {images.length > 0 ? (
           <img src={images[active]} alt={p.name} loading="lazy" />
         ) : (
