@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/StoreContext";
+import Logo from "./Logo";
 
 export default function Header({ onOpenCart }) {
   const { cartCount } = useStore();
@@ -26,7 +27,7 @@ export default function Header({ onOpenCart }) {
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="nav-inner">
           <Link href="/" className="logo">
-            <span className="logo-dot"></span>Jovani Store
+            <Logo size="compact" />
           </Link>
           <div className="nav-links">
             <Link href="/">الرئيسية</Link>
