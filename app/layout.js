@@ -1,6 +1,7 @@
 import "./globals.css";
 import { StoreProvider } from "@/lib/StoreContext";
 import ClientShell from "@/components/ClientShell";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
   title: "Jovani Store | ملابس رجالية ونسائية",
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
         <StoreProvider>
           <ClientShell>{children}</ClientShell>
         </StoreProvider>
+        <Analytics />
       </body>
     </html>
   );
