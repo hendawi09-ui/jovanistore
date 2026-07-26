@@ -7,7 +7,7 @@ import { showToast } from "@/components/Toast";
 
 export default function AdminPage() {
   const { products, addProduct, deleteProduct } = useStore();
-  const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "", image: "" });
+  const [form, setForm] = useState({ name: "", price: "", cat: "men", icon: "shirt", desc: "", images: "" });
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -15,17 +15,21 @@ export default function AdminPage() {
 
   function handleSubmit(e) {
     e.preventDefault();
+    const images = form.images
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
     addProduct({
       cat: form.cat,
       icon: form.icon,
       name: form.name,
       desc: form.desc || "منتج جديد من Jovani Store.",
       price: Number(form.price),
-      image: form.image || null,
+      images,
     }).then((ok) => {
       showToast(ok ? "تمت إضافة المنتج" : "حدث خطأ أثناء الحفظ");
     });
-    setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "", image: "" });
+    setForm({ name: "", price: "", cat: "men", icon: "shirt", desc: "", images: "" });
   }
 
   function handleDelete(id) {
@@ -60,8 +64,14 @@ export default function AdminPage() {
         </div>
         <div className="field"><label>الوصف</label><textarea rows={2} name="desc" value={form.desc} onChange={handleChange} /></div>
         <div className="field">
-          <label>رابط الصورة (اختياري — لو فاضي هتظهر أيقونة بدلًا منها)</label>
-          <input name="image" value={form.image} onChange={handleChange} placeholder="https://..." />
+          <label>روابط الصور (اختياري — حط كل رابط في سطر لوحده، أول رابط بيبقى الصورة الرئيسية)</label>
+          <textarea
+            rows={3}
+            name="images"
+            value={form.images}
+            onChange={handleChange}
+            placeholder={"https://example.com/1.jpg\nhttps://example.com/2.jpg"}
+          />
         </div>
         <button type="submit" className="btn-primary">إضافة المنتج</button>
       </form>
@@ -70,9 +80,12 @@ export default function AdminPage() {
         {products.map((p) => (
           <div className="admin-row" key={p.id}>
             <div className="icon-box" style={{ "--c": `var(${catCssVar[p.cat]})`, overflow: "hidden" }}>
-              {p.image ? <img src={p.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <IconSvg name={p.icon} />}
+              {p.images && p.images[0] ? <img src={p.images[0]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <IconSvg name={p.icon} />}
             </div>
-            <div className="ainfo"><h4>{p.name}</h4><span>{catLabel[p.cat]} · {p.price} ج.م</span></div>
+            <div className="ainfo">
+              <h4>{p.name}</h4>
+              <span>{catLabel[p.cat]} · {p.price} ج.م{p.images && p.images.length > 1 ? ` · ${p.images.length} صور` : ""}</span>
+            </div>
             <button className="del-btn" onClick={() => handleDelete(p.id)}>حذف</button>
           </div>
         ))}

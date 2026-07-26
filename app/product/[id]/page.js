@@ -11,6 +11,7 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const { products, addToCart } = useStore();
   const [qty, setQty] = useState(1);
+  const [active, setActive] = useState(0);
   const p = products.find((x) => x.id == id);
 
   if (!p) {
@@ -21,13 +22,31 @@ export default function ProductDetailPage() {
     );
   }
 
+  const images = p.images && p.images.length > 0 ? p.images : [];
+
   return (
     <div className="pd">
-      <div className="pd-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
-        {p.image ? (
-          <img src={p.image} alt={p.name} />
-        ) : (
-          <div className="icon-box"><IconSvg name={p.icon} /></div>
+      <div>
+        <div className="pd-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
+          {images.length > 0 ? (
+            <img src={images[active]} alt={p.name} />
+          ) : (
+            <div className="icon-box"><IconSvg name={p.icon} /></div>
+          )}
+        </div>
+        {images.length > 1 && (
+          <div className="pd-thumbs">
+            {images.map((src, i) => (
+              <button
+                key={i}
+                className={`pd-thumb ${i === active ? "active" : ""}`}
+                onClick={() => setActive(i)}
+                aria-label={`صورة ${i + 1}`}
+              >
+                <img src={src} alt="" />
+              </button>
+            ))}
+          </div>
         )}
       </div>
       <div className="pd-info">

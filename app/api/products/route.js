@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 
 function toClient(row) {
+  const images =
+    Array.isArray(row.image_urls) && row.image_urls.length > 0
+      ? row.image_urls.filter(Boolean)
+      : row.image_url
+      ? [row.image_url]
+      : [];
   return {
     id: row.id,
     cat: row.cat,
@@ -9,7 +15,8 @@ function toClient(row) {
     name: row.name,
     desc: row.description,
     price: Number(row.price),
-    image: row.image_url || null,
+    images,
+    image: images[0] || null, // توافق مع أي كود قديم بيستخدم صورة واحدة
   };
 }
 
@@ -21,6 +28,7 @@ export async function GET() {
 
 export async function POST(req) {
   const body = await req.json();
+  const images = Array.isArray(body.images) ? body.images.filter(Boolean) : [];
   const { data, error } = await supabase
     .from("products")
     .insert([
@@ -30,7 +38,8 @@ export async function POST(req) {
         name: body.name,
         description: body.desc,
         price: body.price,
-        image_url: body.image || null,
+        image_urls: images.length > 0 ? images : null,
+        image_url: images[0] || null,
       },
     ])
     .select();

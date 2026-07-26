@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { IconSvg } from "@/lib/icons";
 import { catCssVar, catLabel } from "@/lib/products";
@@ -9,6 +9,8 @@ import { showToast } from "./Toast";
 export default function ProductCard({ p }) {
   const ref = useRef(null);
   const { addToCart } = useStore();
+  const images = p.images && p.images.length > 0 ? p.images : [];
+  const [active, setActive] = useState(0);
 
   function onMove(e) {
     const card = ref.current;
@@ -24,12 +26,25 @@ export default function ProductCard({ p }) {
   return (
     <Link href={`/product/${p.id}`} className="card" ref={ref} onMouseMove={onMove} onMouseLeave={onLeave}>
       <div className="card-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
-        {p.image ? (
-          <img src={p.image} alt={p.name} loading="lazy" />
+        {images.length > 0 ? (
+          <img src={images[active]} alt={p.name} loading="lazy" />
         ) : (
           <div className="icon-box"><IconSvg name={p.icon} /></div>
         )}
         <div className="tag">{catLabel[p.cat]}</div>
+        {images.length > 1 && (
+          <div className="card-dots" onClick={(e) => e.preventDefault()}>
+            {images.map((_, i) => (
+              <button
+                key={i}
+                className={`card-dot ${i === active ? "active" : ""}`}
+                aria-label={`صورة ${i + 1}`}
+                onMouseEnter={() => setActive(i)}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActive(i); }}
+              />
+            ))}
+          </div>
+        )}
       </div>
       <div className="card-body" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
         <h3>{p.name}</h3>
