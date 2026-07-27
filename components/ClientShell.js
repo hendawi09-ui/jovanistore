@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BackgroundCanvas from "./BackgroundCanvas";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -8,6 +8,15 @@ import Toast from "./Toast";
 
 export default function ClientShell({ children }) {
   const [cartOpen, setCartOpen] = useState(false);
+
+  // نمنع تمرير الصفحة اللي خلف السلة وقت فتحها، عشان ما يحصلش تعارض
+  // مع ارتفاع الشاشة الفعلي على الموبايل (وده اللي كان بيمنع الوصول لزرار "إتمام الطلب")
+  useEffect(() => {
+    document.body.style.overflow = cartOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [cartOpen]);
 
   return (
     <>
