@@ -11,6 +11,7 @@ export default function ProductCard({ p }) {
   const { addToCart } = useStore();
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
+  const hasVariants = p.colors?.length > 0 || p.sizes?.length > 0;
 
   const touchX = useRef(null);
   const swiped = useRef(false);
@@ -92,7 +93,7 @@ export default function ProductCard({ p }) {
         <div className="desc">{p.desc}</div>
         <div className="card-foot">
           <div className="price">{p.price} ج.م</div>
-          {p.colors?.length > 0 || p.sizes?.length > 0 ? (
+          {hasVariants ? (
             <span className="add-btn add-btn-link">اختر التفاصيل</span>
           ) : (
             <button

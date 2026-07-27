@@ -6,11 +6,20 @@ import { useStore } from "@/lib/StoreContext";
 import { showToast } from "@/components/Toast";
 
 export default function CheckoutPage() {
-  const { cart, products, cartTotal, placeOrder } = useStore();
+  const { cart, products, cartTotal, placeOrder, buyNow, clearBuyNow } = useStore();
   const router = useRouter();
   const [form, setForm] = useState({ name: "", phone: "", city: "", address: "", pay: "cod" });
 
-  const entries = Object.entries(cart).filter(([, e]) => products.some((p) => p.id == e.id));
+  // لو المستخدم جاي من "اشترِ الآن"، بنعرض المنتج ده لوحده ومنمسّش السلة خالص
+  const isBuyNow = Boolean(buyNow && products.some((p) => p.id == buyNow.id));
+
+  const entries = isBuyNow
+    ? [["buynow", buyNow]]
+    : Object.entries(cart).filter(([, e]) => products.some((p) => p.id == e.id));
+
+  const total = isBuyNow
+    ? (products.find((p) => p.id == buyNow.id)?.price || 0) * buyNow.qty
+    : cartTotal;
 
   if (entries.length === 0) {
     return (
@@ -38,7 +47,7 @@ export default function CheckoutPage() {
         size: entry.size || null,
       };
     });
-    await placeOrder(form, items, cartTotal);
+    await placeOrder(form, items, total, isBuyNow ? "buynow" : "cart");
     showToast("تم تأكيد طلبك بنجاح 🎉");
     router.push("/orders");
   }
@@ -65,6 +74,14 @@ export default function CheckoutPage() {
       </div>
       <div className="summary-card">
         <h2>ملخص الطلب</h2>
+        {isBuyNow && (
+          <div className="buynow-note">
+            شراء مباشر لهذا المنتج فقط — سلتك محفوظة كما هي.
+            <button type="button" onClick={() => { clearBuyNow(); router.push("/checkout"); }}>
+              العودة لطلب السلة
+            </button>
+          </div>
+        )}
         {entries.map(([key, entry]) => {
           const p = products.find((x) => x.id == entry.id);
           const variantLabel = [entry.color, entry.size].filter(Boolean).join(" · ");
@@ -76,7 +93,7 @@ export default function CheckoutPage() {
           );
         })}
         <div className="summary-row"><span>الشحن</span><span>مجاني</span></div>
-        <div className="summary-total"><span>الإجمالي</span><span>{cartTotal} ج.م</span></div>
+        <div className="summary-total"><span>الإجمالي</span><span>{total} ج.م</span></div>
       </div>
     </div>
   );

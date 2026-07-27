@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
 import { catCssVar, catLabel, parseColor, parseSize } from "@/lib/products";
@@ -9,7 +9,8 @@ import { showToast } from "@/components/Toast";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const { products, addToCart } = useStore();
+  const router = useRouter();
+  const { products, addToCart, startBuyNow } = useStore();
   const [qty, setQty] = useState(1);
   const [active, setActive] = useState(0);
   const [color, setColor] = useState("");
@@ -59,9 +60,25 @@ export default function ProductDetailPage() {
 
   const images = p.images && p.images.length > 0 ? p.images : [];
 
+  // لازم العميل يختار لون ومقاس (لو المنتج بيوفرهم) قبل الشراء أو الإضافة للسلة
+  function missingSelection() {
+    if (parsedColors.length > 0 && !color) return "من فضلك اختر اللون أولًا";
+    if (parsedSizes.some((s) => s.available) && !size) return "من فضلك اختر المقاس أولًا";
+    return null;
+  }
+
   function handleAddToCart() {
+    const msg = missingSelection();
+    if (msg) return showToast(msg);
     addToCart(p.id, qty, { color, size });
     showToast("أُضيف المنتج إلى سلتك ✓");
+  }
+
+  function handleBuyNow() {
+    const msg = missingSelection();
+    if (msg) return showToast(msg);
+    startBuyNow(p.id, qty, { color, size });
+    router.push("/checkout");
   }
 
   return (
@@ -152,9 +169,14 @@ export default function ProductDetailPage() {
           <span>{qty}</span>
           <button onClick={() => setQty((q) => q + 1)}>+</button>
         </div>
-        <button className="btn-primary" onClick={handleAddToCart}>
-          أضف إلى السلة
-        </button>
+        <div className="pd-actions">
+          <button className="btn-primary" onClick={handleBuyNow}>
+            اشترِ الآن
+          </button>
+          <button className="btn-outline" onClick={handleAddToCart}>
+            أضف إلى السلة
+          </button>
+        </div>
       </div>
     </div>
   );
