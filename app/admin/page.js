@@ -238,12 +238,12 @@ export default function AdminPage() {
 
         <div className="admin-grid">
           <div className="field">
-            <label>الألوان المتاحة (اختياري — افصل بينهم بفاصلة)</label>
-            <input name="colors" value={form.colors} onChange={handleChange} placeholder="أحمر, أسود, أزرق" />
+            <label>الألوان (افصل بفاصلة — تقدر تضيف عيّنة لون أو صورة بعد نقطتين)</label>
+            <input name="colors" value={form.colors} onChange={handleChange} placeholder="أحمر:#E31B23, أسود:#0D0D0D, كحلي" />
           </div>
           <div className="field">
-            <label>المقاسات المتاحة (اختياري — افصل بينهم بفاصلة)</label>
-            <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="S, M, L, XL" />
+            <label>المقاسات (افصل بفاصلة — ضيف ‎:out‎ للمقاس اللي نفد)</label>
+            <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="S, M, L:out, XL" />
           </div>
         </div>
 

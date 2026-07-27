@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
-import { catCssVar, catLabel } from "@/lib/products";
+import { catCssVar, catLabel, parseColor, parseSize } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
 export default function ProductDetailPage() {
@@ -16,10 +16,17 @@ export default function ProductDetailPage() {
   const [size, setSize] = useState("");
   const p = products.find((x) => x.id == id && x.published !== false);
 
-  // اختيار أول لون/مقاس تلقائيًا لما يتوفر المنتج
+  const parsedColors = (p?.colors || []).map(parseColor);
+  const parsedSizes = (p?.sizes || []).map(parseSize);
+
+  // اختيار أول لون وأول مقاس متاح تلقائيًا لما يتوفر المنتج
   useEffect(() => {
-    if (p?.colors?.length > 0) setColor(p.colors[0]);
-    if (p?.sizes?.length > 0) setSize(p.sizes[0]);
+    if (!p) return;
+    const colorList = (p.colors || []).map(parseColor);
+    const sizeList = (p.sizes || []).map(parseSize);
+    if (colorList.length > 0) setColor(colorList[0].name);
+    const firstAvailable = sizeList.find((s) => s.available);
+    if (firstAvailable) setSize(firstAvailable.name);
   }, [p?.id]);
 
   const touchX = useRef(null);
@@ -94,36 +101,46 @@ export default function ProductDetailPage() {
         <span className="price">{p.price} ج.م</span>
         <p className="desc">{p.desc}</p>
 
-        {p.colors?.length > 0 && (
+        {parsedColors.length > 0 && (
           <div className="variant-block">
-            <label>اللون{color ? `: ${color}` : ""}</label>
-            <div className="variant-options">
-              {p.colors.map((c) => (
+            <label>اللون{color ? ` — ${color}` : ""}</label>
+            <div className="swatch-row">
+              {parsedColors.map((c) => (
                 <button
-                  key={c}
+                  key={c.name}
                   type="button"
-                  className={`variant-pill ${color === c ? "active" : ""}`}
-                  onClick={() => setColor(c)}
+                  className={`swatch ${color === c.name ? "active" : ""} ${c.type ? "" : "swatch-text"}`}
+                  onClick={() => setColor(c.name)}
+                  title={c.name}
+                  aria-label={c.name}
                 >
-                  {c}
+                  {c.type === "image" ? (
+                    <img src={c.swatch} alt={c.name} />
+                  ) : c.type === "color" ? (
+                    <span className="swatch-fill" style={{ background: c.swatch }} />
+                  ) : (
+                    c.name
+                  )}
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {p.sizes?.length > 0 && (
+        {parsedSizes.length > 0 && (
           <div className="variant-block">
-            <label>المقاس{size ? `: ${size}` : ""}</label>
-            <div className="variant-options">
-              {p.sizes.map((s) => (
+            <label>المقاس{size ? ` — ${size}` : ""}</label>
+            <div className="size-row">
+              {parsedSizes.map((s) => (
                 <button
-                  key={s}
+                  key={s.name}
                   type="button"
-                  className={`variant-pill ${size === s ? "active" : ""}`}
-                  onClick={() => setSize(s)}
+                  disabled={!s.available}
+                  className={`size-box ${size === s.name ? "active" : ""} ${!s.available ? "unavailable" : ""}`}
+                  onClick={() => s.available && setSize(s.name)}
+                  title={s.available ? s.name : `${s.name} — غير متوفر`}
                 >
-                  {s}
+                  {s.name}
                 </button>
               ))}
             </div>
