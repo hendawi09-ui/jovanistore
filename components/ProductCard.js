@@ -2,7 +2,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { IconSvg } from "@/lib/icons";
-import { catCssVar, catLabel } from "@/lib/products";
+import { catCssVar, catLabel, getTotalStock } from "@/lib/products";
 import { useStore } from "@/lib/StoreContext";
 import { showToast } from "./Toast";
 
@@ -12,6 +12,7 @@ export default function ProductCard({ p }) {
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
   const hasVariants = p.colors?.length > 0 || p.sizes?.length > 0;
+  const soldOut = getTotalStock(p) === 0;
 
   const touchX = useRef(null);
   const swiped = useRef(false);
@@ -74,6 +75,7 @@ export default function ProductCard({ p }) {
           <div className="icon-box"><IconSvg name={p.icon} /></div>
         )}
         <div className="tag">{catLabel[p.cat]}</div>
+        {soldOut && <div className="soldout-overlay">نفدت الكمية</div>}
         {images.length > 1 && (
           <div className="card-dots" onClick={(e) => e.preventDefault()}>
             {images.map((_, i) => (
@@ -93,7 +95,9 @@ export default function ProductCard({ p }) {
         <div className="desc">{p.desc}</div>
         <div className="card-foot">
           <div className="price">{p.price} ج.م</div>
-          {hasVariants ? (
+          {soldOut ? (
+            <span className="add-btn add-btn-link soldout-label">نفدت الكمية</span>
+          ) : hasVariants ? (
             <span className="add-btn add-btn-link">اختر التفاصيل</span>
           ) : (
             <button

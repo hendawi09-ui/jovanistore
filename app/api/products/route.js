@@ -20,6 +20,7 @@ function toClient(row) {
     colors: Array.isArray(row.colors) ? row.colors.filter(Boolean) : [],
     sizes: Array.isArray(row.sizes) ? row.sizes.filter(Boolean) : [],
     published: row.published !== false, // القيمة الافتراضية منشور، إلا لو اتحدد صراحة false
+    stock: row.stock && typeof row.stock === "object" ? row.stock : null,
   };
 }
 
@@ -51,6 +52,7 @@ export async function POST(req) {
         image_url: images[0] || null,
         colors: colors.length > 0 ? colors : null,
         sizes: sizes.length > 0 ? sizes : null,
+        stock: body.stock && typeof body.stock === "object" ? body.stock : null,
       },
     ])
     .select();

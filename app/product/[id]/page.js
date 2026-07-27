@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
-import { catCssVar, catLabel, parseColor, parseSize } from "@/lib/products";
+import { catCssVar, catLabel, parseColor, parseSize, getStock, getTotalStock } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
 export default function ProductDetailPage() {
@@ -18,17 +18,39 @@ export default function ProductDetailPage() {
   const p = products.find((x) => x.id == id && x.published !== false);
 
   const parsedColors = (p?.colors || []).map(parseColor);
-  const parsedSizes = (p?.sizes || []).map(parseSize);
+  const rawSizes = (p?.sizes || []).map(parseSize);
+  const trackingStock = getTotalStock(p) !== null;
+
+  // المقاس يعتبر متاح لو مش مشطوب يدويًا ولو فيه كمية في المخزون للّون المختار
+  const parsedSizes = rawSizes.map((s) => {
+    if (!s.available) return s;
+    if (!trackingStock) return s;
+    const left = getStock(p, color, s.name);
+    return { ...s, available: left > 0, left };
+  });
+
+  const currentStock = trackingStock ? getStock(p, color, size) : null;
+  const soldOut = trackingStock && getTotalStock(p) === 0;
 
   // اختيار أول لون وأول مقاس متاح تلقائيًا لما يتوفر المنتج
   useEffect(() => {
     if (!p) return;
     const colorList = (p.colors || []).map(parseColor);
-    const sizeList = (p.sizes || []).map(parseSize);
     if (colorList.length > 0) setColor(colorList[0].name);
-    const firstAvailable = sizeList.find((s) => s.available);
-    if (firstAvailable) setSize(firstAvailable.name);
   }, [p?.id]);
+
+  // لما اللون يتغيّر، نختار أول مقاس متاح فعليًا لهذا اللون
+  useEffect(() => {
+    if (!p) return;
+    const firstAvailable = parsedSizes.find((s) => s.available);
+    setSize(firstAvailable ? firstAvailable.name : "");
+    setQty(1);
+  }, [p?.id, color]);
+
+  // نمنع الكمية من تجاوز المتاح في المخزون
+  useEffect(() => {
+    if (currentStock !== null && currentStock > 0 && qty > currentStock) setQty(currentStock);
+  }, [currentStock, qty]);
 
   const touchX = useRef(null);
 
@@ -62,8 +84,11 @@ export default function ProductDetailPage() {
 
   // لازم العميل يختار لون ومقاس (لو المنتج بيوفرهم) قبل الشراء أو الإضافة للسلة
   function missingSelection() {
+    if (soldOut) return "نفدت الكمية من هذا المنتج";
     if (parsedColors.length > 0 && !color) return "من فضلك اختر اللون أولًا";
     if (parsedSizes.some((s) => s.available) && !size) return "من فضلك اختر المقاس أولًا";
+    if (trackingStock && (currentStock === null || currentStock <= 0)) return "هذا الخيار غير متوفر حاليًا";
+    if (currentStock !== null && qty > currentStock) return `المتاح ${currentStock} قطعة فقط`;
     return null;
   }
 
@@ -164,16 +189,33 @@ export default function ProductDetailPage() {
           </div>
         )}
 
+        {trackingStock && (
+          <div className={`stock-note ${soldOut || currentStock === 0 ? "out" : currentStock <= 3 ? "low" : ""}`}>
+            {soldOut
+              ? "نفدت الكمية بالكامل"
+              : currentStock === 0
+              ? "هذا الخيار غير متوفر حاليًا"
+              : currentStock <= 3
+              ? `الكمية محدودة — باقي ${currentStock} قطع فقط`
+              : "متوفر في المخزون"}
+          </div>
+        )}
+
         <div className="stepper">
           <button onClick={() => setQty((q) => Math.max(1, q - 1))}>−</button>
           <span>{qty}</span>
-          <button onClick={() => setQty((q) => q + 1)}>+</button>
+          <button
+            onClick={() => setQty((q) => (currentStock !== null ? Math.min(currentStock, q + 1) : q + 1))}
+            disabled={currentStock !== null && qty >= currentStock}
+          >
+            +
+          </button>
         </div>
         <div className="pd-actions">
-          <button className="btn-primary" onClick={handleBuyNow}>
+          <button className="btn-primary" onClick={handleBuyNow} disabled={soldOut || currentStock === 0}>
             اشترِ الآن
           </button>
-          <button className="btn-outline" onClick={handleAddToCart}>
+          <button className="btn-outline" onClick={handleAddToCart} disabled={soldOut || currentStock === 0}>
             أضف إلى السلة
           </button>
         </div>

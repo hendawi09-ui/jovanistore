@@ -18,6 +18,9 @@ export async function PATCH(req, { params }) {
   if (typeof body.cat === "string") update.cat = body.cat;
   if (typeof body.icon === "string") update.icon = body.icon;
   if (typeof body.published === "boolean") update.published = body.published;
+  if (body.stock === null || (body.stock && typeof body.stock === "object")) {
+    update.stock = body.stock;
+  }
 
   if (Array.isArray(body.images)) {
     const images = body.images.filter(Boolean);

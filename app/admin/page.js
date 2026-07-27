@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg, icons } from "@/lib/icons";
-import { catCssVar, catLabel } from "@/lib/products";
+import { catCssVar, catLabel, parseColor, parseSize, stockKey, getTotalStock } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
 const emptyForm = { name: "", price: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" };
@@ -11,6 +11,8 @@ export default function AdminPage() {
   const { products, addProduct, updateProduct, deleteProduct, togglePublish, reorderProducts } = useStore();
   const [form, setForm] = useState(emptyForm);
   const [images, setImages] = useState([]); // uploaded image URLs for the product being added/edited
+  const [stock, setStock] = useState({}); // { "لون|مقاس": عدد }
+  const [trackStock, setTrackStock] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState(null); // null = وضع إضافة، غير null = وضع تعديل
   const formTopRef = useRef(null);
@@ -21,6 +23,32 @@ export default function AdminPage() {
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  }
+
+  // قوائم الألوان والمقاسات الحالية من الحقول النصية (تستخدم لبناء جدول المخزون)
+  const colorNames = form.colors.split(",").map((s) => s.trim()).filter(Boolean).map((c) => parseColor(c).name);
+  const sizeNames = form.sizes.split(",").map((s) => s.trim()).filter(Boolean).map((s) => parseSize(s).name);
+  const stockRows = colorNames.length > 0 ? colorNames : [""];
+  const stockCols = sizeNames.length > 0 ? sizeNames : [""];
+
+  function buildStockPayload(colorsRaw, sizesRaw) {
+    const cNames = colorsRaw.map((c) => parseColor(c).name);
+    const sNames = sizesRaw.map((s) => parseSize(s).name);
+    const rows = cNames.length > 0 ? cNames : [""];
+    const cols = sNames.length > 0 ? sNames : [""];
+    const out = {};
+    for (const c of rows) {
+      for (const s of cols) {
+        const k = stockKey(c, s);
+        out[k] = Number(stock[k]) || 0;
+      }
+    }
+    return out;
+  }
+
+  function setStockValue(c, s, value) {
+    const k = stockKey(c, s);
+    setStock((prev) => ({ ...prev, [k]: value === "" ? "" : Math.max(0, Number(value) || 0) }));
   }
 
   async function handleFilesSelected(e) {
@@ -62,6 +90,8 @@ export default function AdminPage() {
       sizes: (p.sizes || []).join(", "),
     });
     setImages(p.images || []);
+    setStock(p.stock && typeof p.stock === "object" ? p.stock : {});
+    setTrackStock(Boolean(p.stock && typeof p.stock === "object"));
     formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -69,6 +99,8 @@ export default function AdminPage() {
     setEditingId(null);
     setForm(emptyForm);
     setImages([]);
+    setStock({});
+    setTrackStock(false);
   }
 
   function handleSubmit(e) {
@@ -84,6 +116,7 @@ export default function AdminPage() {
       images,
       colors,
       sizes,
+      stock: trackStock ? buildStockPayload(colors, sizes) : null,
     };
 
     if (editingId) {
@@ -99,6 +132,8 @@ export default function AdminPage() {
     setEditingId(null);
     setForm(emptyForm);
     setImages([]);
+    setStock({});
+    setTrackStock(false);
   }
 
   function handleDelete(id) {
@@ -186,6 +221,13 @@ export default function AdminPage() {
               {p.sizes?.length > 0 && <span>{p.sizes.length} مقاسات</span>}
             </div>
           )}
+          {getTotalStock(p) !== null && (
+            <div className="admin-pcard-variants">
+              <span className={getTotalStock(p) === 0 ? "stock-zero" : ""}>
+                {getTotalStock(p) === 0 ? "نفدت الكمية" : `المخزون: ${getTotalStock(p)}`}
+              </span>
+            </div>
+          )}
         </div>
         <div className="admin-pcard-actions">
           <button className="edit-btn" onClick={() => startEdit(p)}>تعديل</button>
@@ -245,6 +287,46 @@ export default function AdminPage() {
             <label>المقاسات (افصل بفاصلة — ضيف ‎:out‎ للمقاس اللي نفد)</label>
             <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="S, M, L:out, XL" />
           </div>
+        </div>
+
+        <div className="field">
+          <label className="stock-toggle">
+            <input type="checkbox" checked={trackStock} onChange={(e) => setTrackStock(e.target.checked)} />
+            تفعيل تتبّع المخزون (الكمية تنقص تلقائيًا مع كل طلب)
+          </label>
+          {trackStock && (
+            <div className="stock-table-wrap">
+              <table className="stock-table">
+                <thead>
+                  <tr>
+                    <th>اللون / المقاس</th>
+                    {stockCols.map((s) => <th key={s}>{s || "—"}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {stockRows.map((c) => (
+                    <tr key={c}>
+                      <th>{c || "—"}</th>
+                      {stockCols.map((s) => (
+                        <td key={s}>
+                          <input
+                            type="number"
+                            min="0"
+                            value={stock[stockKey(c, s)] ?? ""}
+                            onChange={(e) => setStockValue(c, s, e.target.value)}
+                            placeholder="0"
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="note-box" style={{ marginTop: 10 }}>
+                اكتب الألوان والمقاسات فوق الأول، وبعدين املأ الكمية المتاحة لكل تركيبة. المقاس اللي كميته صفر هيظهر مشطوب للعملاء تلقائيًا.
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="field">

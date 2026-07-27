@@ -40,6 +40,7 @@ export default function CheckoutPage() {
       const p = products.find((x) => x.id == entry.id);
       const variantLabel = [entry.color, entry.size].filter(Boolean).join(" · ");
       return {
+        productId: p.id,
         name: variantLabel ? `${p.name} (${variantLabel})` : p.name,
         qty: entry.qty,
         price: p.price,

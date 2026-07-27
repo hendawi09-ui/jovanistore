@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 import { notifyNewOrder } from "@/lib/notify";
+import { stockKey } from "@/lib/products";
 
 export async function GET() {
   const { data, error } = await supabase
@@ -11,10 +12,44 @@ export async function GET() {
   return NextResponse.json(data);
 }
 
+// بينقص الكمية من المخزون لكل منتج في الطلب
+async function decrementStock(items) {
+  const ids = [...new Set((items || []).map((i) => i.productId).filter(Boolean))];
+  if (ids.length === 0) return;
+
+  const { data: rows, error } = await supabase.from("products").select("id, stock").in("id", ids);
+  if (error || !rows) return;
+
+  for (const row of rows) {
+    if (!row.stock || typeof row.stock !== "object") continue; // المخزون غير مُفعّل لهذا المنتج
+    const next = { ...row.stock };
+    let changed = false;
+
+    for (const item of items) {
+      if (item.productId !== row.id) continue;
+      const key = stockKey(item.color || "", item.size || "");
+      if (typeof next[key] === "number") {
+        next[key] = Math.max(0, next[key] - (item.qty || 0));
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      await supabase.from("products").update({ stock: next }).eq("id", row.id);
+    }
+  }
+}
+
 export async function POST(req) {
   const order = await req.json();
   const { data, error } = await supabase.from("orders").insert([order]).select();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  try {
+    await decrementStock(order.items);
+  } catch (e) {
+    console.error("decrementStock failed:", e);
+  }
 
   try {
     await notifyNewOrder(order);

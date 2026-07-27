@@ -263,6 +263,29 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .admin-pcard-variants span{background:var(--paper-dim); font-size:10.5px; padding:2px 8px; border-radius:999px; color:var(--ink-soft);}
 .upload-preview{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;}
 
+/* مؤشرات المخزون في صفحة المنتج */
+.stock-note{font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:10px; margin-bottom:16px; display:inline-block; background:#E7F8EE; color:#1A8A47;}
+.stock-note.low{background:#FFF4E5; color:#8A5A00;}
+.stock-note.out{background:#FDEEEE; color:var(--red-dark);}
+.pd-actions button:disabled, .stepper button:disabled{opacity:.4; cursor:not-allowed;}
+.pd-actions button:disabled:hover{background:var(--red); color:#fff;}
+.btn-outline:disabled:hover{background:#fff; color:var(--ink);}
+
+/* شارة نفاد الكمية على بطاقة المنتج */
+.soldout-overlay{position:absolute; inset:0; background:rgba(255,255,255,.72); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:var(--red-dark); letter-spacing:.02em;}
+.soldout-label{opacity:.5; border-color:var(--muted); color:var(--muted);}
+.stock-zero{color:var(--red) !important; font-weight:700;}
+
+/* جدول المخزون في لوحة التحكم */
+.stock-toggle{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:0;}
+.stock-toggle input{width:auto;}
+.stock-table-wrap{margin-top:14px; overflow-x:auto;}
+.stock-table{border-collapse:collapse; font-size:13px; min-width:100%;}
+.stock-table th, .stock-table td{border:1px solid var(--line); padding:8px 10px; text-align:center;}
+.stock-table thead th{background:var(--paper-dim); font-weight:700; font-size:12px; white-space:nowrap;}
+.stock-table tbody th{background:var(--paper-dim); font-weight:700; font-size:12.5px; white-space:nowrap;}
+.stock-table td input{width:72px; padding:7px 8px; border:1px solid var(--line); border-radius:8px; text-align:center; font-size:13px;}
+
 .admin-tabs{display:flex; gap:8px; margin-bottom:28px; border-bottom:1px solid var(--line); padding-bottom:0;}
 .admin-tab{padding:10px 18px; font-weight:700; font-size:14px; color:var(--muted); text-decoration:none; border-bottom:2px solid transparent; cursor:pointer;}
 .admin-tab.active{color:var(--ink); border-color:var(--red);}
