@@ -56,6 +56,10 @@ export default function Header({ onOpenCart }) {
           <span>🚚 <strong>شحن سريع</strong> لجميع محافظات مصر</span>
           <span>↩️ إرجاع مجاني خلال <strong>14 يومًا</strong></span>
           <span>🔒 دفع <strong>آمن 100%</strong></span>
+          {/* نسخة مكررة عشان الحركة تبقى متصلة من غير فراغ على الموبايل */}
+          <span aria-hidden="true">🚚 <strong>شحن سريع</strong> لجميع محافظات مصر</span>
+          <span aria-hidden="true">↩️ إرجاع مجاني خلال <strong>14 يومًا</strong></span>
+          <span aria-hidden="true">🔒 دفع <strong>آمن 100%</strong></span>
         </div>
       </div>
     </>
