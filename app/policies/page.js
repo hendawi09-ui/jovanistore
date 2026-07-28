@@ -1,4 +1,4 @@
-import { contact, shipping, policy } from "@/lib/siteConfig";
+import { contact, shipping, policy, hasWhatsApp } from "@/lib/siteConfig";
 
 export const metadata = {
   title: "التواصل والسياسات | Jovani Store",
@@ -17,6 +17,7 @@ export default function PoliciesPage() {
           فريقنا جاهز للرد على أي استفسار عن المقاسات أو الخامات أو حالة طلبك. نرد عادةً {contact.hours}.
         </p>
         <div className="contact-cards">
+          {hasWhatsApp() && (
           <a
             className="contact-card wa"
             href={`https://wa.me/${contact.whatsapp}`}
@@ -31,6 +32,7 @@ export default function PoliciesPage() {
               <span>اضغط للمحادثة الفورية</span>
             </div>
           </a>
+          )}
 
           <a
             className="contact-card ig"
@@ -109,7 +111,7 @@ export default function PoliciesPage() {
 
         <h3>خطوات الإرجاع</h3>
         <ol className="policy-list">
-          <li>راسلنا على واتساب مع رقم الطلب وسبب الإرجاع.</li>
+          <li>راسلنا {hasWhatsApp() ? "على واتساب" : "عبر إنستجرام"} مع رقم الطلب وسبب الإرجاع.</li>
           <li>نرتّب لك موعد استلام المنتج من عنوانك.</li>
           <li>بعد فحص المنتج والتأكد من الشروط، نتمّ الاستبدال أو نردّ المبلغ.</li>
         </ol>
@@ -136,7 +138,7 @@ export default function PoliciesPage() {
           <li>لا نبيع بياناتك أو نشاركها مع أي جهة خارجية لأغراض تسويقية.</li>
           <li>تُستخدم بياناتك حصريًا في تجهيز الطلب وشحنه والتواصل معك بشأنه.</li>
           <li>تُشارك بيانات العنوان مع شركة الشحن فقط بالقدر اللازم للتوصيل.</li>
-          <li>يمكنك طلب حذف بياناتك في أي وقت بمراسلتنا على واتساب.</li>
+          <li>يمكنك طلب حذف بياناتك في أي وقت بمراسلتنا {hasWhatsApp() ? "على واتساب" : "عبر إنستجرام"}.</li>
         </ul>
       </section>
 
