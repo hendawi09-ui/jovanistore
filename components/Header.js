@@ -34,6 +34,12 @@ export default function Header({ onOpenCart }) {
             <Link href="/orders">طلباتي</Link>
           </div>
           <div className="nav-actions">
+            <Link href="/#search" className="nav-icon-btn" aria-label="بحث">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" />
+              </svg>
+            </Link>
             <button className={`cart-btn ${bump ? "bump" : ""}`} onClick={onOpenCart} aria-label="سلة المشتريات">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M3 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6" />

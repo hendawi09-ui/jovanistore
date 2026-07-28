@@ -32,6 +32,19 @@ img{max-width:100%; display:block;}
 .nav-links a{color:var(--ink-soft); transition:color .2s;}
 .nav-links a:hover{color:var(--red);}
 .nav-actions{display:flex; align-items:center; gap:14px;}
+.nav-icon-btn{display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; color:var(--ink); border:1px solid var(--line); background:#fff; transition:background .2s, color .2s;}
+.nav-icon-btn:hover{background:var(--ink); color:#fff;}
+
+/* شريط البحث */
+.search-wrap{max-width:1180px; margin:0 auto; padding:0 28px 4px; scroll-margin-top:110px;}
+.search-box{position:relative; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:0 18px; transition:border-color .2s, box-shadow .2s;}
+.search-box:focus-within{border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,13,13,.05);}
+.search-box > svg{width:19px; height:19px; color:var(--muted); flex-shrink:0;}
+.search-box input{flex:1; border:none; outline:none; background:none; padding:15px 0; font-size:14.5px; font-family:inherit; color:var(--ink);}
+.search-box input::placeholder{color:var(--muted);}
+.search-box input::-webkit-search-cancel-button{display:none;}
+.search-clear{background:var(--paper-dim); color:var(--ink-soft); width:24px; height:24px; border-radius:50%; font-size:11px; line-height:1; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
+.search-clear:hover{background:var(--ink); color:#fff;}
 .cart-btn{position:relative; background:var(--ink); color:#fff; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:transform .2s;}
 .cart-btn:hover{transform:scale(1.08);}
 .cart-count{position:absolute; top:-4px; left:-4px; background:var(--red); color:#fff; font-size:11px; font-weight:700; width:19px; height:19px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid var(--paper);}

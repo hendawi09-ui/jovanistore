@@ -2,20 +2,40 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
-import { cats } from "@/lib/products";
+import { cats, catLabel, parseColor, parseSize } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 
 function HomeContent() {
   const { products } = useStore();
   const searchParams = useSearchParams();
   const [activeCat, setActiveCat] = useState("all");
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const c = searchParams.get("cat");
     if (c) setActiveCat(c);
+    const q = searchParams.get("q");
+    if (q) setQuery(q);
   }, [searchParams]);
 
-  const list = products.filter((p) => p.published !== false && (activeCat === "all" || p.cat === activeCat));
+  const q = query.trim().toLowerCase();
+  const list = products.filter((p) => {
+    if (p.published === false) return false;
+    if (activeCat !== "all" && p.cat !== activeCat) return false;
+    if (!q) return true;
+    const haystack = [
+      p.name,
+      p.desc,
+      catLabel[p.cat],
+      ...(p.colors || []).map((c) => parseColor(c).name),
+      ...(p.sizes || []).map((s) => parseSize(s).name),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    // كل كلمة في البحث لازم تظهر، عشان البحث بكلمتين يبقى أدق
+    return q.split(/\s+/).every((word) => haystack.includes(word));
+  });
 
   return (
     <>
@@ -37,6 +57,25 @@ function HomeContent() {
         </div>
       </section>
 
+      <div className="search-wrap" id="search">
+        <div className="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="ابحث عن منتج، لون، أو مقاس..."
+            aria-label="بحث في المنتجات"
+          />
+          {query && (
+            <button className="search-clear" onClick={() => setQuery("")} aria-label="مسح البحث">✕</button>
+          )}
+        </div>
+      </div>
+
       <div className="cats">
         {cats.map((c) => (
           <button
@@ -52,12 +91,23 @@ function HomeContent() {
       </div>
 
       <div className="section-head" id="products">
-        <h2>الأحدث في المتجر</h2>
+        <h2>{q ? "نتائج البحث" : "الأحدث في المتجر"}</h2>
         <span>{list.length} منتج</span>
       </div>
       <div className="grid">
         {list.length === 0 ? (
-          <div className="empty-state" style={{ gridColumn: "1/-1" }}>لا توجد منتجات في هذا القسم حاليًا.</div>
+          <div className="empty-state" style={{ gridColumn: "1/-1" }}>
+            {q ? (
+              <>
+                لا توجد نتائج لـ &laquo;{query}&raquo;.<br />
+                <button className="btn-ghost" style={{ marginTop: 16 }} onClick={() => { setQuery(""); setActiveCat("all"); }}>
+                  عرض كل المنتجات
+                </button>
+              </>
+            ) : (
+              "لا توجد منتجات في هذا القسم حاليًا."
+            )}
+          </div>
         ) : (
           list.map((p) => <ProductCard key={p.id} p={p} />)
         )}
