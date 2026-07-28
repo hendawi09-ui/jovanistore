@@ -5,7 +5,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import CartDrawer from "./CartDrawer";
 import Toast from "./Toast";
-import WhatsAppButton from "./WhatsAppButton";
+import FloatingActions from "./FloatingActions";
 
 export default function ClientShell({ children }) {
   const [cartOpen, setCartOpen] = useState(false);
@@ -26,7 +26,7 @@ export default function ClientShell({ children }) {
       <main>{children}</main>
       <Footer />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-      <WhatsAppButton />
+      <FloatingActions onOpenCart={() => setCartOpen(true)} />
       <Toast />
     </>
   );

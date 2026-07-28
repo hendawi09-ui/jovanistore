@@ -67,10 +67,13 @@ export default function PoliciesPage() {
               </tr>
             </thead>
             <tbody>
-              {shipping.rates.map((r) => (
-                <tr key={r.zone}>
-                  <td>{r.zone}</td>
-                  <td className="ship-price">{r.price} ج.م</td>
+              {shipping.zones.map((z) => (
+                <tr key={z.name}>
+                  <td>
+                    <strong>{z.name}</strong>
+                    <div className="zone-govs">{z.govs.join("، ")}</div>
+                  </td>
+                  <td className="ship-price">{z.price} ج.م</td>
                 </tr>
               ))}
             </tbody>

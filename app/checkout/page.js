@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useStore } from "@/lib/StoreContext";
 import { showToast } from "@/components/Toast";
 import { effectivePrice } from "@/lib/products";
+import { governorates, shippingFor } from "@/lib/siteConfig";
 
 export default function CheckoutPage() {
   const { cart, products, cartTotal, placeOrder, buyNow, clearBuyNow } = useStore();
@@ -28,7 +29,8 @@ export default function CheckoutPage() {
 
   const itemCount = entries.reduce((s, [, e]) => s + e.qty, 0);
   const discount = coupon ? coupon.discount : 0;
-  const total = Math.max(0, subtotal - discount);
+  const shippingFee = shippingFor(form.city); // null لحد ما يختار المحافظة
+  const total = Math.max(0, subtotal - discount) + (shippingFee || 0);
 
   if (entries.length === 0) {
     return (
@@ -92,6 +94,7 @@ export default function CheckoutPage() {
     const extra = {
       subtotal,
       discount,
+      shipping: shippingFee || 0,
       coupon_code: coupon ? coupon.code : null,
     };
 
@@ -107,7 +110,18 @@ export default function CheckoutPage() {
         <form onSubmit={handleSubmit}>
           <div className="field"><label>الاسم الكامل</label><input required name="name" value={form.name} onChange={handleChange} placeholder="مثال: سارة أحمد" /></div>
           <div className="field"><label>رقم الموبايل</label><input required name="phone" value={form.phone} onChange={handleChange} placeholder="01xxxxxxxxx" /></div>
-          <div className="field"><label>المحافظة / المدينة</label><input required name="city" value={form.city} onChange={handleChange} placeholder="مثال: القاهرة" /></div>
+          <div className="field">
+            <label>المحافظة</label>
+            <select required className="admin-select" name="city" value={form.city} onChange={handleChange}>
+              <option value="">اختر محافظتك</option>
+              {governorates.map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+            {shippingFee !== null && (
+              <div className="ship-hint">رسوم الشحن لمحافظة {form.city}: {shippingFee} ج.م</div>
+            )}
+          </div>
           <div className="field"><label>العنوان التفصيلي</label><textarea required rows={3} name="address" value={form.address} onChange={handleChange} placeholder="الحي، الشارع، رقم المبنى" /></div>
           <div className="field">
             <label>طريقة الدفع</label>
@@ -169,7 +183,10 @@ export default function CheckoutPage() {
         {discount > 0 && (
           <div className="summary-row discount-row"><span>الخصم</span><span>− {discount} ج.م</span></div>
         )}
-        <div className="summary-row"><span>الشحن</span><span>مجاني</span></div>
+        <div className="summary-row">
+          <span>الشحن</span>
+          <span>{shippingFee === null ? "اختر المحافظة" : `${shippingFee} ج.م`}</span>
+        </div>
         <div className="summary-total"><span>الإجمالي</span><span>{total} ج.م</span></div>
       </div>
     </div>

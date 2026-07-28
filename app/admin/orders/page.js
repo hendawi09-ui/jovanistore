@@ -113,14 +113,13 @@ export default function AdminOrdersPage() {
                   <div>
                     <div className="aorder-label">الدفع</div>
                     <div>{o.pay === "cod" ? "عند الاستلام" : "بطاقة (تجريبي)"}</div>
+                    {o.subtotal > 0 && <div>المجموع الفرعي: {o.subtotal} ج.م</div>}
                     {o.discount > 0 && (
-                      <>
-                        <div>المجموع الفرعي: {o.subtotal} ج.م</div>
-                        <div style={{ color: "var(--red)" }}>
-                          خصم {o.coupon_code ? `(${o.coupon_code})` : ""}: − {o.discount} ج.م
-                        </div>
-                      </>
+                      <div style={{ color: "var(--red)" }}>
+                        خصم {o.coupon_code ? `(${o.coupon_code})` : ""}: − {o.discount} ج.م
+                      </div>
                     )}
+                    {o.shipping > 0 && <div>الشحن: {o.shipping} ج.م</div>}
                     <div className="aorder-total">{o.total} ج.م</div>
                   </div>
                 </div>

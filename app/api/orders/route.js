@@ -62,7 +62,7 @@ export async function POST(req) {
 
     // نعتمد الخصم المحسوب على السيرفر بدل اللي جاي من المتصفح
     order.discount = result.discount;
-    order.total = Math.max(0, subtotal - result.discount);
+    order.total = Math.max(0, subtotal - result.discount) + (Number(order.shipping) || 0);
 
     await supabase
       .from("coupons")

@@ -396,16 +396,35 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .shipping-table td{color:var(--ink-soft); line-height:1.8;}
 .ship-price{font-weight:800; color:var(--ink); white-space:nowrap;}
 
-/* زرار واتساب العائم */
-.wa-float{position:fixed; bottom:22px; left:22px; z-index:80; width:54px; height:54px; border-radius:50%; background:#25D366; color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 22px rgba(37,211,102,.42); transition:transform .2s, box-shadow .2s;}
-.wa-float svg{width:30px; height:30px;}
-.wa-float:hover{transform:scale(1.08); box-shadow:0 12px 28px rgba(37,211,102,.55);}
-@media (max-width:640px){ .wa-float{bottom:18px; left:18px; width:50px; height:50px;} .wa-float svg{width:27px; height:27px;} }
+/* زرار السلة العائم */
+.float-stack{position:fixed; bottom:22px; left:22px; z-index:80; display:flex; flex-direction:column; gap:10px;}
+.float-btn{position:relative; width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; transition:transform .2s, box-shadow .2s;}
+.float-btn svg{width:26px; height:26px;}
+.float-btn:hover{transform:scale(1.08);}
 
-/* روابط التواصل الاجتماعي في الفوتر */
-.footer-social{display:flex; gap:14px; margin-top:14px;}
-.footer-social a{font-size:13px; font-weight:700; color:var(--red); text-decoration:none;}
-.footer-social a:hover{text-decoration:underline;}
+.float-cart{background:var(--ink); color:#fff; box-shadow:0 8px 22px rgba(13,13,13,.35); width:58px; height:58px;}
+.float-cart svg{width:28px; height:28px;}
+.float-cart:hover{box-shadow:0 12px 28px rgba(13,13,13,.45);}
+.float-count{position:absolute; top:-3px; right:-3px; background:var(--red); color:#fff; font-size:11px; font-weight:800; min-width:21px; height:21px; padding:0 5px; border-radius:999px; display:flex; align-items:center; justify-content:center; border:2px solid var(--paper);}
+.float-cart.bump{animation:cartBump .45s cubic-bezier(.34,1.56,.64,1);}
+@keyframes cartBump{0%{transform:scale(1);}40%{transform:scale(1.18);}100%{transform:scale(1);}}
+
+
+@media (max-width:640px){
+  .float-stack{bottom:18px; left:18px; gap:9px;}
+  .float-btn{width:46px; height:46px;}
+  .float-btn svg{width:23px; height:23px;}
+  .float-cart{width:52px; height:52px;}
+  .float-cart svg{width:25px; height:25px;}
+}
+
+/* أيقونات التواصل الاجتماعي في الفوتر */
+.footer-social{display:flex; gap:10px; margin-top:16px;}
+.social-icon{width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; transition:transform .2s, box-shadow .2s;}
+.social-icon svg{width:21px; height:21px;}
+.social-icon:hover{transform:translateY(-2px);}
+.social-icon.wa{background:#25D366; box-shadow:0 5px 14px rgba(37,211,102,.35);}
+.social-icon.ig{background:linear-gradient(45deg,#F9CE34,#EE2A7B,#6228D7); box-shadow:0 5px 14px rgba(238,42,123,.3);}
 
 /* ===== خصم المنتج ===== */
 .price-sale{color:var(--red); font-weight:800;}
@@ -414,3 +433,7 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .disc-chip{display:inline-block; background:#FDEEEE; color:var(--red-dark); font-weight:700; font-size:11px; padding:2px 9px; border-radius:999px; margin-right:8px; vertical-align:middle;}
 .pd-price{display:flex; align-items:center; flex-wrap:wrap; gap:4px; margin-bottom:16px;}
 .pd-price .price{margin-bottom:0;}
+
+/* رسوم الشحن في صفحة الدفع */
+.ship-hint{font-size:12.5px; color:#1A8A47; background:#E7F8EE; padding:8px 12px; border-radius:10px; margin-top:8px; font-weight:600;}
+.zone-govs{font-size:11.5px; color:var(--muted); margin-top:4px; line-height:1.7;}
