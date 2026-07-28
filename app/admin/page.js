@@ -2,10 +2,10 @@
 import { useState, useRef } from "react";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg, icons } from "@/lib/icons";
-import { catCssVar, catLabel, parseColor, parseSize, stockKey, getTotalStock } from "@/lib/products";
+import { catCssVar, catLabel, parseColor, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
-const emptyForm = { name: "", price: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" };
+const emptyForm = { name: "", price: "", salePrice: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" };
 
 export default function AdminPage() {
   const { products, addProduct, updateProduct, deleteProduct, togglePublish, reorderProducts } = useStore();
@@ -83,6 +83,7 @@ export default function AdminPage() {
     setForm({
       name: p.name || "",
       price: String(p.price ?? ""),
+      salePrice: p.salePrice ? String(p.salePrice) : "",
       cat: p.cat || "men",
       icon: p.icon || "shirt",
       desc: p.desc || "",
@@ -113,6 +114,7 @@ export default function AdminPage() {
       name: form.name,
       desc: form.desc || "منتج جديد من Jovani Store.",
       price: Number(form.price),
+      salePrice: form.salePrice ? Number(form.salePrice) : null,
       images,
       colors,
       sizes,
@@ -214,7 +216,18 @@ export default function AdminPage() {
         </div>
         <div className="admin-pcard-body">
           <h4>{p.name}</h4>
-          <span>{p.price} ج.م{p.images && p.images.length > 1 ? ` · ${p.images.length} صور` : ""}</span>
+          <span>
+            {hasDiscount(p) ? (
+              <>
+                <s style={{ color: "var(--muted)" }}>{p.price}</s>{" "}
+                <strong style={{ color: "var(--red)" }}>{p.salePrice} ج.م</strong>
+                <span className="disc-chip">-{discountPercent(p)}%</span>
+              </>
+            ) : (
+              `${p.price} ج.م`
+            )}
+            {p.images && p.images.length > 1 ? ` · ${p.images.length} صور` : ""}
+          </span>
           {(p.colors?.length > 0 || p.sizes?.length > 0) && (
             <div className="admin-pcard-variants">
               {p.colors?.length > 0 && <span>{p.colors.length} ألوان</span>}
@@ -262,7 +275,11 @@ export default function AdminPage() {
       <form onSubmit={handleSubmit}>
         <div className="admin-grid">
           <div className="field"><label>اسم المنتج</label><input required name="name" value={form.name} onChange={handleChange} /></div>
-          <div className="field"><label>السعر (ج.م)</label><input required type="number" min="1" name="price" value={form.price} onChange={handleChange} /></div>
+          <div className="field"><label>السعر الأصلي (ج.م)</label><input required type="number" min="1" name="price" value={form.price} onChange={handleChange} /></div>
+          <div className="field">
+            <label>السعر بعد الخصم (اختياري)</label>
+            <input type="number" min="1" name="salePrice" value={form.salePrice} onChange={handleChange} placeholder="اتركه فارغًا لو مفيش خصم" />
+          </div>
           <div className="field">
             <label>القسم</label>
             <select className="admin-select" name="cat" value={form.cat} onChange={handleChange}>

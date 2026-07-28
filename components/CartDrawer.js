@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
-import { catCssVar } from "@/lib/products";
+import { catCssVar, effectivePrice, hasDiscount } from "@/lib/products";
 
 export default function CartDrawer({ open, onClose }) {
   const { cart, products, cartTotal, changeQty, removeItem } = useStore();
@@ -36,7 +36,15 @@ export default function CartDrawer({ open, onClose }) {
                   <div className="cart-item-info">
                     <h4>{p.name}</h4>
                     {variantLabel && <div className="cvariant">{variantLabel}</div>}
-                    <div className="cprice">{p.price} ج.م</div>
+                    <div className="cprice">
+                      {hasDiscount(p) ? (
+                        <>
+                          <span className="price-sale">{p.salePrice} ج.م</span> <s className="price-old">{p.price}</s>
+                        </>
+                      ) : (
+                        `${p.price} ج.م`
+                      )}
+                    </div>
                     <div className="qty-ctrl">
                       <button onClick={() => changeQty(key, -1)}>−</button>
                       <span>{entry.qty}</span>

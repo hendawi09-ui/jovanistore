@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/StoreContext";
 import { showToast } from "@/components/Toast";
+import { effectivePrice } from "@/lib/products";
 
 export default function CheckoutPage() {
   const { cart, products, cartTotal, placeOrder, buyNow, clearBuyNow } = useStore();
@@ -22,9 +23,8 @@ export default function CheckoutPage() {
     ? [["buynow", buyNow]]
     : Object.entries(cart).filter(([, e]) => products.some((p) => p.id == e.id));
 
-  const subtotal = isBuyNow
-    ? (products.find((p) => p.id == buyNow.id)?.price || 0) * buyNow.qty
-    : cartTotal;
+  const buyNowProduct = isBuyNow ? products.find((p) => p.id == buyNow.id) : null;
+  const subtotal = isBuyNow ? effectivePrice(buyNowProduct) * buyNow.qty : cartTotal;
 
   const itemCount = entries.reduce((s, [, e]) => s + e.qty, 0);
   const discount = coupon ? coupon.discount : 0;
@@ -83,7 +83,7 @@ export default function CheckoutPage() {
         productId: p.id,
         name: variantLabel ? `${p.name} (${variantLabel})` : p.name,
         qty: entry.qty,
-        price: p.price,
+        price: effectivePrice(p),
         color: entry.color || null,
         size: entry.size || null,
       };
@@ -136,7 +136,7 @@ export default function CheckoutPage() {
           return (
             <div className="summary-row" key={key}>
               <span>{p.name}{variantLabel ? ` (${variantLabel})` : ""} × {entry.qty}</span>
-              <span>{p.price * entry.qty} ج.م</span>
+              <span>{effectivePrice(p) * entry.qty} ج.م</span>
             </div>
           );
         })}

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
-import { catCssVar, catLabel, parseColor, parseSize, getStock, getTotalStock } from "@/lib/products";
+import { catCssVar, catLabel, parseColor, parseSize, getStock, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
 export default function ProductDetailPage() {
@@ -140,7 +140,17 @@ export default function ProductDetailPage() {
         <div className="breadcrumb"><Link href="/">الرئيسية</Link> / {catLabel[p.cat]}</div>
         <div className="tag" style={{ "--c": `var(${catCssVar[p.cat]})` }}>{catLabel[p.cat]}</div>
         <h1>{p.name}</h1>
-        <span className="price">{p.price} ج.م</span>
+        <div className="pd-price">
+          {hasDiscount(p) ? (
+            <>
+              <span className="price price-sale">{p.salePrice} ج.م</span>
+              <s className="price-old">{p.price} ج.م</s>
+              <span className="disc-chip">وفّر {discountPercent(p)}%</span>
+            </>
+          ) : (
+            <span className="price">{p.price} ج.م</span>
+          )}
+        </div>
         <p className="desc">{p.desc}</p>
 
         {parsedColors.length > 0 && (

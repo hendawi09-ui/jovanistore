@@ -15,6 +15,7 @@ function toClient(row) {
     name: row.name,
     desc: row.description,
     price: Number(row.price),
+    salePrice: row.sale_price !== null && row.sale_price !== undefined ? Number(row.sale_price) : null,
     images,
     image: images[0] || null, // توافق مع أي كود قديم بيستخدم صورة واحدة
     colors: Array.isArray(row.colors) ? row.colors.filter(Boolean) : [],
@@ -48,6 +49,7 @@ export async function POST(req) {
         name: body.name,
         description: body.desc,
         price: body.price,
+        sale_price: body.salePrice ? Number(body.salePrice) : null,
         image_urls: images.length > 0 ? images : null,
         image_url: images[0] || null,
         colors: colors.length > 0 ? colors : null,

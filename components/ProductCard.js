@@ -2,7 +2,7 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { IconSvg } from "@/lib/icons";
-import { catCssVar, catLabel, getTotalStock } from "@/lib/products";
+import { catCssVar, catLabel, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { useStore } from "@/lib/StoreContext";
 import { showToast } from "./Toast";
 
@@ -75,6 +75,7 @@ export default function ProductCard({ p }) {
           <div className="icon-box"><IconSvg name={p.icon} /></div>
         )}
         <div className="tag">{catLabel[p.cat]}</div>
+        {hasDiscount(p) && !soldOut && <div className="disc-badge">-{discountPercent(p)}%</div>}
         {soldOut && <div className="soldout-overlay">نفدت الكمية</div>}
         {images.length > 1 && (
           <div className="card-dots" onClick={(e) => e.preventDefault()}>
@@ -94,7 +95,16 @@ export default function ProductCard({ p }) {
         <h3>{p.name}</h3>
         <div className="desc">{p.desc}</div>
         <div className="card-foot">
-          <div className="price">{p.price} ج.م</div>
+          <div className="price">
+            {hasDiscount(p) ? (
+              <>
+                <span className="price-sale">{p.salePrice} ج.م</span>
+                <s className="price-old">{p.price}</s>
+              </>
+            ) : (
+              `${p.price} ج.م`
+            )}
+          </div>
           {soldOut ? (
             <span className="add-btn add-btn-link soldout-label">نفدت الكمية</span>
           ) : hasVariants ? (

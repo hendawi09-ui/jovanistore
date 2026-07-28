@@ -15,6 +15,7 @@ export async function PATCH(req, { params }) {
   if (typeof body.name === "string") update.name = body.name;
   if (typeof body.desc === "string") update.description = body.desc;
   if (typeof body.price !== "undefined") update.price = Number(body.price);
+  if ("salePrice" in body) update.sale_price = body.salePrice ? Number(body.salePrice) : null;
   if (typeof body.cat === "string") update.cat = body.cat;
   if (typeof body.icon === "string") update.icon = body.icon;
   if (typeof body.published === "boolean") update.published = body.published;
