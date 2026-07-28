@@ -1,12 +1,10 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
 import { catCssVar, effectivePrice, hasDiscount } from "@/lib/products";
 
-export default function CartDrawer({ open, onClose }) {
+export default function CartDrawer({ open, onClose, onCheckout }) {
   const { cart, products, cartTotal, changeQty, removeItem } = useStore();
-  const router = useRouter();
   const entries = Object.entries(cart).filter(([, e]) => products.some((p) => p.id == e.id));
 
   return (
@@ -61,7 +59,7 @@ export default function CartDrawer({ open, onClose }) {
           <div className="drawer-total"><span>الإجمالي</span><span>{cartTotal} ج.م</span></div>
           <button
             className="checkout-btn"
-            onClick={() => { onClose(); router.push("/checkout"); }}
+            onClick={onCheckout}
           >
             إتمام الطلب
           </button>
