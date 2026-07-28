@@ -10,6 +10,11 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", phone: "", city: "", address: "", pay: "cod" });
 
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState(null); // { code, discount, label }
+  const [couponError, setCouponError] = useState("");
+  const [checkingCoupon, setCheckingCoupon] = useState(false);
+
   // لو المستخدم جاي من "اشترِ الآن"، بنعرض المنتج ده لوحده ومنمسّش السلة خالص
   const isBuyNow = Boolean(buyNow && products.some((p) => p.id == buyNow.id));
 
@@ -17,9 +22,13 @@ export default function CheckoutPage() {
     ? [["buynow", buyNow]]
     : Object.entries(cart).filter(([, e]) => products.some((p) => p.id == e.id));
 
-  const total = isBuyNow
+  const subtotal = isBuyNow
     ? (products.find((p) => p.id == buyNow.id)?.price || 0) * buyNow.qty
     : cartTotal;
+
+  const itemCount = entries.reduce((s, [, e]) => s + e.qty, 0);
+  const discount = coupon ? coupon.discount : 0;
+  const total = Math.max(0, subtotal - discount);
 
   if (entries.length === 0) {
     return (
@@ -32,6 +41,37 @@ export default function CheckoutPage() {
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  }
+
+  async function applyCoupon() {
+    const code = couponInput.trim();
+    if (!code) return;
+    setCheckingCoupon(true);
+    setCouponError("");
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, subtotal, itemCount }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setCoupon({ code: data.code, discount: data.discount, label: data.label });
+        showToast(`تم تطبيق الخصم ✓ وفّرت ${data.discount} ج.م`);
+      } else {
+        setCoupon(null);
+        setCouponError(data.error || "كود غير صحيح");
+      }
+    } catch {
+      setCouponError("تعذّر التحقق من الكود، حاول مرة أخرى");
+    }
+    setCheckingCoupon(false);
+  }
+
+  function removeCoupon() {
+    setCoupon(null);
+    setCouponInput("");
+    setCouponError("");
   }
 
   async function handleSubmit(e) {
@@ -48,7 +88,14 @@ export default function CheckoutPage() {
         size: entry.size || null,
       };
     });
-    await placeOrder(form, items, total, isBuyNow ? "buynow" : "cart");
+
+    const extra = {
+      subtotal,
+      discount,
+      coupon_code: coupon ? coupon.code : null,
+    };
+
+    await placeOrder({ ...form, ...extra }, items, total, isBuyNow ? "buynow" : "cart");
     showToast("تم تأكيد طلبك بنجاح 🎉");
     router.push("/orders");
   }
@@ -93,6 +140,35 @@ export default function CheckoutPage() {
             </div>
           );
         })}
+
+        <div className="coupon-box">
+          {coupon ? (
+            <div className="coupon-applied">
+              <span>كود <strong>{coupon.code}</strong> ({coupon.label}) مُطبّق</span>
+              <button type="button" onClick={removeCoupon}>إزالة</button>
+            </div>
+          ) : (
+            <>
+              <div className="coupon-row">
+                <input
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder="عندك كود خصم؟"
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyCoupon(); } }}
+                />
+                <button type="button" onClick={applyCoupon} disabled={checkingCoupon}>
+                  {checkingCoupon ? "..." : "تطبيق"}
+                </button>
+              </div>
+              {couponError && <div className="coupon-error">{couponError}</div>}
+            </>
+          )}
+        </div>
+
+        <div className="summary-row"><span>المجموع الفرعي</span><span>{subtotal} ج.م</span></div>
+        {discount > 0 && (
+          <div className="summary-row discount-row"><span>الخصم</span><span>− {discount} ج.م</span></div>
+        )}
         <div className="summary-row"><span>الشحن</span><span>مجاني</span></div>
         <div className="summary-total"><span>الإجمالي</span><span>{total} ج.م</span></div>
       </div>

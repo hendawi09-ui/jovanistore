@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 import { notifyNewOrder } from "@/lib/notify";
 import { stockKey } from "@/lib/products";
+import { validateCoupon } from "@/lib/coupons";
 
 export async function GET() {
   const { data, error } = await supabase
@@ -42,6 +43,33 @@ async function decrementStock(items) {
 
 export async function POST(req) {
   const order = await req.json();
+
+  // إعادة التحقق من الكوبون على السيرفر (منعًا للتلاعب من المتصفح)
+  if (order.coupon_code) {
+    const { data: coupon } = await supabase
+      .from("coupons")
+      .select("*")
+      .eq("code", order.coupon_code)
+      .maybeSingle();
+
+    const subtotal = Number(order.subtotal) || 0;
+    const itemCount = (order.items || []).reduce((s, i) => s + (i.qty || 0), 0);
+    const result = validateCoupon(coupon, { subtotal, itemCount });
+
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+
+    // نعتمد الخصم المحسوب على السيرفر بدل اللي جاي من المتصفح
+    order.discount = result.discount;
+    order.total = Math.max(0, subtotal - result.discount);
+
+    await supabase
+      .from("coupons")
+      .update({ uses: (coupon.uses || 0) + 1 })
+      .eq("id", coupon.id);
+  }
+
   const { data, error } = await supabase.from("orders").insert([order]).select();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

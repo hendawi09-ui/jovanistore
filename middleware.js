@@ -11,6 +11,11 @@ export function middleware(req) {
     return NextResponse.next();
   }
 
+  // التحقق من كود الخصم لازم يفضل عمومي (العميل بيستخدمه من صفحة الدفع)
+  if (pathname.startsWith("/api/coupons/validate")) {
+    return NextResponse.next();
+  }
+
   // إنشاء طلب جديد وعرض الطلبات لازم يفضلوا عموميين (يستخدمهم العميل من صفحة الدفع وطلباتي)
   if (pathname.startsWith("/api/orders") && (req.method === "GET" || req.method === "POST")) {
     return NextResponse.next();
@@ -41,7 +46,7 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/products/:path*", "/api/upload/:path*", "/api/orders/:path*"],
+  matcher: ["/admin/:path*", "/api/products/:path*", "/api/upload/:path*", "/api/orders/:path*", "/api/coupons/:path*"],
 };
 
 

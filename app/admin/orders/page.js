@@ -57,6 +57,7 @@ export default function AdminOrdersPage() {
         <div className="admin-tabs">
           <a href="/admin" className="admin-tab">المنتجات</a>
           <span className="admin-tab active">طلبات الشراء</span>
+          <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
         </div>
         <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }}><h2>طلبات الشراء</h2></div>
         <div className="empty-state">لا توجد طلبات حتى الآن.</div>
@@ -69,6 +70,7 @@ export default function AdminOrdersPage() {
       <div className="admin-tabs">
         <a href="/admin" className="admin-tab">المنتجات</a>
         <span className="admin-tab active">طلبات الشراء</span>
+        <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
       </div>
       <div className="section-head" style={{ margin: "0 0 20px", padding: 0 }}>
         <h2>طلبات الشراء ({orders.length})</h2>
@@ -111,6 +113,14 @@ export default function AdminOrdersPage() {
                   <div>
                     <div className="aorder-label">الدفع</div>
                     <div>{o.pay === "cod" ? "عند الاستلام" : "بطاقة (تجريبي)"}</div>
+                    {o.discount > 0 && (
+                      <>
+                        <div>المجموع الفرعي: {o.subtotal} ج.م</div>
+                        <div style={{ color: "var(--red)" }}>
+                          خصم {o.coupon_code ? `(${o.coupon_code})` : ""}: − {o.discount} ج.م
+                        </div>
+                      </>
+                    )}
                     <div className="aorder-total">{o.total} ج.م</div>
                   </div>
                 </div>
