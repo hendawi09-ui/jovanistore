@@ -1,6 +1,5 @@
 "use client";
-import { useMemo } from "react";
-import { useStore } from "@/lib/StoreContext";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { showToast } from "@/components/Toast";
 
 const STATUS_LABELS = {
@@ -32,7 +31,30 @@ function timeLabel(iso) {
 }
 
 export default function AdminOrdersPage() {
-  const { orders, updateOrderStatus } = useStore();
+  // لوحة التحكم بتجيب كل الطلبات عبر مسار محمي بكلمة السر (مش عبر StoreContext)
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    const res = await fetch("/api/orders");
+    if (res.ok) setOrders(await res.json());
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const updateOrderStatus = useCallback(
+    async (id, status) => {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) await refresh();
+      return res.ok;
+    },
+    [refresh]
+  );
 
   const groups = useMemo(() => {
     const map = new Map();
@@ -49,6 +71,19 @@ export default function AdminOrdersPage() {
     updateOrderStatus(id, status).then((ok) => {
       showToast(ok ? "تم تحديث حالة الطلب" : "حدث خطأ أثناء التحديث");
     });
+  }
+
+  if (loading) {
+    return (
+      <div className="admin-wrap">
+        <div className="admin-tabs">
+          <a href="/admin" className="admin-tab">المنتجات</a>
+          <span className="admin-tab active">طلبات الشراء</span>
+          <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
+        </div>
+        <div className="note-box">جارِ تحميل الطلبات...</div>
+      </div>
+    );
   }
 
   if (orders.length === 0) {

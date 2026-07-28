@@ -16,8 +16,12 @@ export function middleware(req) {
     return NextResponse.next();
   }
 
-  // إنشاء طلب جديد وعرض الطلبات لازم يفضلوا عموميين (يستخدمهم العميل من صفحة الدفع وطلباتي)
-  if (pathname.startsWith("/api/orders") && (req.method === "GET" || req.method === "POST")) {
+  // العميل يقدر ينشئ طلب جديد، ويشوف طلباته هو فقط عبر /api/orders/mine
+  // أما عرض كل الطلبات (GET) فمحصور على لوحة التحكم لحماية بيانات العملاء
+  if (pathname.startsWith("/api/orders/mine") && req.method === "POST") {
+    return NextResponse.next();
+  }
+  if (pathname === "/api/orders" && req.method === "POST") {
     return NextResponse.next();
   }
 
