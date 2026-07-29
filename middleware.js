@@ -34,7 +34,15 @@ export function middleware(req) {
         const idx = decoded.indexOf(":");
         const user = decoded.slice(0, idx);
         const pass = decoded.slice(idx + 1);
-        if (user === ADMIN_USER && pass === process.env.ADMIN_PASSWORD) {
+
+        // كيبورد الموبايل بيكبّر أول حرف تلقائيًا وأحيانًا بيضيف مسافة،
+        // فبنتجاهل حالة الحروف والمسافات الزيادة في اسم المستخدم،
+        // وبنقبل كلمة السر بمسافات زيادة كمان (مع الأصلية بالظبط).
+        const userOk = user.trim().toLowerCase() === ADMIN_USER.toLowerCase();
+        const expected = process.env.ADMIN_PASSWORD;
+        const passOk = pass === expected || pass.trim() === expected;
+
+        if (userOk && passOk) {
           return NextResponse.next();
         }
       } catch {
