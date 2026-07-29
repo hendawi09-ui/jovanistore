@@ -4,21 +4,25 @@ import { IconSvg } from "@/lib/icons";
 import { catCssVar, effectivePrice, hasDiscount } from "@/lib/products";
 import { showToast } from "./Toast";
 
-export default function CartDrawer({ open, onClose, onCheckout }) {
-  const { cart, products, cartTotal, changeQty, removeItem, moveToFavorites } = useStore();
-  const entries = Object.entries(cart).filter(([, e]) => products.some((p) => p.id == e.id));
+export default function FavoritesDrawer({ open, onClose }) {
+  const { favorites, products, removeFavorite, moveToCart } = useStore();
+  const entries = Object.entries(favorites).filter(([, e]) => products.some((p) => p.id == e.id));
 
   return (
     <>
       <div className={`overlay ${open ? "show" : ""}`} onClick={onClose} />
       <aside className={`drawer ${open ? "show" : ""}`}>
         <div className="drawer-head">
-          <h3>سلة المشتريات</h3>
+          <h3>المفضلة</h3>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
         <div className="drawer-items">
           {entries.length === 0 ? (
-            <div className="cart-empty">سلتك فارغة حاليًا<br />ابدأ التسوّق واختر ما يعجبك</div>
+            <div className="cart-empty">
+              قائمة المفضلة فارغة
+              <br />
+              اضغط على ♡ في أي منتج لحفظه هنا
+            </div>
           ) : (
             entries.map(([key, entry]) => {
               const p = products.find((x) => x.id == entry.id);
@@ -44,22 +48,17 @@ export default function CartDrawer({ open, onClose, onCheckout }) {
                         `${p.price} ج.م`
                       )}
                     </div>
-                    <div className="qty-ctrl">
-                      <button onClick={() => changeQty(key, -1)}>−</button>
-                      <span>{entry.qty}</span>
-                      <button onClick={() => changeQty(key, 1)}>+</button>
-                    </div>
                     <div className="item-actions">
                       <button
                         className="move-btn"
                         onClick={() => {
-                          moveToFavorites(key);
-                          showToast("تم نقله إلى المفضلة ♡");
+                          moveToCart(key);
+                          showToast("تم نقله إلى السلة ✓");
                         }}
                       >
-                        نقل للمفضلة
+                        نقل إلى السلة
                       </button>
-                      <button className="rm-btn" onClick={() => removeItem(key)}>إزالة</button>
+                      <button className="rm-btn" onClick={() => removeFavorite(key)}>إزالة</button>
                     </div>
                   </div>
                 </div>
@@ -68,13 +67,10 @@ export default function CartDrawer({ open, onClose, onCheckout }) {
           )}
         </div>
         <div className="drawer-foot">
-          <div className="drawer-total"><span>الإجمالي</span><span>{cartTotal} ج.م</span></div>
-          <button
-            className="checkout-btn"
-            onClick={onCheckout}
-          >
-            إتمام الطلب
-          </button>
+          <div className="drawer-total">
+            <span>عدد المنتجات</span>
+            <span>{entries.length}</span>
+          </div>
         </div>
       </aside>
     </>

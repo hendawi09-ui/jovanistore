@@ -8,7 +8,7 @@ import { showToast } from "./Toast";
 
 export default function ProductCard({ p }) {
   const ref = useRef(null);
-  const { addToCart } = useStore();
+  const { addToCart, isFavorite, toggleFavorite } = useStore();
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
   const hasVariants = p.colors?.length > 0 || p.sizes?.length > 0;
@@ -75,6 +75,20 @@ export default function ProductCard({ p }) {
           <div className="icon-box"><IconSvg name={p.icon} /></div>
         )}
         <div className="tag">{catLabel[p.cat]}</div>
+        <button
+          className={`fav-toggle ${isFavorite(p.id) ? "active" : ""}`}
+          aria-label={isFavorite(p.id) ? "إزالة من المفضلة" : "إضافة للمفضلة"}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFavorite(p.id);
+            showToast(isFavorite(p.id) ? "أُزيل من المفضلة" : "أُضيف إلى المفضلة ♡");
+          }}
+        >
+          <svg viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" />
+          </svg>
+        </button>
         {hasDiscount(p) && !soldOut && <div className="disc-badge">-{discountPercent(p)}%</div>}
         {soldOut && <div className="soldout-overlay">نفدت الكمية</div>}
         {images.length > 1 && (

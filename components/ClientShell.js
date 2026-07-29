@@ -5,62 +5,69 @@ import BackgroundCanvas from "./BackgroundCanvas";
 import Header from "./Header";
 import Footer from "./Footer";
 import CartDrawer from "./CartDrawer";
+import FavoritesDrawer from "./FavoritesDrawer";
 import Toast from "./Toast";
 import FloatingActions from "./FloatingActions";
 
 export default function ClientShell({ children }) {
   const router = useRouter();
-  const [cartOpen, setCartOpen] = useState(false);
+  const [panel, setPanel] = useState(null); // null | "cart" | "favorites"
   const scrollY = useRef(0);
   const pushedState = useRef(false);
 
-  // فتح السلة: بنضيف خطوة في تاريخ المتصفح عشان زرار الرجوع يقفل السلة
-  // بدل ما يخرج المستخدم من الصفحة
-  const openCart = useCallback(() => {
-    if (!cartOpen) {
-      window.history.pushState({ cart: true }, "");
-      pushedState.current = true;
-      setCartOpen(true);
-    }
-  }, [cartOpen]);
+  const anyOpen = panel !== null;
 
-  // قفل السلة من زرار الإغلاق أو الخلفية: بنرجع خطوة في التاريخ لو إحنا اللي ضفناها
-  const closeCart = useCallback(() => {
+  // فتح أي درج: بنضيف خطوة في تاريخ المتصفح عشان زرار الرجوع يقفله
+  // بدل ما يخرج المستخدم من الصفحة
+  const openPanel = useCallback((name) => {
+    setPanel((current) => {
+      if (current === null) {
+        window.history.pushState({ panel: name }, "");
+        pushedState.current = true;
+      }
+      return name;
+    });
+  }, []);
+
+  const openCart = useCallback(() => openPanel("cart"), [openPanel]);
+  const openFavorites = useCallback(() => openPanel("favorites"), [openPanel]);
+
+  // القفل من زرار الإغلاق أو الخلفية
+  const closePanel = useCallback(() => {
     if (pushedState.current) {
       pushedState.current = false;
-      window.history.back(); // هيشغّل popstate اللي بيقفل السلة
+      window.history.back(); // هيشغّل popstate اللي بيقفل الدرج
     } else {
-      setCartOpen(false);
+      setPanel(null);
     }
   }, []);
 
-  // الانتقال لصفحة الدفع: بنستبدل خطوة السلة في التاريخ بدل ما نرجع ونتقدم
-  // عشان زرار الرجوع من صفحة الدفع يرجّع المستخدم للصفحة اللي كان فيها
+  // الانتقال لصفحة الدفع: بنستبدل خطوة الدرج في التاريخ بدل ما نرجع ونتقدم
   const goToCheckout = useCallback(() => {
     if (pushedState.current) {
       pushedState.current = false;
       window.history.replaceState({}, "");
     }
-    setCartOpen(false);
+    setPanel(null);
     router.push("/checkout");
   }, [router]);
 
-  // زرار الرجوع في الموبايل بيقفل السلة
+  // زرار الرجوع في الموبايل بيقفل الدرج المفتوح
   useEffect(() => {
     function onPopState() {
       pushedState.current = false;
-      setCartOpen(false);
+      setPanel(null);
     }
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  // قفل تمرير الصفحة اللي ورا السلة.
+  // قفل تمرير الصفحة اللي ورا الدرج.
   // بنستخدم position:fixed لأن overflow:hidden لوحده مش بيمنع التمرير على متصفحات الموبايل،
   // وبنحفظ مكان التمرير ونرجّعه بعد القفل عشان الصفحة ما تنطّش لفوق.
   useEffect(() => {
     const body = document.body;
-    if (cartOpen) {
+    if (anyOpen) {
       scrollY.current = window.scrollY;
       body.style.position = "fixed";
       body.style.top = `-${scrollY.current}px`;
@@ -78,9 +85,9 @@ export default function ClientShell({ children }) {
       body.style.overflow = "";
       window.scrollTo(0, y);
     }
-  }, [cartOpen]);
+  }, [anyOpen]);
 
-  // تنظيف احتياطي لو الصفحة اتقفلت والسلة مفتوحة
+  // تنظيف احتياطي لو الصفحة اتقفلت والدرج مفتوح
   useEffect(() => {
     return () => {
       const body = document.body;
@@ -96,11 +103,12 @@ export default function ClientShell({ children }) {
   return (
     <>
       <BackgroundCanvas />
-      <Header onOpenCart={openCart} />
+      <Header onOpenCart={openCart} onOpenFavorites={openFavorites} />
       <main>{children}</main>
       <Footer />
-      <CartDrawer open={cartOpen} onClose={closeCart} onCheckout={goToCheckout} />
-      <FloatingActions onOpenCart={openCart} />
+      <CartDrawer open={panel === "cart"} onClose={closePanel} onCheckout={goToCheckout} />
+      <FavoritesDrawer open={panel === "favorites"} onClose={closePanel} />
+      <FloatingActions onOpenCart={openCart} onOpenFavorites={openFavorites} />
       <Toast />
     </>
   );
