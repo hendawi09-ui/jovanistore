@@ -522,3 +522,19 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .fav-toggle svg{width:20px; height:20px;}
   .disc-badge{top:13px; left:13px; font-size:12.5px; padding:6px 12px;}
 }
+
+/* ===== بحث وفلترة لوحة التحكم ===== */
+.admin-search{display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:40px;}
+.admin-search-box{flex:1; min-width:240px; position:relative; display:flex; align-items:center; gap:9px; background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:0 16px; transition:border-color .2s;}
+.admin-search-box:focus-within{border-color:var(--ink);}
+.admin-search-box > svg{width:17px; height:17px; color:var(--muted); flex-shrink:0;}
+.admin-search-box input{flex:1; border:none; outline:none; background:none; padding:11px 0; font-size:13.5px; font-family:inherit;}
+.admin-search-box input::-webkit-search-cancel-button{display:none;}
+.admin-filter{display:flex; gap:6px; background:var(--paper-dim); padding:4px; border-radius:999px;}
+.filter-tab{padding:8px 16px; border-radius:999px; font-size:12.5px; font-weight:700; color:var(--ink-soft); transition:background .2s, color .2s;}
+.filter-tab.active{background:var(--ink); color:#fff;}
+
+/* زرار النقل لأول الترتيب */
+.admin-pcard-top{display:flex; align-items:center; justify-content:space-between; gap:6px;}
+.top-btn{width:24px; height:22px; border-radius:7px; border:1px solid var(--line); background:#fff; font-size:10px; color:var(--ink-soft); line-height:1; transition:background .2s, color .2s;}
+.top-btn:hover{background:var(--ink); color:#fff; border-color:var(--ink);}

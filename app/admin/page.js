@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg, icons } from "@/lib/icons";
-import { catCssVar, catLabel, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
+import { catCssVar, catLabel, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent, matchesQuery } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
 const emptyForm = { name: "", price: "", salePrice: "", cat: "men", icon: "shirt", desc: "", groupKey: "", colorName: "", sizes: "" };
@@ -20,6 +20,8 @@ export default function AdminPage() {
   const dragId = useRef(null);
   const [dragOverId, setDragOverId] = useState(null);
   const [reordering, setReordering] = useState(false);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all"); // all | published | unpublished
 
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -191,6 +193,30 @@ export default function AdminPage() {
     if (!ok) showToast("حدث خطأ أثناء إعادة الترتيب");
   }
 
+  // نقل المنتج لأول الترتيب داخل مجموعته (منشور أو غير منشور)
+  async function moveToTop(id) {
+    const target = products.find((x) => x.id === id);
+    if (!target) return;
+    const group = target.published !== false;
+
+    // أول منتج في نفس المجموعة هو المكان اللي هننقل له
+    const firstInGroup = products.find((x) => (x.published !== false) === group);
+    if (!firstInGroup || firstInGroup.id === id) return;
+
+    const ids = products.map((x) => x.id);
+    const insertAt = ids.indexOf(firstInGroup.id);
+    const from = ids.indexOf(id);
+    if (from === -1 || insertAt === -1) return;
+
+    ids.splice(from, 1);
+    ids.splice(insertAt, 0, id);
+
+    setReordering(true);
+    const ok = await reorderProducts(ids);
+    setReordering(false);
+    showToast(ok ? "تم نقله لأول الترتيب" : "حدث خطأ أثناء النقل");
+  }
+
   function renderCard(p, group) {
     const isPublished = p.published !== false;
     return (
@@ -203,7 +229,17 @@ export default function AdminPage() {
         onDrop={(e) => onDrop(e, p.id, group)}
         className={`admin-pcard ${dragOverId === p.id ? "drag-over" : ""} ${reordering ? "reordering" : ""} ${editingId === p.id ? "editing" : ""} ${!isPublished ? "unpublished" : ""}`}
       >
-        <div className="admin-pcard-handle" title="اسحب لإعادة الترتيب">⠿⠿</div>
+        <div className="admin-pcard-top">
+          <button
+            className="top-btn"
+            onClick={() => moveToTop(p.id)}
+            title="نقل لأول الترتيب"
+            aria-label="نقل لأول الترتيب"
+          >
+            ▲
+          </button>
+          <span className="admin-pcard-handle" title="اسحب لإعادة الترتيب">⠿⠿</span>
+        </div>
         <div className="admin-pcard-media" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
           {p.images && p.images[0] ? (
             <img src={p.images[0]} alt="" />
@@ -254,8 +290,20 @@ export default function AdminPage() {
     );
   }
 
-  const publishedList = products.filter((p) => p.published !== false);
-  const unpublishedList = products.filter((p) => p.published === false);
+  // بحث في الاسم، الوصف، اسم اللون، كود المجموعة، والمقاسات
+  const q = query.trim();
+  function matches(p) {
+    if (!q) return true;
+    const hay = [p.name, p.desc, p.colorName, p.groupKey, ...(p.sizes || [])]
+      .filter(Boolean)
+      .join(" ");
+    return matchesQuery(hay, q);
+  }
+
+  const publishedList = products.filter((p) => p.published !== false && matches(p));
+  const unpublishedList = products.filter((p) => p.published === false && matches(p));
+  const showPublished = filter === "all" || filter === "published";
+  const showUnpublished = filter === "all" || filter === "unpublished";
 
   return (
     <div className="admin-wrap">
@@ -373,29 +421,71 @@ export default function AdminPage() {
         </button>
       </form>
 
-      <div className="section-head" style={{ margin: "40px 0 16px", padding: 0, alignItems: "center" }}>
+      <div className="admin-search">
+        <div className="admin-search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" />
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="ابحث بالاسم أو الوصف أو اللون أو كود المجموعة..."
+          />
+          {query && (
+            <button className="search-clear" onClick={() => setQuery("")} aria-label="مسح">✕</button>
+          )}
+        </div>
+        <div className="admin-filter">
+          {[
+            { k: "all", label: "الكل" },
+            { k: "published", label: "منشور" },
+            { k: "unpublished", label: "غير منشور" },
+          ].map((f) => (
+            <button
+              key={f.k}
+              className={`filter-tab ${filter === f.k ? "active" : ""}`}
+              onClick={() => setFilter(f.k)}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {showPublished && (
+      <>
+      <div className="section-head" style={{ margin: "28px 0 16px", padding: 0, alignItems: "center" }}>
         <h2 style={{ fontSize: "20px" }}>منشور ({publishedList.length})</h2>
         <span style={{ fontSize: "12.5px" }}>ظاهر للعملاء الآن — اسحب لإعادة الترتيب</span>
       </div>
       <div className="admin-product-grid">
         {publishedList.length === 0 ? (
-          <div className="note-box">لا يوجد منتجات منشورة حاليًا.</div>
+          <div className="note-box">{q ? "لا توجد نتائج مطابقة للبحث." : "لا يوجد منتجات منشورة حاليًا."}</div>
         ) : (
           publishedList.map((p) => renderCard(p, true))
         )}
       </div>
 
+      </>
+      )}
+
+      {showUnpublished && (
+      <>
       <div className="section-head" style={{ margin: "40px 0 16px", padding: 0, alignItems: "center" }}>
         <h2 style={{ fontSize: "20px" }}>غير منشور ({unpublishedList.length})</h2>
         <span style={{ fontSize: "12.5px" }}>مخفي عن العملاء</span>
       </div>
       <div className="admin-product-grid">
         {unpublishedList.length === 0 ? (
-          <div className="note-box">لا يوجد منتجات غير منشورة.</div>
+          <div className="note-box">{q ? "لا توجد نتائج مطابقة للبحث." : "لا يوجد منتجات غير منشورة."}</div>
         ) : (
           unpublishedList.map((p) => renderCard(p, false))
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

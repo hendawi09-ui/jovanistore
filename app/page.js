@@ -2,7 +2,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
-import { cats, catLabel, parseSize } from "@/lib/products";
+import { cats, catLabel, parseSize, matchesQuery } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 
 function HomeContent() {
@@ -18,7 +18,7 @@ function HomeContent() {
     if (q) setQuery(q);
   }, [searchParams]);
 
-  const q = query.trim().toLowerCase();
+  const q = query.trim();
   const list = products.filter((p) => {
     if (p.published === false) return false;
     if (activeCat !== "all" && p.cat !== activeCat) return false;
@@ -31,10 +31,9 @@ function HomeContent() {
       ...(p.sizes || []).map((s) => parseSize(s).name),
     ]
       .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    // كل كلمة في البحث لازم تظهر، عشان البحث بكلمتين يبقى أدق
-    return q.split(/\s+/).every((word) => haystack.includes(word));
+      .join(" ");
+    // كل كلمات البحث لازم تظهر (أي عدد كلمات)، مع تجاهل اختلاف شكل الحروف العربية
+    return matchesQuery(haystack, q);
   });
 
   return (
