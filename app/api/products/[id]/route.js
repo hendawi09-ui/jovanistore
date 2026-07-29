@@ -19,6 +19,8 @@ export async function PATCH(req, { params }) {
   if (typeof body.cat === "string") update.cat = body.cat;
   if (typeof body.icon === "string") update.icon = body.icon;
   if (typeof body.published === "boolean") update.published = body.published;
+  if ("groupKey" in body) update.group_key = body.groupKey ? String(body.groupKey).trim() : null;
+  if ("colorName" in body) update.color_name = body.colorName ? String(body.colorName).trim() : null;
   if (body.stock === null || (body.stock && typeof body.stock === "object")) {
     update.stock = body.stock;
   }

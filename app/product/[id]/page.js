@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
-import { catCssVar, catLabel, parseColor, parseSize, getStock, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
+import { catCssVar, catLabel, parseSize, getStock, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
 export default function ProductDetailPage() {
@@ -13,11 +13,10 @@ export default function ProductDetailPage() {
   const { products, addToCart, startBuyNow } = useStore();
   const [qty, setQty] = useState(1);
   const [active, setActive] = useState(0);
-  const [color, setColor] = useState("");
   const [size, setSize] = useState("");
   const p = products.find((x) => x.id == id && x.published !== false);
 
-  const parsedColors = (p?.colors || []).map(parseColor);
+  const productColor = p?.colorName || "";
   const rawSizes = (p?.sizes || []).map(parseSize);
   const trackingStock = getTotalStock(p) !== null;
 
@@ -25,19 +24,12 @@ export default function ProductDetailPage() {
   const parsedSizes = rawSizes.map((s) => {
     if (!s.available) return s;
     if (!trackingStock) return s;
-    const left = getStock(p, color, s.name);
+    const left = getStock(p, productColor, s.name);
     return { ...s, available: left > 0, left };
   });
 
-  const currentStock = trackingStock ? getStock(p, color, size) : null;
+  const currentStock = trackingStock ? getStock(p, productColor, size) : null;
   const soldOut = trackingStock && getTotalStock(p) === 0;
-
-  // اختيار أول لون وأول مقاس متاح تلقائيًا لما يتوفر المنتج
-  useEffect(() => {
-    if (!p) return;
-    const colorList = (p.colors || []).map(parseColor);
-    if (colorList.length > 0) setColor(colorList[0].name);
-  }, [p?.id]);
 
   // لما اللون يتغيّر، نختار أول مقاس متاح فعليًا لهذا اللون
   useEffect(() => {
@@ -45,7 +37,7 @@ export default function ProductDetailPage() {
     const firstAvailable = parsedSizes.find((s) => s.available);
     setSize(firstAvailable ? firstAvailable.name : "");
     setQty(1);
-  }, [p?.id, color]);
+  }, [p?.id]);
 
   // نمنع الكمية من تجاوز المتاح في المخزون
   useEffect(() => {
@@ -80,12 +72,17 @@ export default function ProductDetailPage() {
     );
   }
 
+  // كل لون بقى منتج مستقل بصفحته — فالمعرض بيعرض صور اللون ده بس
   const images = p.images && p.images.length > 0 ? p.images : [];
+
+  // ألوان نفس القطعة = المنتجات اللي بنفس group_key (بما فيهم المنتج الحالي)
+  const siblings = p.groupKey
+    ? products.filter((x) => x.groupKey === p.groupKey && x.published !== false)
+    : [];
 
   // لازم العميل يختار لون ومقاس (لو المنتج بيوفرهم) قبل الشراء أو الإضافة للسلة
   function missingSelection() {
     if (soldOut) return "نفدت الكمية من هذا المنتج";
-    if (parsedColors.length > 0 && !color) return "من فضلك اختر اللون أولًا";
     if (parsedSizes.some((s) => s.available) && !size) return "من فضلك اختر المقاس أولًا";
     if (trackingStock && (currentStock === null || currentStock <= 0)) return "هذا الخيار غير متوفر حاليًا";
     if (currentStock !== null && qty > currentStock) return `المتاح ${currentStock} قطعة فقط`;
@@ -95,14 +92,14 @@ export default function ProductDetailPage() {
   function handleAddToCart() {
     const msg = missingSelection();
     if (msg) return showToast(msg);
-    addToCart(p.id, qty, { color, size });
+    addToCart(p.id, qty, { color: productColor, size });
     showToast("أُضيف المنتج إلى سلتك ✓");
   }
 
   function handleBuyNow() {
     const msg = missingSelection();
     if (msg) return showToast(msg);
-    startBuyNow(p.id, qty, { color, size });
+    startBuyNow(p.id, qty, { color: productColor, size });
     router.push("/checkout");
   }
 
@@ -153,27 +150,29 @@ export default function ProductDetailPage() {
         </div>
         <p className="desc">{p.desc}</p>
 
-        {parsedColors.length > 0 && (
+        {siblings.length > 1 && (
           <div className="variant-block">
-            <label>اللون{color ? ` — ${color}` : ""}</label>
+            <label>اللون{p.colorName ? ` — ${p.colorName}` : ""}</label>
             <div className="swatch-row">
-              {parsedColors.map((c) => (
-                <button
-                  key={c.name}
-                  type="button"
-                  className={`swatch ${color === c.name ? "active" : ""} ${c.type ? "" : "swatch-text"}`}
-                  onClick={() => setColor(c.name)}
-                  title={c.name}
-                  aria-label={c.name}
+              {siblings.map((sib) => (
+                <Link
+                  className="swatch-item"
+                  key={sib.id}
+                  href={`/product/${sib.id}`}
+                  scroll={false}
+                  title={sib.colorName || sib.name}
                 >
-                  {c.type === "image" ? (
-                    <img src={c.swatch} alt={c.name} />
-                  ) : c.type === "color" ? (
-                    <span className="swatch-fill" style={{ background: c.swatch }} />
-                  ) : (
-                    c.name
-                  )}
-                </button>
+                  <span className={`swatch ${sib.id === p.id ? "active" : ""}`}>
+                    {sib.images && sib.images[0] ? (
+                      <img src={sib.images[0]} alt={sib.colorName || sib.name} />
+                    ) : (
+                      <span className="swatch-fill" style={{ background: "var(--paper-dim)" }} />
+                    )}
+                  </span>
+                  <span className={`swatch-name ${sib.id === p.id ? "current" : ""}`}>
+                    {sib.colorName || sib.name}
+                  </span>
+                </Link>
               ))}
             </div>
           </div>

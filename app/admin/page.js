@@ -2,10 +2,10 @@
 import { useState, useRef } from "react";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg, icons } from "@/lib/icons";
-import { catCssVar, catLabel, parseColor, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
+import { catCssVar, catLabel, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 
-const emptyForm = { name: "", price: "", salePrice: "", cat: "men", icon: "shirt", desc: "", colors: "", sizes: "" };
+const emptyForm = { name: "", price: "", salePrice: "", cat: "men", icon: "shirt", desc: "", groupKey: "", colorName: "", sizes: "" };
 
 export default function AdminPage() {
   const { products, addProduct, updateProduct, deleteProduct, togglePublish, reorderProducts } = useStore();
@@ -26,13 +26,13 @@ export default function AdminPage() {
   }
 
   // قوائم الألوان والمقاسات الحالية من الحقول النصية (تستخدم لبناء جدول المخزون)
-  const colorNames = form.colors.split(",").map((s) => s.trim()).filter(Boolean).map((c) => parseColor(c).name);
+  const colorNames = form.colorName.trim() ? [form.colorName.trim()] : [];
   const sizeNames = form.sizes.split(",").map((s) => s.trim()).filter(Boolean).map((s) => parseSize(s).name);
   const stockRows = colorNames.length > 0 ? colorNames : [""];
   const stockCols = sizeNames.length > 0 ? sizeNames : [""];
 
-  function buildStockPayload(colorsRaw, sizesRaw) {
-    const cNames = colorsRaw.map((c) => parseColor(c).name);
+  function buildStockPayload(colorNameRaw, sizesRaw) {
+    const cNames = colorNameRaw ? [colorNameRaw] : [];
     const sNames = sizesRaw.map((s) => parseSize(s).name);
     const rows = cNames.length > 0 ? cNames : [""];
     const cols = sNames.length > 0 ? sNames : [""];
@@ -87,7 +87,8 @@ export default function AdminPage() {
       cat: p.cat || "men",
       icon: p.icon || "shirt",
       desc: p.desc || "",
-      colors: (p.colors || []).join(", "),
+      groupKey: p.groupKey || "",
+      colorName: p.colorName || "",
       sizes: (p.sizes || []).join(", "),
     });
     setImages(p.images || []);
@@ -106,7 +107,6 @@ export default function AdminPage() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    const colors = form.colors.split(",").map((s) => s.trim()).filter(Boolean);
     const sizes = form.sizes.split(",").map((s) => s.trim()).filter(Boolean);
     const payload = {
       cat: form.cat,
@@ -116,9 +116,10 @@ export default function AdminPage() {
       price: Number(form.price),
       salePrice: form.salePrice ? Number(form.salePrice) : null,
       images,
-      colors,
       sizes,
-      stock: trackStock ? buildStockPayload(colors, sizes) : null,
+      groupKey: form.groupKey.trim() || null,
+      colorName: form.colorName.trim() || null,
+      stock: trackStock ? buildStockPayload(form.colorName.trim(), sizes) : null,
     };
 
     if (editingId) {
@@ -228,9 +229,9 @@ export default function AdminPage() {
             )}
             {p.images && p.images.length > 1 ? ` · ${p.images.length} صور` : ""}
           </span>
-          {(p.colors?.length > 0 || p.sizes?.length > 0) && (
+          {(p.colorName || p.sizes?.length > 0) && (
             <div className="admin-pcard-variants">
-              {p.colors?.length > 0 && <span>{p.colors.length} ألوان</span>}
+              {p.colorName && <span>{p.colorName}</span>}
               {p.sizes?.length > 0 && <span>{p.sizes.length} مقاسات</span>}
             </div>
           )}
@@ -298,8 +299,12 @@ export default function AdminPage() {
 
         <div className="admin-grid">
           <div className="field">
-            <label>الألوان (افصل بفاصلة — تقدر تضيف عيّنة لون أو صورة بعد نقطتين)</label>
-            <input name="colors" value={form.colors} onChange={handleChange} placeholder="أحمر:#E31B23, أسود:#0D0D0D, كحلي" />
+            <label>اسم اللون (لون هذا المنتج تحديدًا)</label>
+            <input name="colorName" value={form.colorName} onChange={handleChange} placeholder="مثال: كحلي" />
+          </div>
+          <div className="field">
+            <label>كود مجموعة الألوان (نفس الكود لكل ألوان نفس القطعة)</label>
+            <input name="groupKey" value={form.groupKey} onChange={handleChange} placeholder="مثال: dress-winter-01" />
           </div>
           <div className="field">
             <label>المقاسات (افصل بفاصلة — ضيف ‎:out‎ للمقاس اللي نفد)</label>

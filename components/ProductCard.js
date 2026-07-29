@@ -13,7 +13,7 @@ export default function ProductCard({ p }) {
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
   const [quickOpen, setQuickOpen] = useState(false);
-  const hasVariants = p.colors?.length > 0 || p.sizes?.length > 0;
+  const hasVariants = p.sizes?.length > 0; // اللون بقى منتج مستقل، فالاختيار السريع للمقاسات بس
   const soldOut = getTotalStock(p) === 0;
 
   const touchX = useRef(null);

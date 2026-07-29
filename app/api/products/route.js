@@ -21,6 +21,8 @@ function toClient(row) {
     colors: Array.isArray(row.colors) ? row.colors.filter(Boolean) : [],
     sizes: Array.isArray(row.sizes) ? row.sizes.filter(Boolean) : [],
     published: row.published !== false, // القيمة الافتراضية منشور، إلا لو اتحدد صراحة false
+    groupKey: row.group_key || null,   // المنتجات اللي بنفس المفتاح = ألوان لنفس القطعة
+    colorName: row.color_name || null, // اسم لون هذا المنتج
     stock: row.stock && typeof row.stock === "object" ? row.stock : null,
   };
 }
@@ -55,6 +57,8 @@ export async function POST(req) {
         colors: colors.length > 0 ? colors : null,
         sizes: sizes.length > 0 ? sizes : null,
         stock: body.stock && typeof body.stock === "object" ? body.stock : null,
+        group_key: body.groupKey ? String(body.groupKey).trim() : null,
+        color_name: body.colorName ? String(body.colorName).trim() : null,
       },
     ])
     .select();

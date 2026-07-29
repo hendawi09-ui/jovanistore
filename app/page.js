@@ -2,7 +2,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
-import { cats, catLabel, parseColor, parseSize } from "@/lib/products";
+import { cats, catLabel, parseSize } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 
 function HomeContent() {
@@ -27,7 +27,7 @@ function HomeContent() {
       p.name,
       p.desc,
       catLabel[p.cat],
-      ...(p.colors || []).map((c) => parseColor(c).name),
+      p.colorName,
       ...(p.sizes || []).map((s) => parseSize(s).name),
     ]
       .filter(Boolean)
