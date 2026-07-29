@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg, icons } from "@/lib/icons";
 import { catCssVar, catLabel, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent, matchesQuery } from "@/lib/products";
@@ -12,10 +12,11 @@ export default function AdminPage() {
   const [form, setForm] = useState(emptyForm);
   const [images, setImages] = useState([]); // uploaded image URLs for the product being added/edited
   const [stock, setStock] = useState({}); // { "لون|مقاس": عدد }
-  const [trackStock, setTrackStock] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState(null); // null = وضع إضافة، غير null = وضع تعديل
   const formTopRef = useRef(null);
+  const autoFilledGroup = useRef(null); // آخر كود مجموعة اتنسخت بياناته
+  const [groupNotice, setGroupNotice] = useState("");
 
   const dragId = useRef(null);
   const [dragOverId, setDragOverId] = useState(null);
@@ -26,6 +27,42 @@ export default function AdminPage() {
   function handleChange(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   }
+
+  // لما تكتب كود مجموعة موجود بالفعل (وانت بتضيف منتج جديد)،
+  // بننسخ البيانات المشتركة من أول منتج في المجموعة ونسيب الخانات الخاصة باللون فاضية.
+  useEffect(() => {
+    if (editingId) return; // في وضع التعديل منعملش نسخ
+    const key = form.groupKey.trim();
+
+    if (!key) {
+      autoFilledGroup.current = null;
+      setGroupNotice("");
+      return;
+    }
+    if (autoFilledGroup.current === key) return; // اتنسخت قبل كده، منكتبش فوق تعديلاتك
+
+    const sibling = products.find((p) => (p.groupKey || "").trim() === key);
+    if (!sibling) {
+      autoFilledGroup.current = null;
+      setGroupNotice("");
+      return;
+    }
+
+    autoFilledGroup.current = key;
+    setForm((f) => ({
+      ...f,
+      name: sibling.name || "",
+      cat: sibling.cat || "men",
+      icon: sibling.icon || "shirt",
+      desc: sibling.desc || "",
+      sizes: (sibling.sizes || []).map((x) => parseSize(x).name).join(", "),
+    }));
+    setGroupNotice(
+      `تم نسخ الاسم والقسم والوصف والمقاسات من «${sibling.name}»${
+        sibling.colorName ? ` (${sibling.colorName})` : ""
+      } — عدّل أي خانة زي ما تحب.`
+    );
+  }, [form.groupKey, editingId, products]);
 
   // قوائم الألوان والمقاسات الحالية من الحقول النصية (تستخدم لبناء جدول المخزون)
   const colorNames = form.colorName.trim() ? [form.colorName.trim()] : [];
@@ -94,8 +131,9 @@ export default function AdminPage() {
       sizes: (p.sizes || []).join(", "),
     });
     setImages(p.images || []);
+    setGroupNotice("");
+    autoFilledGroup.current = null;
     setStock(p.stock && typeof p.stock === "object" ? p.stock : {});
-    setTrackStock(Boolean(p.stock && typeof p.stock === "object"));
     formTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -103,8 +141,9 @@ export default function AdminPage() {
     setEditingId(null);
     setForm(emptyForm);
     setImages([]);
+    setGroupNotice("");
+    autoFilledGroup.current = null;
     setStock({});
-    setTrackStock(false);
   }
 
   function handleSubmit(e) {
@@ -121,7 +160,7 @@ export default function AdminPage() {
       sizes,
       groupKey: form.groupKey.trim() || null,
       colorName: form.colorName.trim() || null,
-      stock: trackStock ? buildStockPayload(form.colorName.trim(), sizes) : null,
+      stock: buildStockPayload(form.colorName.trim(), sizes),
     };
 
     if (editingId) {
@@ -138,7 +177,8 @@ export default function AdminPage() {
     setForm(emptyForm);
     setImages([]);
     setStock({});
-    setTrackStock(false);
+    setGroupNotice("");
+    autoFilledGroup.current = null;
   }
 
   function handleDelete(id) {
@@ -278,6 +318,25 @@ export default function AdminPage() {
               </span>
             </div>
           )}
+          {p.groupKey && (
+            <button
+              className="group-chip"
+              title="اضغط لنسخ كود المجموعة"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard?.writeText(p.groupKey).then(
+                  () => showToast(`تم نسخ الكود: ${p.groupKey}`),
+                  () => showToast("تعذّر النسخ")
+                );
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="9" y="9" width="12" height="12" rx="2" />
+                <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+              </svg>
+              {p.groupKey}
+            </button>
+          )}
         </div>
         <div className="admin-pcard-actions">
           <button className="edit-btn" onClick={() => startEdit(p)}>تعديل</button>
@@ -353,19 +412,17 @@ export default function AdminPage() {
           <div className="field">
             <label>كود مجموعة الألوان (نفس الكود لكل ألوان نفس القطعة)</label>
             <input name="groupKey" value={form.groupKey} onChange={handleChange} placeholder="مثال: dress-winter-01" />
+            {groupNotice && <div className="group-notice">{groupNotice}</div>}
           </div>
           <div className="field">
-            <label>المقاسات (افصل بفاصلة — ضيف ‎:out‎ للمقاس اللي نفد)</label>
-            <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="S, M, L:out, XL" />
+            <label>المقاسات المتاحة (افصل بفاصلة)</label>
+            <input name="sizes" value={form.sizes} onChange={handleChange} placeholder="S, M, L, XL" />
           </div>
         </div>
 
         <div className="field">
-          <label className="stock-toggle">
-            <input type="checkbox" checked={trackStock} onChange={(e) => setTrackStock(e.target.checked)} />
-            تفعيل تتبّع المخزون (الكمية تنقص تلقائيًا مع كل طلب)
-          </label>
-          {trackStock && (
+          <label>الكميات المتاحة (تنقص تلقائيًا مع كل طلب)</label>
+          <div>
             <div className="stock-table-wrap">
               <table className="stock-table">
                 <thead>
@@ -394,10 +451,10 @@ export default function AdminPage() {
                 </tbody>
               </table>
               <div className="note-box" style={{ marginTop: 10 }}>
-                اكتب الألوان والمقاسات فوق الأول، وبعدين املأ الكمية المتاحة لكل تركيبة. المقاس اللي كميته صفر هيظهر مشطوب للعملاء تلقائيًا.
+                اكتب اسم اللون والمقاسات فوق الأول، وبعدين املأ الكمية المتاحة لكل مقاس. المقاس اللي كميته صفر هيظهر مشطوب للعملاء تلقائيًا.
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         <div className="field">

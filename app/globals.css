@@ -327,8 +327,6 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .stock-zero{color:var(--red) !important; font-weight:700;}
 
 /* جدول المخزون في لوحة التحكم */
-.stock-toggle{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:0;}
-.stock-toggle input{width:auto;}
 .stock-table-wrap{margin-top:14px; overflow-x:auto;}
 .stock-table{border-collapse:collapse; font-size:13px; min-width:100%;}
 .stock-table th, .stock-table td{border:1px solid var(--line); padding:8px 10px; text-align:center;}
@@ -535,3 +533,11 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .social-icon:hover{transform:translateY(-2px);}
 .social-icon.wa{background:#25D366; box-shadow:0 5px 14px rgba(37,211,102,.35);}
 .social-icon.ig{background:linear-gradient(45deg,#F9CE34,#EE2A7B,#6228D7); box-shadow:0 5px 14px rgba(238,42,123,.3);}
+
+/* تنبيه نسخ بيانات مجموعة الألوان */
+.group-notice{margin-top:8px; background:#E7F1FF; border:1px solid #B8D4FF; color:#1B4F9C; font-size:12px; line-height:1.8; padding:9px 12px; border-radius:10px;}
+
+/* كود مجموعة الألوان على بطاقة لوحة التحكم */
+.group-chip{display:flex; align-items:center; gap:5px; width:100%; margin-top:6px; background:var(--paper-dim); color:var(--ink-soft); font-size:10.5px; font-weight:700; padding:5px 9px; border-radius:8px; border:1px dashed var(--line); font-family:inherit; cursor:pointer; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:background .2s, color .2s, border-color .2s;}
+.group-chip svg{width:12px; height:12px; flex-shrink:0;}
+.group-chip:hover{background:var(--ink); color:#fff; border-color:var(--ink);}
