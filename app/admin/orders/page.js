@@ -77,6 +77,7 @@ export default function AdminOrdersPage() {
     return (
       <div className="admin-wrap">
         <div className="admin-tabs">
+          <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
           <a href="/admin" className="admin-tab">المنتجات</a>
           <span className="admin-tab active">طلبات الشراء</span>
           <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
@@ -90,6 +91,7 @@ export default function AdminOrdersPage() {
     return (
       <div className="admin-wrap">
         <div className="admin-tabs">
+          <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
           <a href="/admin" className="admin-tab">المنتجات</a>
           <span className="admin-tab active">طلبات الشراء</span>
           <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
@@ -103,6 +105,7 @@ export default function AdminOrdersPage() {
   return (
     <div className="admin-wrap">
       <div className="admin-tabs">
+        <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
         <a href="/admin" className="admin-tab">المنتجات</a>
         <span className="admin-tab active">طلبات الشراء</span>
         <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>

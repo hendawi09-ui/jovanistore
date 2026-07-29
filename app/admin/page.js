@@ -367,6 +367,7 @@ export default function AdminPage() {
   return (
     <div className="admin-wrap">
       <div className="admin-tabs">
+        <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
         <span className="admin-tab active">المنتجات</span>
         <a href="/admin/orders" className="admin-tab">طلبات الشراء</a>
         <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
