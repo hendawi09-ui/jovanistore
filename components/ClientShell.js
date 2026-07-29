@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import BackgroundCanvas from "./BackgroundCanvas";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -11,11 +11,26 @@ import FloatingActions from "./FloatingActions";
 
 export default function ClientShell({ children }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [panel, setPanel] = useState(null); // null | "cart" | "favorites"
   const scrollY = useRef(0);
   const pushedState = useRef(false);
 
   const anyOpen = panel !== null;
+
+  // فك قفل تمرير الصفحة فورًا (مش مستنيين دورة الرسم الجاية)
+  const unlockBody = useCallback((restoreScroll = true) => {
+    const body = document.body;
+    if (body.style.position !== "fixed") return;
+    const y = scrollY.current;
+    body.style.position = "";
+    body.style.top = "";
+    body.style.left = "";
+    body.style.right = "";
+    body.style.width = "";
+    body.style.overflow = "";
+    if (restoreScroll) window.scrollTo(0, y);
+  }, []);
 
   // فتح أي درج: بنضيف خطوة في تاريخ المتصفح عشان زرار الرجوع يقفله
   // بدل ما يخرج المستخدم من الصفحة
@@ -49,8 +64,12 @@ export default function ClientShell({ children }) {
       window.history.replaceState({}, "");
     }
     setPanel(null);
+    // مهم: نفك القفل قبل الانتقال، وإلا الصفحة الجديدة بتفتح والجسم لسه مثبّت
+    // فتظهر مزحزحة ومقصوصة على الموبايل
+    unlockBody(false);
+    window.scrollTo(0, 0);
     router.push("/checkout");
-  }, [router]);
+  }, [router, unlockBody]);
 
   // زرار الرجوع في الموبايل بيقفل الدرج المفتوح
   useEffect(() => {
@@ -75,17 +94,15 @@ export default function ClientShell({ children }) {
       body.style.right = "0";
       body.style.width = "100%";
       body.style.overflow = "hidden";
-    } else if (body.style.position === "fixed") {
-      const y = scrollY.current;
-      body.style.position = "";
-      body.style.top = "";
-      body.style.left = "";
-      body.style.right = "";
-      body.style.width = "";
-      body.style.overflow = "";
-      window.scrollTo(0, y);
+    } else {
+      unlockBody();
     }
-  }, [anyOpen]);
+  }, [anyOpen, unlockBody]);
+
+  // أمان إضافي: أي تغيير في الصفحة بيفك القفل
+  useEffect(() => {
+    unlockBody(false);
+  }, [pathname, unlockBody]);
 
   // تنظيف احتياطي لو الصفحة اتقفلت والدرج مفتوح
   useEffect(() => {

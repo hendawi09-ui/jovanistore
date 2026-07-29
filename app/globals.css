@@ -638,3 +638,22 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .fav-toggle svg{width:20px; height:20px;}
   .disc-badge{top:13px; left:13px; font-size:12.5px; padding:6px 12px;}
 }
+
+/* ===== ضمان مقاس صفحة الدفع على الموبايل ===== */
+.checkout-wrap{min-width:0;}
+.checkout-wrap > *{min-width:0;}
+.form-card, .summary-card{min-width:0; max-width:100%; overflow-wrap:anywhere;}
+.field{min-width:0;}
+.field input, .field textarea, .field select, .admin-select{max-width:100%;}
+@media (max-width:640px){
+  .checkout-wrap{padding:22px 14px 70px; gap:16px;}
+  .form-card, .summary-card{padding:18px 16px; border-radius:16px;}
+  .field input, .field textarea, .admin-select{font-size:16px;} /* 16px يمنع تكبير الصفحة تلقائيًا وقت الكتابة */
+  .summary-row{font-size:12.5px; gap:10px;}
+  .summary-row span:first-child{flex:1; min-width:0; overflow-wrap:anywhere;}
+  .summary-row span:last-child{white-space:nowrap;}
+  .summary-total{font-size:15px;}
+  .coupon-row{flex-wrap:nowrap;}
+  .coupon-row input{min-width:0; flex:1;}
+  .coupon-row button{flex-shrink:0;}
+}
