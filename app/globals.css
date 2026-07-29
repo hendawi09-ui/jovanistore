@@ -657,3 +657,31 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .coupon-row input{min-width:0; flex:1;}
   .coupon-row button{flex-shrink:0;}
 }
+
+/* ===== تبويبات لوحة التحكم كشريط أفقي قابل للسحب — موبايل فقط ===== */
+@media (max-width:640px){
+  .admin-tabs{
+    flex-wrap:nowrap;            /* منمنعش الالتفاف عشان يفضل سطر واحد */
+    overflow-x:auto;             /* السحب الأفقي */
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;        /* نخفي شريط التمرير */
+    overscroll-behavior-x:contain;
+    gap:2px;
+    margin-bottom:22px;
+    /* نمد الشريط لحواف الشاشة عشان يبان إنه بيتسحب */
+    margin-inline:-16px;
+    padding-inline:16px;
+    scroll-padding-inline:16px;
+  }
+  .admin-tabs::-webkit-scrollbar{display:none;}
+
+  .admin-tab{
+    flex:0 0 auto;               /* كل تبويب بحجمه من غير انكماش */
+    white-space:nowrap;
+    padding:10px 14px;
+    font-size:13px;
+    scroll-snap-align:start;
+  }
+  .admin-tabs{scroll-snap-type:x proximity;}
+}
