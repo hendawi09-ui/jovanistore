@@ -2,15 +2,17 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { IconSvg } from "@/lib/icons";
-import { catCssVar, catLabel, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
+import { catCssVar, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { useStore } from "@/lib/StoreContext";
 import { showToast } from "./Toast";
+import QuickAddModal from "./QuickAddModal";
 
 export default function ProductCard({ p }) {
   const ref = useRef(null);
   const { addToCart, isFavorite, toggleFavorite } = useStore();
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
+  const [quickOpen, setQuickOpen] = useState(false);
   const hasVariants = p.colors?.length > 0 || p.sizes?.length > 0;
   const soldOut = getTotalStock(p) === 0;
 
@@ -60,7 +62,8 @@ export default function ProductCard({ p }) {
   }
 
   return (
-    <Link href={`/product/${p.id}`} className="card" ref={ref} onMouseMove={onMove} onMouseLeave={onLeave}>
+    <>
+      <Link href={`/product/${p.id}`} className="card" ref={ref} onMouseMove={onMove} onMouseLeave={onLeave}>
       <div
         className="card-media"
         style={{ "--c": `var(${catCssVar[p.cat]})` }}
@@ -74,7 +77,6 @@ export default function ProductCard({ p }) {
         ) : (
           <div className="icon-box"><IconSvg name={p.icon} /></div>
         )}
-        <div className="tag">{catLabel[p.cat]}</div>
         <button
           className={`fav-toggle ${isFavorite(p.id) ? "active" : ""}`}
           aria-label={isFavorite(p.id) ? "إزالة من المفضلة" : "إضافة للمفضلة"}
@@ -121,18 +123,28 @@ export default function ProductCard({ p }) {
           </div>
           {soldOut ? (
             <span className="add-btn add-btn-link soldout-label">نفدت الكمية</span>
-          ) : hasVariants ? (
-            <span className="add-btn add-btn-link">اختر التفاصيل</span>
           ) : (
             <button
               className="add-btn"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(p.id); showToast('أُضيف المنتج إلى سلتك ✓'); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // لو المنتج عنده ألوان أو مقاسات، بنفتح نافذة سريعة للاختيار قبل الإضافة
+                if (hasVariants) {
+                  setQuickOpen(true);
+                } else {
+                  addToCart(p.id);
+                  showToast("أُضيف المنتج إلى سلتك ✓");
+                }
+              }}
             >
               أضف للسلة
             </button>
           )}
         </div>
       </div>
-    </Link>
+      </Link>
+      <QuickAddModal product={p} open={quickOpen} onClose={() => setQuickOpen(false)} />
+    </>
   );
 }
