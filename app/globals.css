@@ -502,13 +502,6 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .qa-sheet{max-width:none; border-radius:22px 22px 0 0; max-height:82vh; padding:20px 18px 26px;}
 }
 
-/* على شاشات الكمبيوتر بس: نكبّر القلب وشارة الخصم.
-   الموبايل بيفضل بالأحجام الصغيرة المعرّفة فوق. */
-@media (min-width:641px){
-  .fav-toggle{top:13px; right:13px; width:38px; height:38px;}
-  .fav-toggle svg{width:20px; height:20px;}
-  .disc-badge{top:13px; left:13px; font-size:12.5px; padding:6px 12px;}
-}
 
 /* ===== بحث وفلترة لوحة التحكم ===== */
 .admin-search{display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:40px;}
@@ -605,4 +598,43 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .stat-value{font-size:22px;}
   .chart{height:150px; gap:6px;}
   .panel{padding:16px;}
+}
+
+/* ===== حالة الطلب وإلغاؤه في صفحة طلباتي ===== */
+.badge.st-pending{background:#FFF9E5; color:#8A6D00;}
+.badge.st-confirmed{background:#EAF1FF; color:#2857C6;}
+.badge.st-shipped{background:#F3EAFE; color:#6A2FC9;}
+.badge.st-delivered{background:#E7F8EE; color:#1A8A47;}
+.badge.st-cancelled{background:#FDEEEE; color:var(--red-dark);}
+
+.cancel-order-btn{margin-top:12px; background:none; color:var(--red); font-size:12.5px; font-weight:700; text-decoration:underline; padding:0;}
+.cancel-order-btn:hover{color:var(--red-dark);}
+
+.cancel-confirm{margin-top:12px; background:#FDEEEE; border:1px solid #F7C9C9; border-radius:12px; padding:12px 14px; font-size:12.5px; color:var(--red-dark); line-height:1.9;}
+.cancel-actions{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+.cancel-yes{background:var(--red); color:#fff; font-weight:700; font-size:12.5px; padding:8px 16px; border-radius:999px;}
+.cancel-yes:hover{background:var(--red-dark);}
+.cancel-yes:disabled, .cancel-no:disabled{opacity:.6; cursor:not-allowed;}
+.cancel-no{background:#fff; color:var(--ink); border:1.5px solid var(--line); font-weight:700; font-size:12.5px; padding:8px 16px; border-radius:999px;}
+
+.order-note{margin-top:12px; font-size:12px; color:var(--muted); line-height:1.9;}
+.order-note a{color:var(--red); font-weight:700; text-decoration:underline;}
+
+/* ===== خصم المنتج (أُعيدت) ===== */
+.price-sale{color:var(--red); font-weight:800;}
+.price-old{color:var(--muted); font-weight:500; font-size:.82em; margin-right:6px; text-decoration:line-through;}
+.disc-badge{position:absolute; top:9px; left:9px; background:var(--red); color:#fff; font-weight:800; font-size:9.5px; padding:3px 7px; border-radius:999px; box-shadow:0 4px 12px rgba(227,27,35,.35); z-index:2;}
+.disc-chip{display:inline-block; background:#FDEEEE; color:var(--red-dark); font-weight:700; font-size:11px; padding:2px 9px; border-radius:999px; margin-right:8px; vertical-align:middle;}
+.pd-price{display:flex; align-items:center; flex-wrap:wrap; gap:4px; margin-bottom:16px;}
+.pd-price .price{margin-bottom:0;}
+
+/* تفاصيل بطاقة الكوبون */
+.coupon-card-main{flex:1; min-width:0;}
+
+/* على شاشات الكمبيوتر بس: نكبّر القلب وشارة الخصم.
+   الموبايل بيفضل بالأحجام الصغيرة المعرّفة فوق. */
+@media (min-width:641px){
+  .fav-toggle{top:13px; right:13px; width:38px; height:38px;}
+  .fav-toggle svg{width:20px; height:20px;}
+  .disc-badge{top:13px; left:13px; font-size:12.5px; padding:6px 12px;}
 }

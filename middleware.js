@@ -21,6 +21,10 @@ export function middleware(req) {
   if (pathname.startsWith("/api/orders/mine") && req.method === "POST") {
     return NextResponse.next();
   }
+  // إلغاء الطلب من العميل — محمي برقم الموبايل داخل المسار نفسه
+  if (/^\/api\/orders\/[^/]+\/cancel$/.test(pathname) && req.method === "POST") {
+    return NextResponse.next();
+  }
   if (pathname === "/api/orders" && req.method === "POST") {
     return NextResponse.next();
   }
