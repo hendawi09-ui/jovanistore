@@ -509,3 +509,11 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .qa-overlay{align-items:flex-end; padding:0;}
   .qa-sheet{max-width:none; border-radius:22px 22px 0 0; max-height:82vh; padding:20px 18px 26px;}
 }
+
+/* على شاشات الكمبيوتر بس: نكبّر القلب وشارة الخصم.
+   الموبايل بيفضل بالأحجام الصغيرة المعرّفة فوق. */
+@media (min-width:641px){
+  .fav-toggle{top:13px; right:13px; width:38px; height:38px;}
+  .fav-toggle svg{width:20px; height:20px;}
+  .disc-badge{top:13px; left:13px; font-size:12.5px; padding:6px 12px;}
+}
