@@ -2,6 +2,7 @@ import "./globals.css";
 import { StoreProvider } from "@/lib/StoreContext";
 import ClientShell from "@/components/ClientShell";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata = {
   title: "Jovani Store | ملابس رجالية ونسائية",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
           <ClientShell>{children}</ClientShell>
         </StoreProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
