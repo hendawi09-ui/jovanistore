@@ -21,6 +21,7 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites }) {
   const [bump, setBump] = useState(false);
   const [collapsed, setCollapsed] = useState(true); // مخفيين افتراضيًا عشان مساحة الشاشة
   const [dragging, setDragging] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); // السحب والإخفاء على الموبايل بس
 
   // الزرار القائد (السلة) وباقي الأزرار اللي بتجري وراه
   const leadRef = useRef(null);
@@ -30,6 +31,15 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites }) {
   const follows = useRef([]);                    // أماكن التابعين (بتلحق تدريجيًا)
   const drag = useRef({ active: false, moved: false, dx: 0, dy: 0 });
   const raf = useRef(null);
+
+  // نتابع حجم الشاشة: الموبايل بيتحرك ويتخفي، والديسكتوب ثابت زي ما كان
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const apply = () => setIsMobile(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
 
   useEffect(() => {
     if (cartCount === 0) return;
@@ -113,9 +123,10 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites }) {
   }, []);
 
   useEffect(() => {
+    if (!isMobile) return; // الديسكتوب ثابت — مش محتاج حلقة رسم
     raf.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf.current);
-  }, [tick, collapsed]);
+  }, [tick, collapsed, isMobile]);
 
   useEffect(() => {
     function onResize() {
@@ -199,6 +210,39 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites }) {
     onPointerUp,
     onPointerCancel: onPointerUp,
   };
+
+  // نسخة الديسكتوب: ثابتة في الركن، من غير سحب ولا إخفاء
+  if (!isMobile) {
+    return (
+      <div className="float-static">
+        <button
+          className={`float-btn float-cart ${bump ? "bump" : ""}`}
+          onClick={onOpenCart}
+          aria-label="سلة المشتريات"
+          title="سلة المشتريات"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M3 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6" />
+            <circle cx="9" cy="21" r="1.4" />
+            <circle cx="18" cy="21" r="1.4" />
+          </svg>
+          {cartCount > 0 && <span className="float-count">{cartCount}</span>}
+        </button>
+
+        <button
+          className="float-btn float-fav"
+          onClick={onOpenFavorites}
+          aria-label="المفضلة"
+          title="المفضلة"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" />
+          </svg>
+          {favCount > 0 && <span className="float-count fav">{favCount}</span>}
+        </button>
+      </div>
+    );
+  }
 
   if (collapsed) {
     const total = cartCount + favCount;
