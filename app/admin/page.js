@@ -290,6 +290,7 @@ export default function AdminPage() {
           <span className={`pub-badge ${isPublished ? "pub-yes" : "pub-no"}`}>
             {isPublished ? "منشور" : "غير منشور"}
           </span>
+          <span className="views-badge" title="عدد الزيارات">👁 {p.views || 0}</span>
         </div>
         <div className="admin-pcard-body">
           <h4>{p.name}</h4>

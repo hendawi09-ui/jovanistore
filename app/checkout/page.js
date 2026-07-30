@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/StoreContext";
@@ -8,9 +8,22 @@ import { effectivePrice } from "@/lib/products";
 import { governorates, shippingFor } from "@/lib/siteConfig";
 
 export default function CheckoutPage() {
-  const { cart, products, cartTotal, placeOrder, buyNow, clearBuyNow } = useStore();
+  const { cart, products, cartTotal, placeOrder, buyNow, clearBuyNow, account } = useStore();
   const router = useRouter();
   const [form, setForm] = useState({ name: "", phone: "", city: "", address: "", pay: "cod" });
+
+  // لو العميل داخل حسابه وعنده بيانات محفوظة، بنملأها تلقائيًا (يقدر يعدّلها لو حابب)
+  useEffect(() => {
+    if (!account) return;
+    setForm((f) => ({
+      ...f,
+      name: f.name || account.name || "",
+      phone: f.phone || account.phone || "",
+      city: f.city || account.city || "",
+      address: f.address || account.address || "",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account]);
 
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState(null); // { code, discount, label }

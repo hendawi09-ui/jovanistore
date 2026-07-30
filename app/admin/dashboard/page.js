@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useStore } from "@/lib/StoreContext";
 import { getTotalStock, stockKey, parseSize, effectivePrice } from "@/lib/products";
+import { IconSvg } from "@/lib/icons";
 
 const LOW_STOCK = 3; // تحت الرقم ده يعتبر مخزون منخفض
 
@@ -104,6 +105,21 @@ export default function AdminDashboardPage() {
     return { low, out };
   }, [products]);
 
+  // أكتر 5 منتجات زيارة لكل قسم (رجالي / نسائي)
+  const topViewedMen = useMemo(() => {
+    return [...products]
+      .filter((p) => p.cat === "men" && (p.views || 0) > 0)
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 10);
+  }, [products]);
+
+  const topViewedWomen = useMemo(() => {
+    return [...products]
+      .filter((p) => p.cat === "women" && (p.views || 0) > 0)
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 10);
+  }, [products]);
+
   const publishedCount = products.filter((p) => p.published !== false).length;
   const soldOutProducts = products.filter((p) => getTotalStock(p) === 0).length;
   const maxDaily = Math.max(...stats.daily.map(([, v]) => v), 1);
@@ -186,6 +202,60 @@ export default function AdminDashboardPage() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* أكتر 5 منتجات زيارة - مقسّمة رجالي ونسائي */}
+      <div className="panel">
+        <div className="panel-head">
+          <h3>الأكثر زيارة</h3>
+          <span>أعلى 10 منتجات في كل قسم حسب عدد الزيارات</span>
+        </div>
+
+        <div className="top-viewed-split">
+          <div className="top-viewed-col">
+            <h4 className="top-viewed-col-title">رجالي</h4>
+            {topViewedMen.length === 0 ? (
+              <div className="alert-empty">لسه مفيش زيارات مسجّلة</div>
+            ) : (
+              <div className="top-viewed-list">
+                {topViewedMen.map((p, i) => (
+                  <div className="top-viewed-row" key={p.id}>
+                    <span className="top-viewed-rank">{i + 1}</span>
+                    {p.images && p.images[0] ? (
+                      <img className="top-viewed-thumb" src={p.images[0]} alt="" />
+                    ) : (
+                      <div className="top-viewed-thumb icon-box"><IconSvg name={p.icon} /></div>
+                    )}
+                    <span className="top-viewed-name">{p.name}</span>
+                    <span className="top-viewed-count">👁 {p.views || 0}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="top-viewed-col">
+            <h4 className="top-viewed-col-title">نسائي</h4>
+            {topViewedWomen.length === 0 ? (
+              <div className="alert-empty">لسه مفيش زيارات مسجّلة</div>
+            ) : (
+              <div className="top-viewed-list">
+                {topViewedWomen.map((p, i) => (
+                  <div className="top-viewed-row" key={p.id}>
+                    <span className="top-viewed-rank">{i + 1}</span>
+                    {p.images && p.images[0] ? (
+                      <img className="top-viewed-thumb" src={p.images[0]} alt="" />
+                    ) : (
+                      <div className="top-viewed-thumb icon-box"><IconSvg name={p.icon} /></div>
+                    )}
+                    <span className="top-viewed-name">{p.name}</span>
+                    <span className="top-viewed-count">👁 {p.views || 0}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

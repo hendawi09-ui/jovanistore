@@ -24,6 +24,7 @@ function toClient(row) {
     groupKey: row.group_key || null,   // المنتجات اللي بنفس المفتاح = ألوان لنفس القطعة
     colorName: row.color_name || null, // اسم لون هذا المنتج
     stock: row.stock && typeof row.stock === "object" ? row.stock : null,
+    views: typeof row.views === "number" ? row.views : 0,
   };
 }
 

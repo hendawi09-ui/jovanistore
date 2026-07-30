@@ -8,6 +8,7 @@ import CartDrawer from "./CartDrawer";
 import FavoritesDrawer from "./FavoritesDrawer";
 import Toast from "./Toast";
 import FloatingActions from "./FloatingActions";
+import MobileNav from "./MobileNav";
 
 export default function ClientShell({ children }) {
   const router = useRouter();
@@ -126,6 +127,7 @@ export default function ClientShell({ children }) {
       <CartDrawer open={panel === "cart"} onClose={closePanel} onCheckout={goToCheckout} />
       <FavoritesDrawer open={panel === "favorites"} onClose={closePanel} />
       <FloatingActions onOpenCart={openCart} onOpenFavorites={openFavorites} />
+      <MobileNav />
       <Toast />
     </>
   );

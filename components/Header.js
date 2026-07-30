@@ -1,11 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
+import { handleSearchNav } from "@/lib/searchFocus";
 import Logo from "./Logo";
 
 export default function Header({ onOpenCart, onOpenFavorites }) {
-  const { cartCount, favCount } = useStore();
+  const { cartCount, favCount, account } = useStore();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [bump, setBump] = useState(false);
 
@@ -31,15 +34,17 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
           </Link>
           <div className="nav-links">
             <Link href="/">الرئيسية</Link>
-            <Link href="/orders">طلباتي</Link>
+            <Link href="/orders">
+              {account?.name ? `أهلًا ${account.name.trim().split(/\s+/)[0]}` : "حسابي"}
+            </Link>
           </div>
           <div className="nav-actions">
-            <Link href="/#search" className="nav-icon-btn" aria-label="بحث">
+            <a href="/#search" className="nav-icon-btn" aria-label="بحث" onClick={(e) => handleSearchNav(e, router)}>
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <circle cx="11" cy="11" r="7" />
                 <path d="M20 20l-3.5-3.5" />
               </svg>
-            </Link>
+            </a>
             <button className="fav-btn" onClick={onOpenFavorites} aria-label="المفضلة">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" />

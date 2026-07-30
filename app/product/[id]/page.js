@@ -31,6 +31,14 @@ export default function ProductDetailPage() {
   const currentStock = trackingStock ? getStock(p, productColor, size) : null;
   const soldOut = trackingStock && getTotalStock(p) === 0;
 
+  // تسجيل زيارة للمنتج (مرة واحدة بس لكل فتح صفحة، مش مع كل تغيير في اللون/المقاس)
+  const viewedRef = useRef(null);
+  useEffect(() => {
+    if (!p || viewedRef.current === p.id) return;
+    viewedRef.current = p.id;
+    fetch(`/api/products/${p.id}/view`, { method: "POST" }).catch(() => {});
+  }, [p?.id]);
+
   // لما اللون يتغيّر، نختار أول مقاس متاح فعليًا لهذا اللون
   useEffect(() => {
     if (!p) return;

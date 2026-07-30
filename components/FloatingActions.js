@@ -7,6 +7,7 @@ const CLOSE_SIZE = 30;  // قطر زرار الإخفاء
 const GAP = 8;          // المسافة بين السلة والمفضلة
 const CLOSE_GAP = 3;    // زرار الإخفاء أقرب للمفضلة
 const MARGIN = 14;      // أقل مسافة من حافة الشاشة
+const BOTTOM_NAV = 66;  // ارتفاع شريط التنقل السفلي على الموبايل — الأزرار ما تنزلش تحته
 const DRAG_THRESHOLD = 6;
 // حركة زنبركية (spring) — القائد أسرع شوية والتابعين أبطأ عشان يبان التتابع
 const LEAD_STIFFNESS = 0.34;   // القائد بيلحق الإصبع بسرعة مع لمسة نعومة
@@ -50,12 +51,12 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites }) {
 
   const clampPos = useCallback((x, y) => ({
     x: Math.min(Math.max(MARGIN, x), window.innerWidth - SIZE - MARGIN),
-    y: Math.min(Math.max(MARGIN, y), window.innerHeight - SIZE - MARGIN),
+    y: Math.min(Math.max(MARGIN, y), window.innerHeight - SIZE - MARGIN - BOTTOM_NAV),
   }), []);
 
-  // المكان الابتدائي: أسفل يسار، أو المحفوظ من زيارة سابقة
+  // المكان الابتدائي: أسفل يسار فوق الشريط السفلي، أو المحفوظ من زيارة سابقة
   useEffect(() => {
-    let start = { x: MARGIN + 4, y: window.innerHeight - SIZE - 22 };
+    let start = { x: MARGIN + 4, y: window.innerHeight - SIZE - 22 - BOTTOM_NAV };
     try {
       const saved = JSON.parse(window.localStorage.getItem("jv_float") || "null");
       if (saved?.pos) start = saved.pos;
