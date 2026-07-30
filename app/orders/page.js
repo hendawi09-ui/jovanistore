@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useStore } from "@/lib/StoreContext";
 import { showToast } from "@/components/Toast";
 
+// ⚙️ مفتاح زرار "الدخول بحساب فيسبوك"
+// مخفي حاليًا لأن Meta مش بتحفظ روابط الرجوع (Valid OAuth Redirect URIs) في التطبيق.
+// لما المشكلة دي تتحل، غيّر false لـ true وهيرجع الزرار زي ما كان.
+const SHOW_FACEBOOK_LOGIN = false;
+
 const STATUS = {
   pending: { label: "قيد الانتظار", cls: "st-pending" },
   confirmed: { label: "تم التأكيد", cls: "st-confirmed" },
@@ -22,7 +27,32 @@ function OrdersContent() {
   const [mode, setMode] = useState("login"); // login | register
   const [phoneInput, setPhoneInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [authBusy, setAuthBusy] = useState(false);
+
+  // استرجاع كلمة السر
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotInput, setForgotInput] = useState("");
+  const [forgotBusy, setForgotBusy] = useState(false);
+
+  async function handleForgotSubmit(e) {
+    e.preventDefault();
+    setForgotBusy(true);
+    const res = await fetch("/api/account/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ identifier: forgotInput }),
+    });
+    const data = await res.json().catch(() => ({}));
+    setForgotBusy(false);
+    if (!res.ok) {
+      showToast(data.error || "حصل خطأ");
+      return;
+    }
+    setForgotInput("");
+    setForgotMode(false);
+    showToast(data.message || "لو الحساب موجود، هيوصلك إيميل فيه رابط إعادة التعيين");
+  }
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -91,17 +121,69 @@ function OrdersContent() {
               value={phoneInput}
               onChange={(e) => setPhoneInput(e.target.value)}
             />
-            <input
-              type="password"
-              required
-              placeholder="كلمة السر"
-              value={passwordInput}
-              onChange={(e) => setPasswordInput(e.target.value)}
-            />
+            <div className="password-field">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                placeholder="كلمة السر"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "إخفاء كلمة السر" : "إظهار كلمة السر"}
+                title={showPassword ? "إخفاء كلمة السر" : "إظهار كلمة السر"}
+              >
+                {showPassword ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.1 10.1 0 0 1 12 20c-7 0-11-8-11-8a18.4 18.4 0 0 1 5.06-5.94" />
+                    <path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                    <path d="M1 1l22 22" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
             <button type="submit" className="btn-primary" disabled={authBusy}>
               {authBusy ? "جارِ التنفيذ..." : mode === "login" ? "دخول" : "إنشاء الحساب"}
             </button>
           </form>
+
+          {mode === "login" && !forgotMode && (
+            <button type="button" className="forgot-link" onClick={() => setForgotMode(true)}>
+              نسيت كلمة السر؟
+            </button>
+          )}
+
+          {forgotMode && (
+            <div className="forgot-box">
+              <p className="forgot-hint">
+                اكتب رقم موبايلك أو إيميلك، وهنبعتلك رابط على إيميلك تعيّن منه كلمة سر جديدة.
+              </p>
+              <form onSubmit={handleForgotSubmit} className="account-login-form">
+                <input
+                  type="text"
+                  required
+                  placeholder="رقم الموبايل أو الإيميل"
+                  value={forgotInput}
+                  onChange={(e) => setForgotInput(e.target.value)}
+                />
+                <button type="submit" className="btn-primary" disabled={forgotBusy}>
+                  {forgotBusy ? "جارِ الإرسال..." : "إرسال رابط الاسترجاع"}
+                </button>
+              </form>
+              <button type="button" className="forgot-link" onClick={() => setForgotMode(false)}>
+                رجوع لتسجيل الدخول
+              </button>
+            </div>
+          )}
 
           <div className="oauth-divider"><span>أو</span></div>
 
@@ -109,9 +191,11 @@ function OrdersContent() {
             <a href="/api/auth/google" className="oauth-btn oauth-google">
               الدخول بحساب جوجل
             </a>
-            <a href="/api/auth/facebook" className="oauth-btn oauth-facebook">
-              الدخول بحساب فيسبوك
-            </a>
+            {SHOW_FACEBOOK_LOGIN && (
+              <a href="/api/auth/facebook" className="oauth-btn oauth-facebook">
+                الدخول بحساب فيسبوك
+              </a>
+            )}
           </div>
         </div>
       </div>

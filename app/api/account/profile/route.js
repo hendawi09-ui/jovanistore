@@ -17,6 +17,11 @@ export async function PATCH(req) {
   if (typeof body.phone === "string" && body.phone.trim()) {
     update.phone = body.phone.replace(/\D/g, "");
   }
+  // الإيميل اختياري — بيستخدم في استرجاع كلمة السر
+  if (typeof body.email === "string") {
+    const em = body.email.trim();
+    update.email = em === "" ? null : em;
+  }
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: "لا يوجد بيانات للتحديث" }, { status: 400 });
@@ -29,7 +34,8 @@ export async function PATCH(req) {
 
   if (error) {
     if (error.message && error.message.includes("duplicate key")) {
-      return NextResponse.json({ error: "رقم الموبايل ده مستخدم بحساب تاني بالفعل" }, { status: 409 });
+      const field = error.message.includes("email") ? "الإيميل" : "رقم الموبايل";
+      return NextResponse.json({ error: `${field} ده مستخدم بحساب تاني بالفعل` }, { status: 409 });
     }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
