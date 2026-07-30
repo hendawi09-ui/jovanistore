@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { showToast } from "@/components/Toast";
 
-export default function OAuthCompletePage() {
+function OAuthCompleteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { applyOAuthSession } = useStore();
@@ -38,5 +38,14 @@ export default function OAuthCompletePage() {
     <div className="orders-wrap">
       <div className="empty-state">{status}</div>
     </div>
+  );
+}
+
+// نغلّف الصفحة بـ Suspense لأن useSearchParams بيقرأ رمز الدخول من الرابط
+export default function OAuthCompletePage() {
+  return (
+    <Suspense fallback={<div className="orders-wrap"><div className="empty-state">جارِ تسجيل الدخول...</div></div>}>
+      <OAuthCompleteContent />
+    </Suspense>
   );
 }

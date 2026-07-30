@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/StoreContext";
@@ -13,7 +13,7 @@ const STATUS = {
   cancelled: { label: "ملغي", cls: "st-cancelled" },
 };
 
-export default function OrdersPage() {
+function OrdersContent() {
   const { orders, cancelOrder, account, loginAccount, registerAccount, logoutAccount } = useStore();
   const [confirmId, setConfirmId] = useState(null); // الطلب اللي بيستنى تأكيد الإلغاء
   const [busy, setBusy] = useState(false);
@@ -200,5 +200,15 @@ export default function OrdersPage() {
         })
       )}
     </div>
+  );
+}
+
+// نغلّف الصفحة بـ Suspense لأن useSearchParams بيقرأ من الرابط،
+// وده بيمنع فشل البناء وقت النشر على Vercel
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<div className="orders-wrap"><div className="empty-state">جارِ التحميل...</div></div>}>
+      <OrdersContent />
+    </Suspense>
   );
 }
