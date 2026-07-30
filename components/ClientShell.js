@@ -1,7 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import BackgroundCanvas from "./BackgroundCanvas";
 import Header from "./Header";
 import Footer from "./Footer";
 import CartDrawer from "./CartDrawer";
@@ -120,7 +119,6 @@ export default function ClientShell({ children }) {
 
   return (
     <>
-      <BackgroundCanvas />
       <Header onOpenCart={openCart} onOpenFavorites={openFavorites} />
       <main>{children}</main>
       <Footer />
