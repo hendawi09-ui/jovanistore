@@ -57,7 +57,7 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
                 <circle cx="9" cy="21" r="1.4" />
                 <circle cx="18" cy="21" r="1.4" />
               </svg>
-              <span className="cart-count">{cartCount}</span>
+              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
             </button>
           </div>
         </div>

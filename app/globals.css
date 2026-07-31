@@ -513,7 +513,11 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .qa-details:hover{color:var(--ink);}
 @media (max-width:640px){
   .qa-overlay{align-items:flex-end; padding:0;}
-  .qa-sheet{max-width:none; border-radius:22px 22px 0 0; max-height:82vh; padding:20px 18px 26px;}
+  /* مساحة سفلية بقدر شريط التنقل عشان زرار "أضف للسلة" ما يتحجبش تحته */
+  .qa-sheet{
+    max-width:none; border-radius:22px 22px 0 0; max-height:82vh;
+    padding:20px 18px calc(26px + 66px + env(safe-area-inset-bottom));
+  }
 }
 
 
@@ -778,6 +782,8 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   /* رفع الأزرار العائمة والتنبيهات فوق الشريط */
   .float-static{bottom:calc(22px + 62px + env(safe-area-inset-bottom));}
   .toast{bottom:calc(24px + 62px + env(safe-area-inset-bottom));}
+  /* أسفل درج السلة/المفضلة — يحمي زرار "إتمام الطلب" من إن الشريط يغطي عليه */
+  .drawer-foot{padding-bottom:calc(20px + 66px + env(safe-area-inset-bottom));}
 }
 
 /* ===== زرار كشف كلمة السر ===== */
