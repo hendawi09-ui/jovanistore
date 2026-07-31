@@ -6,6 +6,8 @@ import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
 import { catCssVar, catLabel, parseSize, getStock, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { showToast } from "@/components/Toast";
+import ShareButton from "@/components/ShareButton";
+import SuggestedProducts from "@/components/SuggestedProducts";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -112,6 +114,7 @@ export default function ProductDetailPage() {
   }
 
   return (
+    <>
     <div className="pd">
       <div>
         <div
@@ -236,7 +239,12 @@ export default function ProductDetailPage() {
             أضف إلى السلة
           </button>
         </div>
+
+        <ShareButton title={p.name} text={`${hasDiscount(p) ? p.salePrice : p.price} ج.م — Jovani Store`} />
       </div>
     </div>
+
+    <SuggestedProducts currentProduct={p} />
+    </>
   );
 }
