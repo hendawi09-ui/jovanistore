@@ -90,6 +90,7 @@ export default function AdminCouponsPage() {
         <a href="/admin" className="admin-tab">المنتجات</a>
         <a href="/admin/orders" className="admin-tab">طلبات الشراء</a>
         <span className="admin-tab active">كوبونات الخصم</span>
+        <a href="/admin/hero" className="admin-tab">هيرو الرئيسية</a>
       </div>
 
       <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }}>

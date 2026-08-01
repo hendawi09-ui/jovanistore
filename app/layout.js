@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./hero.css";
 import { StoreProvider } from "@/lib/StoreContext";
 import ClientShell from "@/components/ClientShell";
 import { Analytics } from "@vercel/analytics/react";

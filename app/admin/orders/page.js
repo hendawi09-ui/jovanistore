@@ -73,15 +73,20 @@ export default function AdminOrdersPage() {
     });
   }
 
+  const tabs = (
+    <div className="admin-tabs">
+      <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
+      <a href="/admin" className="admin-tab">المنتجات</a>
+      <span className="admin-tab active">طلبات الشراء</span>
+      <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
+      <a href="/admin/hero" className="admin-tab">هيرو الرئيسية</a>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="admin-wrap">
-        <div className="admin-tabs">
-          <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
-          <a href="/admin" className="admin-tab">المنتجات</a>
-          <span className="admin-tab active">طلبات الشراء</span>
-          <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
-        </div>
+        {tabs}
         <div className="note-box">جارِ تحميل الطلبات...</div>
       </div>
     );
@@ -90,12 +95,7 @@ export default function AdminOrdersPage() {
   if (orders.length === 0) {
     return (
       <div className="admin-wrap">
-        <div className="admin-tabs">
-          <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
-          <a href="/admin" className="admin-tab">المنتجات</a>
-          <span className="admin-tab active">طلبات الشراء</span>
-          <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
-        </div>
+        {tabs}
         <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }}><h2>طلبات الشراء</h2></div>
         <div className="empty-state">لا توجد طلبات حتى الآن.</div>
       </div>
@@ -104,12 +104,7 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="admin-wrap">
-      <div className="admin-tabs">
-        <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
-        <a href="/admin" className="admin-tab">المنتجات</a>
-        <span className="admin-tab active">طلبات الشراء</span>
-        <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
-      </div>
+      {tabs}
       <div className="section-head" style={{ margin: "0 0 20px", padding: 0 }}>
         <h2>طلبات الشراء ({orders.length})</h2>
       </div>

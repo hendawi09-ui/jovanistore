@@ -11,23 +11,19 @@ export function middleware(req) {
     return NextResponse.next();
   }
 
-  // التحقق من كود الخصم لازم يفضل عمومي (العميل بيستخدمه من صفحة الدفع)
-  if (pathname.startsWith("/api/coupons/validate")) {
+  // قراءة سلايدات الهيرو لازم تفضل عمومية (بتستخدمها الصفحة الرئيسية نفسها)
+  if (pathname.startsWith("/api/hero") && req.method === "GET") {
     return NextResponse.next();
   }
 
-  // تسجيل زيارة منتج لازم يفضل عمومي — العميل العادي هو اللي بيفتح صفحة المنتج
-  if (/^\/api\/products\/[^/]+\/view$/.test(pathname) && req.method === "POST") {
+  // التحقق من كود الخصم لازم يفضل عمومي (العميل بيستخدمه من صفحة الدفع)
+  if (pathname.startsWith("/api/coupons/validate")) {
     return NextResponse.next();
   }
 
   // العميل يقدر ينشئ طلب جديد، ويشوف طلباته هو فقط عبر /api/orders/mine
   // أما عرض كل الطلبات (GET) فمحصور على لوحة التحكم لحماية بيانات العملاء
   if (pathname.startsWith("/api/orders/mine") && req.method === "POST") {
-    return NextResponse.next();
-  }
-  // حساب العميل البسيط: جلب طلباته عن طريق رقم موبايله
-  if (pathname === "/api/orders/by-phone" && req.method === "POST") {
     return NextResponse.next();
   }
   // إلغاء الطلب من العميل — محمي برقم الموبايل داخل المسار نفسه
@@ -71,5 +67,12 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/products/:path*", "/api/upload/:path*", "/api/orders/:path*", "/api/coupons/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/api/products/:path*",
+    "/api/hero/:path*",
+    "/api/upload/:path*",
+    "/api/orders/:path*",
+    "/api/coupons/:path*",
+  ],
 };

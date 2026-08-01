@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { cats, catLabel, parseSize, matchesQuery } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
+import HeroSlider from "@/components/HeroSlider";
 
 function HomeContent() {
   const { products } = useStore();
@@ -38,23 +39,7 @@ function HomeContent() {
 
   return (
     <>
-      <section className="hero">
-        <div>
-          <div className="hero-eyebrow"><span className="pulse-dot"></span>تشكيلة 2026 وصلت</div>
-          <h1>مرحبًا بك في<br /><span className="arc-word">Jovani Store</span></h1>
-          <p>ملابس رجالية ونسائية في مكان واحد، بجودة نثق بها وأسعار عادلة — اختر أسلوبك اليوم.</p>
-          <div className="hero-ctas">
-            <a href="#products" className="btn-primary">تسوّق الآن</a>
-            <a href="#about" className="btn-ghost">تعرف علينا</a>
-          </div>
-        </div>
-        <div className="hero-art">
-          <svg viewBox="0 0 600 340" preserveAspectRatio="xMidYMid meet">
-            <path className="arc-path" d="M 40 300 Q 300 20 560 300" pathLength="1000" stroke="#0D0D0D" strokeWidth="26" style={{ animationDelay: ".05s" }} />
-            <path className="arc-path" d="M 85 300 Q 300 90 515 300" pathLength="1000" stroke="#E31B23" strokeWidth="26" style={{ animationDelay: ".25s" }} />
-          </svg>
-        </div>
-      </section>
+      <HeroSlider />
 
       <div className="search-wrap" id="search">
         <div className="search-box">
@@ -63,7 +48,6 @@ function HomeContent() {
             <path d="M20 20l-3.5-3.5" />
           </svg>
           <input
-            id="site-search-input"
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
