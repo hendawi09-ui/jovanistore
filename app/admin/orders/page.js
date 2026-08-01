@@ -138,6 +138,7 @@ export default function AdminOrdersPage() {
       <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
       <a href="/admin" className="admin-tab">المنتجات</a>
       <span className="admin-tab active">طلبات الشراء</span>
+      <a href="/admin/returns" className="admin-tab">الاسترجاع والاستبدال</a>
       <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
       <a href="/admin/hero" className="admin-tab">هيرو الرئيسية</a>
     </div>

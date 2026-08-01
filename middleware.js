@@ -67,6 +67,8 @@ function isPublicApi(pathname, method) {
   if (pathname === "/api/orders/by-phone" && method === "POST") return true;
   if (/^\/api\/orders\/[^/]+\/cancel$/.test(pathname) && method === "POST") return true;
   if (pathname === "/api/orders" && method === "POST") return true;
+  // تقديم طلب استرجاع/استبدال — محمي جوه المسار نفسه (بيتأكد إن الطلب على رقم العميل)
+  if (pathname === "/api/returns" && method === "POST") return true;
   return false;
 }
 
@@ -78,7 +80,8 @@ function needsAdminAuth(pathname, method) {
     pathname.startsWith("/api/hero") ||
     pathname.startsWith("/api/upload") ||
     pathname.startsWith("/api/orders") ||
-    pathname.startsWith("/api/coupons");
+    pathname.startsWith("/api/coupons") ||
+    pathname.startsWith("/api/returns");
   return guarded && !isPublicApi(pathname, method);
 }
 

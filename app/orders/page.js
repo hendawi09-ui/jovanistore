@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/StoreContext";
+import ReturnRequest from "@/components/ReturnRequest";
 import { showToast } from "@/components/Toast";
 
 // ⚙️ مفتاح زرار "الدخول بحساب فيسبوك"
@@ -274,12 +275,14 @@ function OrdersContent() {
                 </div>
               )}
 
-              {!canCancel && status !== "cancelled" && status !== "returned" && (
+              {!canCancel && status !== "cancelled" && status !== "returned" && status !== "delivered" && (
                 <div className="order-note">
                   تم تأكيد الطلب — للإلغاء أو التعديل تواصل معنا عبر{" "}
                   <Link href="/policies#contact">صفحة التواصل</Link>.
                 </div>
               )}
+
+              {status === "delivered" && <ReturnRequest order={o} />}
             </div>
           );
         })
