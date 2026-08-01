@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import AdminTabs from "@/components/AdminTabs";
 import { showToast } from "@/components/Toast";
 
 const emptyForm = {
@@ -85,14 +86,7 @@ export default function AdminCouponsPage() {
 
   return (
     <div className="admin-wrap">
-      <div className="admin-tabs">
-        <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
-        <a href="/admin" className="admin-tab">المنتجات</a>
-        <a href="/admin/orders" className="admin-tab">طلبات الشراء</a>
-      <a href="/admin/returns" className="admin-tab">الاسترجاع والاستبدال</a>
-        <span className="admin-tab active">كوبونات الخصم</span>
-        <a href="/admin/hero" className="admin-tab">هيرو الرئيسية</a>
-      </div>
+      <AdminTabs active="/admin/coupons" />
 
       <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }}>
         <h2>إضافة كوبون جديد</h2>

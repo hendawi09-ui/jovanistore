@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import AdminTabs from "@/components/AdminTabs";
 import { showToast } from "@/components/Toast";
 import { compressImage, compressionLabel } from "@/lib/compressImage";
 
@@ -144,14 +145,7 @@ export default function AdminHeroPage() {
   }
 
   const tabs = (
-    <div className="admin-tabs">
-      <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
-      <a href="/admin" className="admin-tab">المنتجات</a>
-      <a href="/admin/orders" className="admin-tab">طلبات الشراء</a>
-      <a href="/admin/returns" className="admin-tab">الاسترجاع والاستبدال</a>
-      <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
-      <span className="admin-tab active">هيرو الرئيسية</span>
-    </div>
+    <AdminTabs active="/admin/hero" />
   );
 
   if (loading) {

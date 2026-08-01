@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import AdminTabs from "@/components/AdminTabs";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg, icons } from "@/lib/icons";
 import { catCssVar, catLabel, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent, matchesQuery } from "@/lib/products";
@@ -372,14 +373,7 @@ export default function AdminPage() {
 
   return (
     <div className="admin-wrap">
-      <div className="admin-tabs">
-        <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
-        <span className="admin-tab active">المنتجات</span>
-        <a href="/admin/orders" className="admin-tab">طلبات الشراء</a>
-      <a href="/admin/returns" className="admin-tab">الاسترجاع والاستبدال</a>
-        <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
-        <a href="/admin/hero" className="admin-tab">هيرو الرئيسية</a>
-      </div>
+      <AdminTabs active="/admin" />
       <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }} ref={formTopRef}>
         <h2>{editingId ? "تعديل منتج" : "إضافة منتج جديد"}</h2>
         {editingId && (

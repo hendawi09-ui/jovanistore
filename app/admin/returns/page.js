@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import AdminTabs from "@/components/AdminTabs";
 import { showToast } from "@/components/Toast";
 
 const KIND_LABELS = { return: "استرجاع", exchange: "استبدال" };
@@ -65,14 +66,7 @@ export default function AdminReturnsPage() {
   }
 
   const tabs = (
-    <div className="admin-tabs">
-      <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
-      <a href="/admin" className="admin-tab">المنتجات</a>
-      <a href="/admin/orders" className="admin-tab">طلبات الشراء</a>
-      <span className="admin-tab active">الاسترجاع والاستبدال</span>
-      <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
-      <a href="/admin/hero" className="admin-tab">هيرو الرئيسية</a>
-    </div>
+    <AdminTabs active="/admin/returns" />
   );
 
   if (loading) {

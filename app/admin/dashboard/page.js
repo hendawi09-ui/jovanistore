@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import AdminTabs from "@/components/AdminTabs";
 import { useStore } from "@/lib/StoreContext";
 import { getTotalStock, stockKey, parseSize, effectivePrice } from "@/lib/products";
 import { IconSvg } from "@/lib/icons";
@@ -127,14 +128,7 @@ export default function AdminDashboardPage() {
   const maxDaily = Math.max(...stats.daily.map(([, v]) => v), 1);
 
   const tabs = (
-    <div className="admin-tabs">
-      <span className="admin-tab active">لوحة المعلومات</span>
-      <a href="/admin" className="admin-tab">المنتجات</a>
-      <a href="/admin/orders" className="admin-tab">طلبات الشراء</a>
-      <a href="/admin/returns" className="admin-tab">الاسترجاع والاستبدال</a>
-      <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
-      <a href="/admin/hero" className="admin-tab">هيرو الرئيسية</a>
-    </div>
+    <AdminTabs active="/admin/dashboard" />
   );
 
   if (loading) {

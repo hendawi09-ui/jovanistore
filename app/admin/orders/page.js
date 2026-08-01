@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import AdminTabs from "@/components/AdminTabs";
 import { showToast } from "@/components/Toast";
 import { printShippingLabel } from "@/lib/shippingLabel";
 
@@ -12,9 +13,12 @@ const STATUS_LABELS = {
   cancelled: "ملغي",
 };
 
-// لون كل حالة في شريط الفلتر
 // حالات لا تُحتسب ضمن المبيعات (ملغي أو مسترجع)
 const NON_REVENUE = ["cancelled", "returned"];
+
+// «مسترجع» ليها صفحتها الخاصة (الاسترجاع والاستبدال)، فمش بتظهر كفلتر هنا.
+// بس بتفضل في القايمة المنسدلة عشان الطلبات القديمة تتعرض صح.
+const HIDDEN_FILTERS = ["returned"];
 
 // الطلب بيتأرشف لما يكون اتسلّم وعدّى عليه أكتر من مدة الاسترجاع
 const ARCHIVE_AFTER_DAYS = 14;
@@ -87,10 +91,10 @@ export default function AdminOrdersPage() {
 
   // عدد الطلبات في كل حالة — بيظهر جنب اسم الفلتر
   const counts = useMemo(() => {
-    const c = { all: 0, archive: 0 };
+    const c = { all: 0 };
     for (const k of Object.keys(STATUS_LABELS)) c[k] = 0;
     for (const o of orders) {
-      if (isArchived(o)) { c.archive++; continue; } // المؤرشف بيتعد في الأرشيف بس
+      if (isArchived(o)) continue; // المؤرشف ليه تبويب لوحده
       c.all++;
       const st = o.status || "pending";
       if (st in c) c[st]++;
@@ -99,7 +103,6 @@ export default function AdminOrdersPage() {
   }, [orders]);
 
   const visibleOrders = useMemo(() => {
-    if (filter === "archive") return orders.filter(isArchived);
     const active = orders.filter((o) => !isArchived(o));
     return filter === "all" ? active : active.filter((o) => (o.status || "pending") === filter);
   }, [orders, filter]);
@@ -136,7 +139,9 @@ export default function AdminOrdersPage() {
       >
         الكل <span className="cnt">{counts.all}</span>
       </button>
-      {Object.entries(STATUS_LABELS).map(([val, label]) => (
+      {Object.entries(STATUS_LABELS)
+        .filter(([val]) => !HIDDEN_FILTERS.includes(val))
+        .map(([val, label]) => (
         <button
           key={val}
           className={`ofilter ${filter === val ? "active" : ""}`}
@@ -146,26 +151,11 @@ export default function AdminOrdersPage() {
           {label} <span className="cnt">{counts[val]}</span>
         </button>
       ))}
-      <span className="fsep" />
-      <button
-        className={`ofilter archive ${filter === "archive" ? "active" : ""}`}
-        style={{ "--c": "#6E6B80" }}
-        onClick={() => setFilter("archive")}
-      >
-        🗄 الأرشيف <span className="cnt">{counts.archive}</span>
-      </button>
     </div>
   );
 
   const tabs = (
-    <div className="admin-tabs">
-      <a href="/admin/dashboard" className="admin-tab">لوحة المعلومات</a>
-      <a href="/admin" className="admin-tab">المنتجات</a>
-      <span className="admin-tab active">طلبات الشراء</span>
-      <a href="/admin/returns" className="admin-tab">الاسترجاع والاستبدال</a>
-      <a href="/admin/coupons" className="admin-tab">كوبونات الخصم</a>
-      <a href="/admin/hero" className="admin-tab">هيرو الرئيسية</a>
-    </div>
+    <AdminTabs active="/admin/orders" />
   );
 
   if (loading) {
@@ -202,11 +192,6 @@ export default function AdminOrdersPage() {
           : `${visibleOrders.length} طلب · إجمالي ${visibleTotal.toLocaleString("ar-EG")} ج.م${
               filter === "all" ? " (بدون الملغي والمسترجع)" : ""
             }`}
-        {filter === "archive" && visibleOrders.length > 0 && (
-          <div className="order-summary-sub">
-            طلبات مسلّمة عدّى عليها أكتر من {ARCHIVE_AFTER_DAYS} يوم — مدة الاسترجاع انتهت.
-          </div>
-        )}
       </div>
 
       {visibleOrders.length === 0 && (
@@ -223,14 +208,11 @@ export default function AdminOrdersPage() {
             </div>
 
             {dayOrders.map((o) => (
-              <div className={`admin-order-card ${isArchived(o) ? "arch" : ""}`} key={o.id}>
+              <div className="admin-order-card" key={o.id}>
                 <div className="admin-order-top">
                   <div>
                     <strong>طلب #{o.id}</strong>
                     <span className="admin-order-time">{timeLabel(o.created_at)}</span>
-                    {isArchived(o) && (
-                      <span className="arch-badge">مؤرشف · من {daysSinceDelivery(o)} يوم</span>
-                    )}
                   </div>
                   <div className="admin-order-tools">
                     <button
