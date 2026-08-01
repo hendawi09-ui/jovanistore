@@ -28,7 +28,7 @@ export default function HeroSlider() {
     if (slides.length > 1) {
       dTimerRef.current = setInterval(() => {
         setDIdx((i) => (i + 1) % slides.length);
-      }, 5000);
+      }, 3000);
     }
   }, [slides.length]);
 
@@ -39,6 +39,11 @@ export default function HeroSlider() {
 
   function goDesktop(i) {
     setDIdx(i);
+    restartDesktopTimer();
+  }
+
+  function stepDesktop(dir) {
+    setDIdx((i) => (i + dir + slides.length) % slides.length);
     restartDesktopTimer();
   }
 
@@ -101,6 +106,20 @@ export default function HeroSlider() {
               </div>
             </div>
           ))}
+        {slides.length > 1 && (
+          <>
+            <button className="fnav prev" onClick={() => stepDesktop(-1)} aria-label="السابق">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </button>
+            <button className="fnav next" onClick={() => stepDesktop(1)} aria-label="التالي">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 6l-6 6 6 6" />
+              </svg>
+            </button>
+          </>
+        )}
         </div>
         {slides.length > 1 && (
           <div className="dots-desktop">
