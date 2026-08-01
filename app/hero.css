@@ -20,7 +20,7 @@
 }
 
 .feature-panel{
-  position:relative; height:440px; border-radius:28px; overflow:hidden;
+  position:relative; height:560px; border-radius:28px; overflow:hidden;
   box-shadow:0 30px 60px -20px rgba(13,13,13,.25);
 }
 .feature-slide{
@@ -37,21 +37,21 @@
 /* تدرّج غامق عشان الكلام يفضل مقروء فوق الصورة */
 .feature-slide::after{
   content:""; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(270deg, rgba(0,0,0,.78) 0%, rgba(0,0,0,.5) 42%, rgba(0,0,0,.12) 72%, transparent 100%);
+  background:linear-gradient(0deg, rgba(0,0,0,.82) 0%, rgba(0,0,0,.55) 22%, rgba(0,0,0,.1) 45%, transparent 65%);
 }
 
 .feature-text{
-  position:relative; z-index:2; height:100%; max-width:620px;
-  padding:54px 60px; color:#fff;
-  display:flex; flex-direction:column; justify-content:center; gap:16px;
+  position:absolute; left:0; right:0; bottom:0; z-index:2;
+  padding:36px 44px 40px; color:#fff;
+  display:flex; flex-direction:column; align-items:flex-start; gap:12px;
 }
-.feature-text h3{font-family:'Cairo'; font-weight:900; font-size:40px; line-height:1.15; text-shadow:0 2px 14px rgba(0,0,0,.35);}
-.feature-text p{font-size:15.5px; opacity:.92; max-width:400px; font-weight:500; text-shadow:0 1px 10px rgba(0,0,0,.35);}
+.feature-text h3{font-family:'Cairo'; font-weight:900; font-size:38px; line-height:1.15; text-shadow:0 2px 14px rgba(0,0,0,.4);}
+.feature-text p{font-size:15.5px; opacity:.92; max-width:520px; font-weight:500; text-shadow:0 1px 10px rgba(0,0,0,.4);}
 .feature-badge{position:absolute; top:22px; left:22px; z-index:3; background:#fff; color:var(--red-dark); font-weight:800; font-size:13px; padding:8px 16px; border-radius:999px;}
 .feature-cta{
   display:inline-flex; align-items:center; gap:8px; width:fit-content;
-  background:#fff; color:var(--ink); font-weight:700; font-size:15px;
-  padding:14px 28px; border-radius:999px; transition:transform .15s;
+  background:var(--paper); color:var(--ink); font-weight:700; font-size:15px;
+  padding:13px 26px; border-radius:999px; transition:transform .15s;
 }
 .feature-cta:hover{transform:translateY(-2px);}
 
@@ -61,13 +61,13 @@
 
 /* أسهم التقليب */
 .fnav{
-  position:absolute; top:50%; transform:translateY(-50%); z-index:5;
+  position:absolute; top:45%; transform:translateY(-50%); z-index:5;
   width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,.9);
   display:flex; align-items:center; justify-content:center; color:var(--ink);
   border:none; box-shadow:0 8px 20px rgba(0,0,0,.18);
   transition:background .2s, transform .15s;
 }
-.fnav:hover{background:#fff; transform:translateY(-50%) scale(1.06);}
+.fnav:hover{background:var(--paper); transform:translateY(-50%) scale(1.06);}
 .fnav svg{width:20px; height:20px;}
 .fnav.prev{right:20px;}
 .fnav.next{left:20px;}
@@ -95,10 +95,10 @@
 .m-slide-body h3{font-family:'Cairo'; font-weight:900; font-size:24px; margin-bottom:6px;}
 .m-slide-body p{font-size:13px; opacity:.9; margin-bottom:14px; max-width:280px;}
 .m-badge{position:absolute; top:16px; left:16px; z-index:2; background:#fff; color:var(--red-dark); font-weight:800; font-size:12px; padding:6px 14px; border-radius:999px;}
-.m-cta{display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:13.5px; color:#fff; background:var(--ink); padding:11px 20px; border-radius:999px;}
+.m-cta{display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:13.5px; color:var(--ink); background:var(--paper); padding:11px 20px; border-radius:999px;}
 
 .m-dots{display:flex; gap:7px; justify-content:center; margin-top:14px;}
-.m-dots button{width:8px; height:8px; border-radius:50%; background:var(--line); transition:all .25s; border:none;}
+.m-dots button{width:8px; height:8px; border-radius:50%; background:var(--ink); transition:all .25s; border:none;}
 .m-dots button.active{background:var(--ink); width:22px; border-radius:5px;}
 
 @media (prefers-reduced-motion: reduce){

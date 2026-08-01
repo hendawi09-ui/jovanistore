@@ -51,6 +51,36 @@ export default function HeroSlider() {
   const trackRef = useRef(null);
   const [mIdx, setMIdx] = useState(0);
   const mScrollTimer = useRef(null);
+  const mAutoRef = useRef(null);
+  const touchingRef = useRef(false);
+
+  const scrollToMobile = useCallback((i) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const w = track.getBoundingClientRect().width;
+    track.scrollTo({ left: i * w, behavior: "smooth" });
+  }, []);
+
+  // تقليب تلقائي على الموبايل كل 3 ثواني — بيقف وانت ماسك بصباعك
+  const restartMobileTimer = useCallback(() => {
+    clearInterval(mAutoRef.current);
+    if (slides.length > 1) {
+      mAutoRef.current = setInterval(() => {
+        if (touchingRef.current) return;
+        const track = trackRef.current;
+        if (!track) return;
+        const w = track.getBoundingClientRect().width;
+        const cur = Math.round(track.scrollLeft / w);
+        const next = (cur + 1) % slides.length;
+        track.scrollTo({ left: next * w, behavior: "smooth" });
+      }, 3000);
+    }
+  }, [slides.length]);
+
+  useEffect(() => {
+    restartMobileTimer();
+    return () => clearInterval(mAutoRef.current);
+  }, [restartMobileTimer]);
 
   function handleMobileScroll() {
     clearTimeout(mScrollTimer.current);
@@ -62,11 +92,18 @@ export default function HeroSlider() {
     }, 80);
   }
 
-  function scrollToMobile(i) {
-    const track = trackRef.current;
-    if (!track) return;
-    const w = track.getBoundingClientRect().width;
-    track.scrollTo({ left: i * w, behavior: "smooth" });
+  // وانت بتسحب بصباعك، التقليب التلقائي بيقف عشان مايقاطعكش
+  function onTouchStart() {
+    touchingRef.current = true;
+  }
+  function onTouchEnd() {
+    touchingRef.current = false;
+    restartMobileTimer();
+  }
+
+  function goMobile(i) {
+    scrollToMobile(i);
+    restartMobileTimer();
   }
 
   if (!loaded) return null;
@@ -137,7 +174,14 @@ export default function HeroSlider() {
 
       {/* ===== الموبايل ===== */}
       <div className="hero-mobile">
-        <div className="m-track" ref={trackRef} onScroll={handleMobileScroll}>
+        <div
+          className="m-track"
+          ref={trackRef}
+          onScroll={handleMobileScroll}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          onTouchCancel={onTouchEnd}
+        >
           {slides.map((s) => (
             <div key={s.id} className="m-slide">
               {s.image ? <img src={s.image} alt={s.title} /> : <div className="m-slide-empty" />}
@@ -158,7 +202,7 @@ export default function HeroSlider() {
               <button
                 key={s.id}
                 className={i === mIdx ? "active" : ""}
-                onClick={() => scrollToMobile(i)}
+                onClick={() => goMobile(i)}
                 aria-label={`سلايد ${i + 1}`}
               />
             ))}
