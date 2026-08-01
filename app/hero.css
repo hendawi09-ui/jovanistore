@@ -244,3 +244,15 @@
 .rr-act.del{border-color:var(--line); color:var(--muted);}
 
 @media (max-width:640px){ .rr-card-grid{grid-template-columns:1fr;} }
+
+/* ============================================================
+   أرشيف الطلبات — صفحة الطلبات في لوحة التحكم
+   ============================================================ */
+.fsep{width:1px; height:24px; background:var(--line); margin:0 4px; align-self:center;}
+.ofilter.archive{border-style:dashed;}
+.arch-badge{
+  background:var(--paper-dim); color:var(--muted); font-size:11px; font-weight:800;
+  padding:3px 11px; border-radius:999px; margin-inline-start:8px; white-space:nowrap;
+}
+.admin-order-card.arch{background:#FAFAFA; border-style:dashed;}
+.order-summary-sub{font-weight:500; font-size:12px; color:var(--muted); margin-top:5px; line-height:1.7;}

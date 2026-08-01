@@ -16,6 +16,19 @@ const STATUS_LABELS = {
 // حالات لا تُحتسب ضمن المبيعات (ملغي أو مسترجع)
 const NON_REVENUE = ["cancelled", "returned"];
 
+// الطلب بيتأرشف لما يكون اتسلّم وعدّى عليه أكتر من مدة الاسترجاع
+const ARCHIVE_AFTER_DAYS = 14;
+
+function daysSinceDelivery(o) {
+  const base = o.delivered_at || o.created_at;
+  if (!base) return 0;
+  return Math.floor((Date.now() - new Date(base).getTime()) / 86400000);
+}
+
+function isArchived(o) {
+  return (o.status || "pending") === "delivered" && daysSinceDelivery(o) > ARCHIVE_AFTER_DAYS;
+}
+
 const STATUS_COLORS = {
   pending: "#C2870B",
   confirmed: "#2857C6",
@@ -74,19 +87,22 @@ export default function AdminOrdersPage() {
 
   // عدد الطلبات في كل حالة — بيظهر جنب اسم الفلتر
   const counts = useMemo(() => {
-    const c = { all: orders.length };
+    const c = { all: 0, archive: 0 };
     for (const k of Object.keys(STATUS_LABELS)) c[k] = 0;
     for (const o of orders) {
+      if (isArchived(o)) { c.archive++; continue; } // المؤرشف بيتعد في الأرشيف بس
+      c.all++;
       const st = o.status || "pending";
       if (st in c) c[st]++;
     }
     return c;
   }, [orders]);
 
-  const visibleOrders = useMemo(
-    () => (filter === "all" ? orders : orders.filter((o) => (o.status || "pending") === filter)),
-    [orders, filter]
-  );
+  const visibleOrders = useMemo(() => {
+    if (filter === "archive") return orders.filter(isArchived);
+    const active = orders.filter((o) => !isArchived(o));
+    return filter === "all" ? active : active.filter((o) => (o.status || "pending") === filter);
+  }, [orders, filter]);
 
   // في "الكل" بنستبعد الملغي من الإجمالي عشان الرقم يعبّر عن مبيعات حقيقية.
   // في أي فلتر تاني بنجمع كل اللي ظاهر (بما فيه فلتر "ملغي" نفسه).
@@ -130,6 +146,14 @@ export default function AdminOrdersPage() {
           {label} <span className="cnt">{counts[val]}</span>
         </button>
       ))}
+      <span className="fsep" />
+      <button
+        className={`ofilter archive ${filter === "archive" ? "active" : ""}`}
+        style={{ "--c": "#6E6B80" }}
+        onClick={() => setFilter("archive")}
+      >
+        🗄 الأرشيف <span className="cnt">{counts.archive}</span>
+      </button>
     </div>
   );
 
@@ -174,14 +198,19 @@ export default function AdminOrdersPage() {
 
       <div className="order-summary">
         {visibleOrders.length === 0
-          ? "مفيش طلبات في الحالة دي"
+          ? "مفيش طلبات في القسم ده"
           : `${visibleOrders.length} طلب · إجمالي ${visibleTotal.toLocaleString("ar-EG")} ج.م${
               filter === "all" ? " (بدون الملغي والمسترجع)" : ""
             }`}
+        {filter === "archive" && visibleOrders.length > 0 && (
+          <div className="order-summary-sub">
+            طلبات مسلّمة عدّى عليها أكتر من {ARCHIVE_AFTER_DAYS} يوم — مدة الاسترجاع انتهت.
+          </div>
+        )}
       </div>
 
       {visibleOrders.length === 0 && (
-        <div className="empty-state">مفيش طلبات في الحالة دي.</div>
+        <div className="empty-state">مفيش طلبات في القسم ده.</div>
       )}
 
       {groups.map(([key, dayOrders]) => {
@@ -194,11 +223,14 @@ export default function AdminOrdersPage() {
             </div>
 
             {dayOrders.map((o) => (
-              <div className="admin-order-card" key={o.id}>
+              <div className={`admin-order-card ${isArchived(o) ? "arch" : ""}`} key={o.id}>
                 <div className="admin-order-top">
                   <div>
                     <strong>طلب #{o.id}</strong>
                     <span className="admin-order-time">{timeLabel(o.created_at)}</span>
+                    {isArchived(o) && (
+                      <span className="arch-badge">مؤرشف · من {daysSinceDelivery(o)} يوم</span>
+                    )}
                   </div>
                   <div className="admin-order-tools">
                     <button
