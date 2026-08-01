@@ -8,6 +8,11 @@ const ADMIN_USER = "admin";
 const MAINTENANCE = process.env.MAINTENANCE_MODE === "true";
 const PREVIEW_COOKIE = "jv_preview";
 
+// كلمة سر منفصلة للمعاينة وقت الصيانة — مش كلمة سر الأدمن.
+// خليها حروف وأرقام بس (من غير & # @ + مسافات) عشان تشتغل في الرابط.
+// بتتحط في Vercel باسم PREVIEW_KEY. لو مش موجودة، الفتح المؤقت بيبقى متعطّل.
+const PREVIEW_KEY = process.env.PREVIEW_KEY;
+
 function maintenancePage() {
   const html = `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -79,14 +84,12 @@ export function middleware(req) {
   // ============ 1) بوابة الصيانة (للزوار العاديين فقط) ============
   // لوحة التحكم والـ API بيفضلوا شغّالين عشان تقدر تكمّل شغلك عادي
   if (MAINTENANCE && !pathname.startsWith("/admin") && !pathname.startsWith("/api/")) {
-    const adminPass = process.env.ADMIN_PASSWORD;
-
-    // رابط الفتح المؤقت: yoursite.com/?unlock=كلمة_السر
+    // رابط الفتح المؤقت: yoursite.com/?unlock=PREVIEW_KEY
     // بيحط كوكي في متصفحك عشان تتصفح الموقع كله عادي وانت شغّال
     const unlock = searchParams.get("unlock");
-    if (adminPass && unlock === adminPass) {
+    if (PREVIEW_KEY && unlock === PREVIEW_KEY) {
       const res = NextResponse.redirect(new URL(pathname, origin));
-      res.cookies.set(PREVIEW_COOKIE, adminPass, {
+      res.cookies.set(PREVIEW_COOKIE, PREVIEW_KEY, {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
@@ -96,7 +99,7 @@ export function middleware(req) {
     }
 
     const cookie = req.cookies.get(PREVIEW_COOKIE)?.value;
-    if (!(adminPass && cookie === adminPass)) {
+    if (!(PREVIEW_KEY && cookie === PREVIEW_KEY)) {
       return maintenancePage();
     }
   }
