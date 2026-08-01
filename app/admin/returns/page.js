@@ -8,7 +8,6 @@ const RSTATUS = {
   new: { label: "جديد", color: "#C2870B" },
   approved: { label: "موافق عليه", color: "#2857C6" },
   rejected: { label: "مرفوض", color: "#E31B23" },
-  done: { label: "منتهي", color: "#1A8A47" },
 };
 
 function when(iso) {
@@ -160,9 +159,6 @@ export default function AdminReturnsPage() {
                 )}
                 {(r.status || "new") !== "rejected" && (
                   <button className="rr-act no" onClick={() => setStatus(r.id, "rejected")}>رفض</button>
-                )}
-                {(r.status || "new") !== "done" && (
-                  <button className="rr-act done" onClick={() => setStatus(r.id, "done")}>تم الإنهاء</button>
                 )}
                 <button className="rr-act del" onClick={() => remove(r.id)}>حذف</button>
               </div>

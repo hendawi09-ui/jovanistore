@@ -69,6 +69,8 @@ function isPublicApi(pathname, method) {
   if (pathname === "/api/orders" && method === "POST") return true;
   // تقديم طلب استرجاع/استبدال — محمي جوه المسار نفسه (بيتأكد إن الطلب على رقم العميل)
   if (pathname === "/api/returns" && method === "POST") return true;
+  // قراءة القطع اللي عليها طلب بالفعل — محمي جوه المسار بمطابقة رقم العميل
+  if (pathname === "/api/returns/mine" && method === "POST") return true;
   return false;
 }
 

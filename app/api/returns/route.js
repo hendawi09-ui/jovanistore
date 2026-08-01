@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 import { policy } from "@/lib/siteConfig";
+import { notifyReturnRequest } from "@/lib/notify";
 
 const KINDS = ["return", "exchange"];
 
@@ -57,15 +58,17 @@ export async function POST(req) {
     );
   }
 
-  // منع تكرار نفس الطلب وهو لسه تحت المراجعة
+  // منع تقديم طلب تاني على نفس القطعة (مهما كانت حالته).
+  // القطع التانية في نفس الأوردر لسه متاحة عادي.
+  const itemName = String(body.itemName || "").slice(0, 300);
   const { data: existing } = await supabase
     .from("return_requests")
     .select("id")
     .eq("order_id", orderId)
-    .in("status", ["new", "approved"]);
+    .eq("item_name", itemName);
   if (existing && existing.length > 0) {
     return NextResponse.json(
-      { error: "فيه طلب على نفس الأوردر تحت المراجعة بالفعل" },
+      { error: "فيه طلب مقدّم على القطعة دي بالفعل" },
       { status: 409 }
     );
   }
@@ -76,7 +79,7 @@ export async function POST(req) {
       customer_name: order.name || "",
       customer_phone: orderPhone,
       kind: body.kind,
-      item_name: String(body.itemName || "").slice(0, 300),
+      item_name: itemName,
       item_qty: Math.max(1, Number(body.itemQty) || 1),
       wanted_size: body.kind === "exchange" ? String(body.wantedSize || "").slice(0, 60) : null,
       wanted_color: body.kind === "exchange" ? String(body.wantedColor || "").slice(0, 60) : null,
@@ -87,5 +90,20 @@ export async function POST(req) {
   ]);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // إشعار واتساب وإيميل — لو فشل مش بيأثر على الطلب نفسه
+  notifyReturnRequest({
+    orderId,
+    name: order.name,
+    phone: orderPhone,
+    kind: body.kind,
+    itemName,
+    itemQty: Math.max(1, Number(body.itemQty) || 1),
+    wantedSize: body.wantedSize,
+    wantedColor: body.wantedColor,
+    reason: body.reason,
+    note: body.note,
+  }).catch(() => {});
+
   return NextResponse.json({ ok: true });
 }

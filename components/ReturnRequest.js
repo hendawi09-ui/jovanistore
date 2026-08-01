@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useStore } from "@/lib/StoreContext";
 import { parseSize } from "@/lib/products";
@@ -32,7 +32,9 @@ export default function ReturnRequest({ order }) {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const items = Array.isArray(order.items) ? order.items : [];
+  const allItems = Array.isArray(order.items) ? order.items : [];
+  // القطع اللي اتقدّم عليها طلب قبل كده — بتتشال من القايمة
+  const [usedNames, setUsedNames] = useState(null);
   const [itemIdx, setItemIdx] = useState(0);
   const [qty, setQty] = useState(1);
   const [wantedSize, setWantedSize] = useState("");
@@ -41,7 +43,32 @@ export default function ReturnRequest({ order }) {
   const [note, setNote] = useState("");
 
   const daysLeft = returnDaysLeft(order);
-  const item = items[itemIdx];
+
+  const loadUsed = useCallback(async () => {
+    try {
+      const res = await fetch("/api/returns/mine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, phone: order.phone }),
+      });
+      const data = await res.json();
+      setUsedNames(Array.isArray(data) ? data.map((r) => r.item_name) : []);
+    } catch {
+      setUsedNames([]);
+    }
+  }, [order.id, order.phone]);
+
+  useEffect(() => {
+    if (daysLeft !== null) loadUsed();
+  }, [daysLeft, loadUsed]);
+
+  // القطع المتاحة للطلب = كل القطع ناقص اللي اتقدّم عليها طلب
+  const items = useMemo(
+    () => (usedNames ? allItems.filter((it) => !usedNames.includes(it.name)) : allItems),
+    [allItems, usedNames]
+  );
+
+  const item = items[itemIdx] || items[0];
 
   // المقاسات والألوان المتاحة لنفس المنتج — بنجيبها من المتجر عشان يختار مش يكتب
   const variants = useMemo(() => {
@@ -52,7 +79,18 @@ export default function ReturnRequest({ order }) {
     return { sizes, colors };
   }, [products, item]);
 
-  if (daysLeft === null || !item) return null;
+  if (daysLeft === null) return null;
+  if (usedNames === null) return null; // لسه بنحمّل
+
+  // كل قطع الطلب اتقدّم عليها طلبات خلاص
+  if (items.length === 0) {
+    return (
+      <div className="rr-done">
+        📋 تم تقديم طلب على كل قطع الأوردر ده — هنتواصل معاك على رقم موبايلك.
+      </div>
+    );
+  }
+  if (!item) return null;
 
   const urgent = daysLeft <= 3;
 
@@ -82,6 +120,7 @@ export default function ReturnRequest({ order }) {
       if (res.ok) {
         setSent(true);
         showToast("تم إرسال طلبك");
+        loadUsed();
       } else {
         showToast(data.error || "حصل خطأ، حاول تاني");
       }
@@ -92,10 +131,30 @@ export default function ReturnRequest({ order }) {
   }
 
   if (sent) {
+    const remaining = allItems.filter((it) => !(usedNames || []).includes(it.name));
     return (
-      <div className="rr-done">
-        ✅ <strong>تم استلام طلبك</strong> — هنراجعه ونكلّمك على رقم موبايلك خلال يوم عمل.
-      </div>
+      <>
+        <div className="rr-done">
+          ✅ <strong>تم استلام طلبك</strong> — هنراجعه ونكلّمك على رقم موبايلك خلال يوم عمل.
+        </div>
+        {remaining.length > 0 && (
+          <div className="rr-actions">
+            <button
+              className="rr-btn"
+              onClick={() => {
+                setSent(false);
+                setMode(null);
+                setItemIdx(0);
+                setWantedSize("");
+                setWantedColor("");
+                setNote("");
+              }}
+            >
+              طلب على قطعة تانية ({remaining.length})
+            </button>
+          </div>
+        )}
+      </>
     );
   }
 
