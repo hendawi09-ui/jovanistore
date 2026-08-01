@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { showToast } from "@/components/Toast";
+import { compressImage } from "@/lib/compressImage";
 
 export default function AdminHeroPage() {
   const [slides, setSlides] = useState([]);
@@ -118,8 +119,9 @@ export default function AdminHeroPage() {
 
   async function handleImageChange(s, file) {
     setUploadingId(s.id);
+    const small = await compressImage(file);
     const fd = new FormData();
-    fd.append("file", file);
+    fd.append("file", small);
     try {
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const data = await res.json();

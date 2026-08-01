@@ -131,3 +131,14 @@
 .hcard-actions{display:flex; gap:8px; margin-top:4px;}
 .hcard-actions button{flex:1; padding:9px; border-radius:10px; font-weight:700; font-size:12.5px;}
 .hcard-actions .save-btn{background:var(--red); color:#fff;}
+
+/* ============================================================
+   زرار طباعة بوليصة الشحن — صفحة الطلبات في لوحة التحكم
+   ============================================================ */
+.admin-order-tools{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.print-label-btn{
+  background:#fff; color:var(--ink); border:1.5px solid var(--ink);
+  font-weight:700; font-size:12.5px; padding:7px 14px; border-radius:10px;
+  white-space:nowrap; transition:background .2s, color .2s;
+}
+.print-label-btn:hover{background:var(--ink); color:#fff;}

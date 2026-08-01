@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { showToast } from "@/components/Toast";
+import { printShippingLabel } from "@/lib/shippingLabel";
 
 const STATUS_LABELS = {
   pending: "قيد الانتظار",
@@ -125,15 +126,24 @@ export default function AdminOrdersPage() {
                     <strong>طلب #{o.id}</strong>
                     <span className="admin-order-time">{timeLabel(o.created_at)}</span>
                   </div>
-                  <select
-                    className={`status-select status-${o.status || "pending"}`}
-                    value={o.status || "pending"}
-                    onChange={(e) => handleStatusChange(o.id, e.target.value)}
-                  >
-                    {Object.entries(STATUS_LABELS).map(([val, label]) => (
-                      <option key={val} value={val}>{label}</option>
-                    ))}
-                  </select>
+                  <div className="admin-order-tools">
+                    <button
+                      className="print-label-btn"
+                      onClick={() => printShippingLabel(o)}
+                      title="طباعة بوليصة الشحن"
+                    >
+                      🖨 بوليصة
+                    </button>
+                    <select
+                      className={`status-select status-${o.status || "pending"}`}
+                      value={o.status || "pending"}
+                      onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                    >
+                      {Object.entries(STATUS_LABELS).map(([val, label]) => (
+                        <option key={val} value={val}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div className="admin-order-grid">

@@ -4,6 +4,7 @@ import { useStore } from "@/lib/StoreContext";
 import { IconSvg, icons } from "@/lib/icons";
 import { catCssVar, catLabel, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent, matchesQuery } from "@/lib/products";
 import { showToast } from "@/components/Toast";
+import { compressImage, compressionLabel } from "@/lib/compressImage";
 
 const emptyForm = { name: "", price: "", salePrice: "", cat: "men", icon: "shirt", desc: "", groupKey: "", colorName: "", sizes: "" };
 
@@ -95,13 +96,17 @@ export default function AdminPage() {
     if (files.length === 0) return;
     setUploading(true);
     for (const file of files) {
+      // بنصغّر الصورة في المتصفح قبل الرفع — الموقع بيبقى أسرع للزباين
+      const small = await compressImage(file);
+      const saved = compressionLabel(file.size, small.size);
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", small);
       try {
         const res = await fetch("/api/upload", { method: "POST", body: fd });
         const data = await res.json();
         if (res.ok && data.url) {
           setImages((prev) => [...prev, data.url]);
+          if (saved) showToast(`تم تصغير الصورة: ${saved}`);
         } else {
           showToast(data.error || "فشل رفع صورة");
         }
