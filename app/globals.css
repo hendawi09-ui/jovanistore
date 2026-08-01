@@ -116,7 +116,7 @@ body::before{
 .cat-tab{display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid var(--line); padding:10px 18px; border-radius:999px; font-weight:700; font-size:14px; color:var(--ink-soft); transition:all .2s;}
 .cat-dot{width:9px; height:9px; border-radius:50%; background:var(--c,var(--muted));}
 .cat-tab:hover{border-color:var(--c,var(--muted));}
-.cat-tab.active{background:var(--ink); border-color:var(--ink); color:#fff;}
+.cat-tab.active{background:var(--c,var(--ink)); border-color:var(--c,var(--ink)); color:#fff;}
 .cat-tab.active .cat-dot{background:#fff;}
 
 /* products grid */

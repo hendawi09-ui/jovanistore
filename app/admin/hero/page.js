@@ -191,7 +191,7 @@ export default function AdminHeroPage() {
               حذف الكل
             </button>
           )}
-          <button className="add-btn" onClick={handleAdd}>+ إضافة سلايد جديد</button>
+          <button className="hero-add-btn" onClick={handleAdd}>+ إضافة سلايد جديد</button>
         </div>
       </div>
 
@@ -208,8 +208,8 @@ export default function AdminHeroPage() {
                   {s.published ? "منشور" : "مخفي"}
                 </span>
                 <div className="hcard-move">
-                  <button className="move-btn" onClick={() => handleMove(i, -1)} disabled={i === 0}>▲</button>
-                  <button className="move-btn" onClick={() => handleMove(i, 1)} disabled={i === slides.length - 1}>▼</button>
+                  <button className="hero-move-btn" onClick={() => handleMove(i, -1)} disabled={i === 0}>▲</button>
+                  <button className="hero-move-btn" onClick={() => handleMove(i, 1)} disabled={i === slides.length - 1}>▼</button>
                 </div>
                 <label className="upload-btn">
                   {uploadingId === s.id ? "جارِ الرفع..." : "تغيير الصورة"}
