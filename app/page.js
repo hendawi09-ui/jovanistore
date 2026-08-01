@@ -48,6 +48,7 @@ function HomeContent() {
             <path d="M20 20l-3.5-3.5" />
           </svg>
           <input
+            id="site-search-input"
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
