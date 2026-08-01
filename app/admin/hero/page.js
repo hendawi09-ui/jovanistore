@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { showToast } from "@/components/Toast";
-import { compressImage } from "@/lib/compressImage";
+import { compressImage, compressionLabel } from "@/lib/compressImage";
 
 export default function AdminHeroPage() {
   const [slides, setSlides] = useState([]);
@@ -120,6 +120,7 @@ export default function AdminHeroPage() {
   async function handleImageChange(s, file) {
     setUploadingId(s.id);
     const small = await compressImage(file);
+    const saved = compressionLabel(file.size, small.size);
     const fd = new FormData();
     fd.append("file", small);
     try {
@@ -132,7 +133,7 @@ export default function AdminHeroPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ image: data.url }),
         });
-        showToast("تم تحديث الصورة");
+        showToast(saved ? `تم تحديث الصورة · ${saved}` : "تم تحديث الصورة");
       } else {
         showToast(data.error || "فشل رفع الصورة");
       }
