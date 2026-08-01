@@ -142,3 +142,26 @@
   white-space:nowrap; transition:background .2s, color .2s;
 }
 .print-label-btn:hover{background:var(--ink); color:#fff;}
+
+/* ============================================================
+   فلتر الطلبات حسب الحالة — صفحة الطلبات في لوحة التحكم
+   ============================================================ */
+.order-filters{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;}
+.ofilter{
+  display:inline-flex; align-items:center; gap:7px; background:#fff;
+  border:1.5px solid var(--line); padding:9px 16px; border-radius:999px;
+  font-weight:700; font-size:13.5px; color:var(--ink-soft);
+  transition:background .2s, border-color .2s, color .2s;
+}
+.ofilter:hover{border-color:var(--c, var(--muted));}
+.ofilter .cnt{
+  background:var(--paper-dim); color:var(--ink-soft); font-size:11.5px; font-weight:800;
+  min-width:20px; padding:1px 7px; border-radius:999px; transition:background .2s, color .2s;
+}
+.ofilter.active{background:var(--c, var(--ink)); border-color:var(--c, var(--ink)); color:#fff;}
+.ofilter.active .cnt{background:rgba(255,255,255,.25); color:#fff;}
+
+.order-summary{
+  background:var(--paper-dim); border-radius:12px; padding:12px 16px;
+  font-size:13px; color:var(--ink-soft); font-weight:600; margin-bottom:20px;
+}

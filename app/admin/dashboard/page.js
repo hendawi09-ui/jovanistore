@@ -4,6 +4,8 @@ import { useStore } from "@/lib/StoreContext";
 import { getTotalStock, stockKey, parseSize, effectivePrice } from "@/lib/products";
 import { IconSvg } from "@/lib/icons";
 
+const NON_REVENUE = ["cancelled", "returned"]; // حالات لا تُحتسب ضمن المبيعات
+
 const LOW_STOCK = 3; // تحت الرقم ده يعتبر مخزون منخفض
 
 function startOfDay(d) {
@@ -51,19 +53,19 @@ export default function AdminDashboardPage() {
       const created = o.created_at ? new Date(o.created_at) : null;
       const status = o.status || "pending";
 
-      if (status !== "cancelled") allSales += total;
+      if (!NON_REVENUE.includes(status)) allSales += total;
       if (status === "pending") pending++;
 
       if (created) {
         const key = created.toISOString().slice(0, 10);
-        if (daily.has(key) && status !== "cancelled") {
+        if (daily.has(key) && !NON_REVENUE.includes(status)) {
           daily.set(key, daily.get(key) + total);
         }
-        if (created >= today && status !== "cancelled") {
+        if (created >= today && !NON_REVENUE.includes(status)) {
           todaySales += total;
           todayCount++;
         }
-        if (created >= weekAgo && status !== "cancelled") {
+        if (created >= weekAgo && !NON_REVENUE.includes(status)) {
           weekSales += total;
           weekCount++;
         }

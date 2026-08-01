@@ -15,6 +15,7 @@ const STATUS = {
   confirmed: { label: "تم التأكيد", cls: "st-confirmed" },
   shipped: { label: "تم الشحن", cls: "st-shipped" },
   delivered: { label: "تم التسليم", cls: "st-delivered" },
+  returned: { label: "مسترجع", cls: "st-returned" },
   cancelled: { label: "ملغي", cls: "st-cancelled" },
 };
 
@@ -273,7 +274,7 @@ function OrdersContent() {
                 </div>
               )}
 
-              {!canCancel && status !== "cancelled" && (
+              {!canCancel && status !== "cancelled" && status !== "returned" && (
                 <div className="order-note">
                   تم تأكيد الطلب — للإلغاء أو التعديل تواصل معنا عبر{" "}
                   <Link href="/policies#contact">صفحة التواصل</Link>.

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
 
-const VALID_STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
+const VALID_STATUSES = ["pending", "confirmed", "shipped", "delivered", "returned", "cancelled"];
 
 export async function PATCH(req, { params }) {
   const body = await req.json();

@@ -8,7 +8,21 @@ const STATUS_LABELS = {
   confirmed: "تم التأكيد",
   shipped: "تم الشحن",
   delivered: "تم التسليم",
+  returned: "مسترجع",
   cancelled: "ملغي",
+};
+
+// لون كل حالة في شريط الفلتر
+// حالات لا تُحتسب ضمن المبيعات (ملغي أو مسترجع)
+const NON_REVENUE = ["cancelled", "returned"];
+
+const STATUS_COLORS = {
+  pending: "#C2870B",
+  confirmed: "#2857C6",
+  shipped: "#6B3FA0",
+  delivered: "#1A8A47",
+  returned: "#B06A00",
+  cancelled: "#E31B23",
 };
 
 function dayKey(iso) {
@@ -35,6 +49,7 @@ export default function AdminOrdersPage() {
   // لوحة التحكم بتجيب كل الطلبات عبر مسار محمي بكلمة السر (مش عبر StoreContext)
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/orders");
@@ -57,22 +72,66 @@ export default function AdminOrdersPage() {
     [refresh]
   );
 
+  // عدد الطلبات في كل حالة — بيظهر جنب اسم الفلتر
+  const counts = useMemo(() => {
+    const c = { all: orders.length };
+    for (const k of Object.keys(STATUS_LABELS)) c[k] = 0;
+    for (const o of orders) {
+      const st = o.status || "pending";
+      if (st in c) c[st]++;
+    }
+    return c;
+  }, [orders]);
+
+  const visibleOrders = useMemo(
+    () => (filter === "all" ? orders : orders.filter((o) => (o.status || "pending") === filter)),
+    [orders, filter]
+  );
+
+  // في "الكل" بنستبعد الملغي من الإجمالي عشان الرقم يعبّر عن مبيعات حقيقية.
+  // في أي فلتر تاني بنجمع كل اللي ظاهر (بما فيه فلتر "ملغي" نفسه).
+  const visibleTotal = useMemo(() => {
+    const list = filter === "all" ? visibleOrders.filter((o) => !NON_REVENUE.includes(o.status || "pending")) : visibleOrders;
+    return list.reduce((sum, o) => sum + Number(o.total || 0), 0);
+  }, [visibleOrders, filter]);
+
   const groups = useMemo(() => {
     const map = new Map();
-    for (const o of orders) {
+    for (const o of visibleOrders) {
       const key = dayKey(o.created_at);
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(o);
     }
     // orders already مرتّبة الأحدث أولًا من الـ API، فبنحافظ على نفس الترتيب داخل كل يوم
     return Array.from(map.entries()); // [ [key, orders[]], ... ] بترتيب الأحدث أولًا تلقائيًا
-  }, [orders]);
+  }, [visibleOrders]);
 
   function handleStatusChange(id, status) {
     updateOrderStatus(id, status).then((ok) => {
       showToast(ok ? "تم تحديث حالة الطلب" : "حدث خطأ أثناء التحديث");
     });
   }
+
+  const filterBar = (
+    <div className="order-filters">
+      <button
+        className={`ofilter ${filter === "all" ? "active" : ""}`}
+        onClick={() => setFilter("all")}
+      >
+        الكل <span className="cnt">{counts.all}</span>
+      </button>
+      {Object.entries(STATUS_LABELS).map(([val, label]) => (
+        <button
+          key={val}
+          className={`ofilter ${filter === val ? "active" : ""}`}
+          style={{ "--c": STATUS_COLORS[val] }}
+          onClick={() => setFilter(val)}
+        >
+          {label} <span className="cnt">{counts[val]}</span>
+        </button>
+      ))}
+    </div>
+  );
 
   const tabs = (
     <div className="admin-tabs">
@@ -106,9 +165,23 @@ export default function AdminOrdersPage() {
   return (
     <div className="admin-wrap">
       {tabs}
-      <div className="section-head" style={{ margin: "0 0 20px", padding: 0 }}>
+      <div className="section-head" style={{ margin: "0 0 16px", padding: 0 }}>
         <h2>طلبات الشراء ({orders.length})</h2>
       </div>
+
+      {filterBar}
+
+      <div className="order-summary">
+        {visibleOrders.length === 0
+          ? "مفيش طلبات في الحالة دي"
+          : `${visibleOrders.length} طلب · إجمالي ${visibleTotal.toLocaleString("ar-EG")} ج.م${
+              filter === "all" ? " (بدون الملغي والمسترجع)" : ""
+            }`}
+      </div>
+
+      {visibleOrders.length === 0 && (
+        <div className="empty-state">مفيش طلبات في الحالة دي.</div>
+      )}
 
       {groups.map(([key, dayOrders]) => {
         const dayTotal = dayOrders.reduce((s, o) => s + Number(o.total || 0), 0);
