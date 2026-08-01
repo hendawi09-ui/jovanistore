@@ -141,7 +141,7 @@ body::before{
 .card-body .desc{font-size:12.5px; color:var(--muted);}
 .card-foot{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:14px;}
 .price{font-family:'Cairo'; font-weight:800; font-size:17px;}
-.add-btn{background:transparent; color:var(--ink); border:1.5px solid var(--ink); padding:8px 15px; border-radius:999px; font-weight:700; font-size:13px; transition:background .2s, color .2s, transform .15s;}
+.add-btn{background:transparent; color:var(--ink); border:1.5px solid var(--ink); padding:6px 12px; border-radius:999px; font-weight:700; font-size:12px; transition:background .2s, color .2s, transform .15s;}
 .add-btn-link{display:inline-block;}
 .add-btn:hover{background:var(--ink); color:#fff;}
 .add-btn:active{transform:scale(.94);}
