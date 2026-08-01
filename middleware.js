@@ -58,9 +58,13 @@ function maintenancePage() {
 // المسارات اللي لازم تفضل عمومية حتى وهي تحت /api
 function isPublicApi(pathname, method) {
   if (pathname.startsWith("/api/products") && method === "GET") return true;
+  // تسجيل زيارة منتج — بينادى من صفحة المنتج نفسها للزوار العاديين
+  if (/^\/api\/products\/[^/]+\/view$/.test(pathname) && method === "POST") return true;
   if (pathname.startsWith("/api/hero") && method === "GET") return true;
   if (pathname.startsWith("/api/coupons/validate")) return true;
   if (pathname.startsWith("/api/orders/mine") && method === "POST") return true;
+  // متابعة الطلب برقم الموبايل — محمي جوه المسار نفسه بالرقم
+  if (pathname === "/api/orders/by-phone" && method === "POST") return true;
   if (/^\/api\/orders\/[^/]+\/cancel$/.test(pathname) && method === "POST") return true;
   if (pathname === "/api/orders" && method === "POST") return true;
   return false;
