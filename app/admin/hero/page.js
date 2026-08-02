@@ -9,6 +9,7 @@ export default function AdminHeroPage() {
   const [enabled, setEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [uploadingId, setUploadingId] = useState(null);
+  const [uploadingMobileId, setUploadingMobileId] = useState(null);
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/hero");
@@ -67,6 +68,7 @@ export default function AdminHeroPage() {
         ctaLink: s.ctaLink,
         badge: s.badge,
         image: s.image,
+        imageMobile: s.imageMobile,
       }),
     });
     showToast(res.ok ? "تم الحفظ" : "حدث خطأ أثناء الحفظ");
@@ -142,6 +144,43 @@ export default function AdminHeroPage() {
       showToast("فشل رفع الصورة");
     }
     setUploadingId(null);
+  }
+
+  // صورة موبايل مخصوصة (اختياري) — لو مفيش صورة موبايل، السلايدر بيستخدم صورة الديسكتوب تلقائيًا
+  async function handleImageChangeMobile(s, file) {
+    setUploadingMobileId(s.id);
+    const small = await compressImage(file);
+    const saved = compressionLabel(file.size, small.size);
+    const fd = new FormData();
+    fd.append("file", small);
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        updateLocal(s.id, { imageMobile: data.url });
+        await fetch(`/api/hero/${s.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageMobile: data.url }),
+        });
+        showToast(saved ? `تم تحديث صورة الموبايل · ${saved}` : "تم تحديث صورة الموبايل");
+      } else {
+        showToast(data.error || "فشل رفع الصورة");
+      }
+    } catch {
+      showToast("فشل رفع الصورة");
+    }
+    setUploadingMobileId(null);
+  }
+
+  async function handleRemoveMobileImage(s) {
+    updateLocal(s.id, { imageMobile: null });
+    const res = await fetch(`/api/hero/${s.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageMobile: null }),
+    });
+    showToast(res.ok ? "هترجع صورة الديسكتوب تظهر في الموبايل" : "حدث خطأ");
   }
 
   const tabs = (
@@ -223,6 +262,34 @@ export default function AdminHeroPage() {
                 </label>
               </div>
               <div className="hcard-body">
+                <div className="hcard-mobile-row">
+                  {s.imageMobile ? (
+                    <div className="hcard-mobile-thumb"><img src={s.imageMobile} alt="" /></div>
+                  ) : null}
+                  <div className="hcard-mobile-info">
+                    <span className="field-label">صورة الموبايل (اختياري)</span>
+                    {!s.imageMobile && (
+                      <p className="hcard-mobile-hint">مفيش صورة موبايل مخصوصة — هتظهر صورة الديسكتوب بدالها.</p>
+                    )}
+                  </div>
+                  <label className="upload-btn-static">
+                    {uploadingMobileId === s.id ? "جارِ الرفع..." : (s.imageMobile ? "تغيير" : "رفع صورة")}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        if (e.target.files[0]) handleImageChangeMobile(s, e.target.files[0]);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  {s.imageMobile && (
+                    <button type="button" className="mobile-remove-btn" onClick={() => handleRemoveMobileImage(s)}>
+                      حذف
+                    </button>
+                  )}
+                </div>
                 <div>
                   <span className="field-label">العنوان</span>
                   <input className="field-input" value={s.title}

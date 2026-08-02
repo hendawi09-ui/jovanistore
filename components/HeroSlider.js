@@ -248,19 +248,22 @@ export default function HeroSlider() {
           onTouchEnd={onTouchEnd}
           onTouchCancel={onTouchEnd}
         >
-          {mobileSlides.map((s, i) => (
-            <div key={`${s.id}-${i}`} className="m-slide" aria-hidden={s._clone || undefined}>
-              {s.image ? <img src={s.image} alt={s.title} /> : <div className="m-slide-empty" />}
-              {s.badge && <span className="m-badge">{s.badge}</span>}
-              <div className="m-slide-body">
-                <h3>{s.title}</h3>
-                <p>{s.description}</p>
-                <Link href={s.ctaLink || "#"} className="m-cta" tabIndex={s._clone ? -1 : undefined}>
-                  {s.ctaLabel || "اكتشف المزيد"} ←
-                </Link>
+          {mobileSlides.map((s, i) => {
+            const mImg = s.imageMobile || s.image; // لو مفيش صورة موبايل مخصوصة، بتتظهر صورة الديسكتوب بدالها
+            return (
+              <div key={`${s.id}-${i}`} className="m-slide" aria-hidden={s._clone || undefined}>
+                {mImg ? <img src={mImg} alt={s.title} /> : <div className="m-slide-empty" />}
+                {s.badge && <span className="m-badge">{s.badge}</span>}
+                <div className="m-slide-body">
+                  <h3>{s.title}</h3>
+                  <p>{s.description}</p>
+                  <Link href={s.ctaLink || "#"} className="m-cta" tabIndex={s._clone ? -1 : undefined}>
+                    {s.ctaLabel || "اكتشف المزيد"} ←
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         {slides.length > 1 && (
           <div className="m-dots">

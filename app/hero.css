@@ -158,6 +158,24 @@
 .hcard-actions button{flex:1; padding:9px; border-radius:10px; font-weight:700; font-size:12.5px;}
 .hcard-actions .save-btn{background:var(--red); color:#fff;}
 
+.hcard-mobile-row{
+  display:flex; align-items:center; gap:10px;
+  background:var(--paper-dim); border-radius:12px; padding:9px 10px;
+}
+.hcard-mobile-thumb{width:44px; height:44px; border-radius:8px; overflow:hidden; flex-shrink:0; background:#fff; border:1px solid var(--line);}
+.hcard-mobile-thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+.hcard-mobile-info{flex:1; min-width:0;}
+.hcard-mobile-info .field-label{margin-bottom:1px;}
+.hcard-mobile-hint{font-size:11.5px; color:var(--muted); line-height:1.6;}
+.upload-btn-static{
+  background:var(--ink); color:#fff; font-size:11.5px; font-weight:700;
+  padding:7px 12px; border-radius:8px; cursor:pointer; white-space:nowrap; flex-shrink:0;
+}
+.mobile-remove-btn{
+  background:#fff; border:1.5px solid var(--line); color:var(--muted);
+  font-size:11px; font-weight:700; padding:7px 10px; border-radius:8px; flex-shrink:0;
+}
+
 /* ============================================================
    زرار طباعة بوليصة الشحن — صفحة الطلبات في لوحة التحكم
    ============================================================ */

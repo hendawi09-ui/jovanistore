@@ -5,6 +5,8 @@ function toClient(row) {
   return {
     id: row.id,
     image: row.image_url || null,
+    // لو مفيش صورة موبايل مرفوعة، بترجع null وبنستخدم صورة الديسكتوب بدالها في الواجهة
+    imageMobile: row.image_mobile_url || null,
     title: row.title || "",
     description: row.description || "",
     ctaLabel: row.cta_label || "",
@@ -68,6 +70,7 @@ export async function POST(req) {
     .insert([
       {
         image_url: body.image || null,
+        image_mobile_url: body.imageMobile || null,
         title: body.title || "",
         description: body.description || "",
         cta_label: body.ctaLabel || "",
