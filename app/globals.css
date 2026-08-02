@@ -350,6 +350,8 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .admin-tabs{display:flex; gap:8px; margin-bottom:28px; border-bottom:1px solid var(--line); padding-bottom:0;}
 .admin-tab{padding:10px 18px; font-weight:700; font-size:14px; color:var(--muted); text-decoration:none; border-bottom:2px solid transparent; cursor:pointer;}
 .admin-tab.active{color:var(--ink); border-color:var(--red);}
+.admin-logout{margin-inline-start:auto; align-self:center; padding:8px 16px; font-weight:700; font-size:13px; color:var(--muted); border:1px solid var(--line); border-radius:8px; transition:color .2s, border-color .2s;}
+.admin-logout:hover{color:var(--red); border-color:var(--red);}
 
 .order-day-group{margin-bottom:36px;}
 .order-day-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--line);}
@@ -702,6 +704,7 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
     font-size:13px;
     scroll-snap-align:start;
   }
+  .admin-logout{flex:0 0 auto; white-space:nowrap;}
   .admin-tabs{scroll-snap-type:x proximity;}
 }
 

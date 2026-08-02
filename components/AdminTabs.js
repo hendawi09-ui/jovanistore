@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 // تبويبات لوحة التحكم في مكان واحد — أي تعديل هنا بيظهر في كل الصفحات.
 // العدّادات بتعد اللي محتاج منك تصرّف: طلبات لسه قيد الانتظار، وطلبات استرجاع جديدة.
@@ -14,7 +15,13 @@ const TABS = [
 ];
 
 export default function AdminTabs({ active }) {
+  const router = useRouter();
   const [counts, setCounts] = useState({ orders: 0, returns: 0 });
+
+  async function handleLogout() {
+    await fetch("/api/admin/logout", { method: "POST" });
+    router.push("/admin/login");
+  }
 
   useEffect(() => {
     let alive = true;
@@ -60,6 +67,9 @@ export default function AdminTabs({ active }) {
           </a>
         );
       })}
+      <button type="button" className="admin-logout" onClick={handleLogout}>
+        تسجيل الخروج
+      </button>
     </div>
   );
 }

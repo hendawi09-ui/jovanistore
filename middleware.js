@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-
-const REALM = "Jovani Admin";
-const ADMIN_USER = "admin";
+import { verifySessionToken, ADMIN_SESSION_COOKIE } from "@/lib/adminSession";
 
 // وضع الصيانة — بيتحكم فيه متغيّر MAINTENANCE_MODE من Vercel
 // القيمة "true" = الموقع مقفول على الزوار. أي قيمة تانية أو مش موجود = الموقع شغّال عادي.
@@ -76,6 +74,7 @@ function isPublicApi(pathname, method) {
 
 // المسارات اللي محتاجة كلمة سر الأدمن
 function needsAdminAuth(pathname, method) {
+  if (pathname === "/admin/login") return false; // صفحة الدخول نفسها لازم تفضل مفتوحة
   if (pathname.startsWith("/admin")) return true;
   const guarded =
     pathname.startsWith("/api/products") ||
@@ -87,7 +86,7 @@ function needsAdminAuth(pathname, method) {
   return guarded && !isPublicApi(pathname, method);
 }
 
-export function middleware(req) {
+export async function middleware(req) {
   const { pathname, searchParams, origin } = req.nextUrl;
 
   // ============ 1) بوابة الصيانة (للزوار العاديين فقط) ============
@@ -113,41 +112,28 @@ export function middleware(req) {
     }
   }
 
-  // ============ 2) حماية لوحة التحكم (زي ما كانت بالظبط) ============
+  // ============ 2) حماية لوحة التحكم بجلسة تسجيل دخول حقيقية ============
   if (!needsAdminAuth(pathname, req.method)) {
     return NextResponse.next();
   }
 
-  const auth = req.headers.get("authorization");
-  if (auth) {
-    const [scheme, encoded] = auth.split(" ");
-    if (scheme === "Basic" && encoded) {
-      try {
-        const decoded = atob(encoded);
-        const idx = decoded.indexOf(":");
-        const user = decoded.slice(0, idx);
-        const pass = decoded.slice(idx + 1);
+  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD;
+  const sessionCookie = req.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  const valid = secret ? await verifySessionToken(sessionCookie, secret) : false;
 
-        // كيبورد الموبايل بيكبّر أول حرف تلقائيًا وأحيانًا بيضيف مسافة،
-        // فبنتجاهل حالة الحروف والمسافات الزيادة في اسم المستخدم،
-        // وبنقبل كلمة السر بمسافات زيادة كمان (مع الأصلية بالظبط).
-        const userOk = user.trim().toLowerCase() === ADMIN_USER.toLowerCase();
-        const expected = process.env.ADMIN_PASSWORD;
-        const passOk = pass === expected || pass.trim() === expected;
-
-        if (userOk && passOk) {
-          return NextResponse.next();
-        }
-      } catch {
-        // fall through to 401 below
-      }
-    }
+  if (valid) {
+    return NextResponse.next();
   }
 
-  return new NextResponse("Authentication required", {
-    status: 401,
-    headers: { "WWW-Authenticate": `Basic realm="${REALM}"` },
-  });
+  // صفحة أدمن عادية → نوجّهه لصفحة تسجيل الدخول
+  if (pathname.startsWith("/admin")) {
+    const loginUrl = new URL("/admin/login", origin);
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // طلب API محمي (بينادى من كود لوحة التحكم نفسها) → رد برسالة واضحة بدل صفحة فاضية
+  return NextResponse.json({ error: "الجلسة انتهت، سجّل دخولك تاني" }, { status: 401 });
 }
 
 export const config = {
