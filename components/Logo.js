@@ -1,32 +1,21 @@
 import Image from "next/image";
 
+// نسبة أبعاد اللوجو الجديد (عرض/ارتفاع) — عشان العرض يتحسب تلقائيًا وميتشوهش
+const LOGO_RATIO = 1829 / 1487;
+
 export default function Logo({ size = "normal" }) {
   const compact = size === "compact";
-  const badgeSize = compact ? 52 : 88; // قطر الإطار الدائري
+  const h = compact ? 34 : 64; // ارتفاع اللوجو
+  const w = Math.round(h * LOGO_RATIO);
 
   return (
-    <span
-      style={{
-        width: badgeSize,
-        height: badgeSize,
-        borderRadius: "50%",
-        background: "#fff",
-        border: "2px solid #0D0D0D",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-        flexShrink: 0,
-      }}
-    >
-      <Image
-        src="/logo.png"
-        alt="JOVANI Casual Wear"
-        width={1040}
-        height={1008}
-        priority
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-      />
-    </span>
+    <Image
+      src="/logo.png"
+      alt="JOVANI store"
+      width={w}
+      height={h}
+      priority
+      style={{ width: w, height: h, objectFit: "contain", flexShrink: 0 }}
+    />
   );
 }
