@@ -14,7 +14,13 @@ function HomeContent() {
 
   useEffect(() => {
     const c = searchParams.get("cat");
-    if (c) setActiveCat(c);
+    if (c) {
+      setActiveCat(c);
+      // النزول التلقائي لقسم المنتجات لو المستخدم جاي من رابط فيه قسم محدد (زي زرار السلايدر)
+      setTimeout(() => {
+        document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
     const q = searchParams.get("q");
     if (q) setQuery(q);
   }, [searchParams]);

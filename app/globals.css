@@ -765,26 +765,26 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
     position:fixed; bottom:0; left:0; right:0; z-index:85;
     background:rgba(252,251,255,.97); backdrop-filter:blur(10px);
     border-top:1px solid var(--line);
-    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+    padding:5px 6px calc(5px + env(safe-area-inset-bottom));
     box-shadow:0 -4px 20px rgba(20,18,31,.07);
   }
   .mnav-item{
-    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
-    padding:6px 4px; color:var(--muted); font-size:11px; font-weight:700;
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    padding:4px 4px; color:var(--muted); font-size:10px; font-weight:700;
     transition:color .2s; min-width:0;
   }
-  .mnav-item svg{width:21px; height:21px; flex-shrink:0;}
+  .mnav-item svg{width:19px; height:19px; flex-shrink:0;}
   .mnav-item span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%;}
   .mnav-item.active{color:var(--red);}
   .mnav-item:active{transform:scale(.94);}
 
   /* مساحة إضافية تحت الفوتر عشان الشريط ما يغطيش على آخر المحتوى */
-  footer{padding-bottom:calc(28px + 62px + env(safe-area-inset-bottom));}
+  footer{padding-bottom:calc(28px + 52px + env(safe-area-inset-bottom));}
   /* رفع الأزرار العائمة والتنبيهات فوق الشريط */
-  .float-static{bottom:calc(22px + 62px + env(safe-area-inset-bottom));}
-  .toast{bottom:calc(24px + 62px + env(safe-area-inset-bottom));}
+  .float-static{bottom:calc(22px + 52px + env(safe-area-inset-bottom));}
+  .toast{bottom:calc(24px + 52px + env(safe-area-inset-bottom));}
   /* أسفل درج السلة/المفضلة — يحمي زرار "إتمام الطلب" من إن الشريط يغطي عليه */
-  .drawer-foot{padding-bottom:calc(20px + 66px + env(safe-area-inset-bottom));}
+  .drawer-foot{padding-bottom:calc(20px + 56px + env(safe-area-inset-bottom));}
 }
 
 /* ===== زرار كشف كلمة السر ===== */
