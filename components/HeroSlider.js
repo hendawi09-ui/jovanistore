@@ -48,63 +48,129 @@ export default function HeroSlider() {
   }
 
   // ---------- الموبايل: سلايدر بعرض كامل قابل للمس + نقاط ----------
+  // السلايدر الدائري على الموبايل:
+  // بنحط نسخة من آخر سلايدة في الأول، ونسخة من أول سلايدة في الآخر.
+  // أول ما توصل لنسخة، بننقل المشهد فورًا (من غير حركة) للسلايدة الحقيقية —
+  // فالإحساس إنه بيلف من غير نهاية.
   const trackRef = useRef(null);
   const [mIdx, setMIdx] = useState(0);
   const mScrollTimer = useRef(null);
   const mAutoRef = useRef(null);
   const touchingRef = useRef(false);
+  const readyRef = useRef(false);
+  // أول ما المستخدم يقلّب بصباعه، التقليب التلقائي بيقف —
+  // ويرجع لوحده بعد 6 ثواني من آخر لمسة.
+  const userTookOverRef = useRef(false);
+  const resumeTimerRef = useRef(null);
+  const RESUME_AFTER_MS = 6000;
 
-  const scrollToMobile = useCallback((i) => {
+  const loop = slides.length > 1;
+
+  const slideWidth = () => trackRef.current?.getBoundingClientRect().width || 0;
+
+  // نبدأ عند السلايدة الحقيقية الأولى (بعد النسخة اللي في الأول)
+  useEffect(() => {
     const track = trackRef.current;
-    if (!track) return;
-    const w = track.getBoundingClientRect().width;
-    track.scrollTo({ left: i * w, behavior: "smooth" });
-  }, []);
+    if (!track || !loop) {
+      readyRef.current = true;
+      return;
+    }
+    readyRef.current = false;
+    const t = setTimeout(() => {
+      track.scrollTo({ left: slideWidth(), behavior: "auto" });
+      readyRef.current = true;
+    }, 50);
+    return () => clearTimeout(t);
+  }, [loop, slides.length]);
 
-  // تقليب تلقائي على الموبايل كل 3 ثواني — بيقف وانت ماسك بصباعك
   const restartMobileTimer = useCallback(() => {
     clearInterval(mAutoRef.current);
+    if (userTookOverRef.current) return; // المستخدم قلّب بإيده → مفيش تقليب تلقائي تاني
     if (slides.length > 1) {
       mAutoRef.current = setInterval(() => {
         if (touchingRef.current) return;
         const track = trackRef.current;
         if (!track) return;
         const w = track.getBoundingClientRect().width;
+        if (!w) return;
         const cur = Math.round(track.scrollLeft / w);
-        const next = (cur + 1) % slides.length;
-        track.scrollTo({ left: next * w, behavior: "smooth" });
+        track.scrollTo({ left: (cur + 1) * w, behavior: "smooth" });
       }, 3000);
     }
   }, [slides.length]);
 
   useEffect(() => {
     restartMobileTimer();
-    return () => clearInterval(mAutoRef.current);
+    return () => {
+      clearInterval(mAutoRef.current);
+      clearTimeout(resumeTimerRef.current);
+    };
   }, [restartMobileTimer]);
 
   function handleMobileScroll() {
     clearTimeout(mScrollTimer.current);
     mScrollTimer.current = setTimeout(() => {
       const track = trackRef.current;
-      if (!track) return;
+      if (!track || !readyRef.current) return;
       const w = track.getBoundingClientRect().width;
-      setMIdx(Math.round(track.scrollLeft / w));
-    }, 80);
+      if (!w) return;
+      const raw = Math.round(track.scrollLeft / w);
+
+      if (!loop) {
+        setMIdx(raw);
+        return;
+      }
+
+      // وصلنا لنسخة أول سلايدة (في الآخر) → ننقل للأصلية في الأول
+      if (raw >= slides.length + 1) {
+        track.scrollTo({ left: w, behavior: "auto" });
+        setMIdx(0);
+        return;
+      }
+      // وصلنا لنسخة آخر سلايدة (في الأول) → ننقل للأصلية في الآخر
+      if (raw <= 0) {
+        track.scrollTo({ left: slides.length * w, behavior: "auto" });
+        setMIdx(slides.length - 1);
+        return;
+      }
+      setMIdx(raw - 1);
+    }, 90);
   }
 
-  // وانت بتسحب بصباعك، التقليب التلقائي بيقف عشان مايقاطعكش
   function onTouchStart() {
     touchingRef.current = true;
+    userTookOverRef.current = true;
+    clearInterval(mAutoRef.current);   // يقف من أول لمسة
+    clearTimeout(resumeTimerRef.current); // ولو كان مستني يرجع، نلغي الانتظار
   }
+
   function onTouchEnd() {
     touchingRef.current = false;
+    // بعد 6 ثواني من آخر لمسة، التقليب التلقائي يرجع لوحده
+    clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => {
+      userTookOverRef.current = false;
+      restartMobileTimer();
+    }, RESUME_AFTER_MS);
+  }
+
+  // النقاط: بتاخد رقم السلايدة الحقيقية وتحوّله لمكانها في المسار
+  function goMobile(i) {
+    const track = trackRef.current;
+    if (!track) return;
+    const w = track.getBoundingClientRect().width;
+    track.scrollTo({ left: (loop ? i + 1 : i) * w, behavior: "smooth" });
     restartMobileTimer();
   }
 
-  function goMobile(i) {
-    scrollToMobile(i);
-    restartMobileTimer();
-  }
+  // المسار الفعلي: [نسخة الأخيرة] + السلايدات الحقيقية + [نسخة الأولى]
+  const mobileSlides = loop
+    ? [
+        { ...slides[slides.length - 1], _clone: true },
+        ...slides,
+        { ...slides[0], _clone: true },
+      ]
+    : slides;
 
   if (!loaded) return null;
 
@@ -182,14 +248,14 @@ export default function HeroSlider() {
           onTouchEnd={onTouchEnd}
           onTouchCancel={onTouchEnd}
         >
-          {slides.map((s) => (
-            <div key={s.id} className="m-slide">
+          {mobileSlides.map((s, i) => (
+            <div key={`${s.id}-${i}`} className="m-slide" aria-hidden={s._clone || undefined}>
               {s.image ? <img src={s.image} alt={s.title} /> : <div className="m-slide-empty" />}
               {s.badge && <span className="m-badge">{s.badge}</span>}
               <div className="m-slide-body">
                 <h3>{s.title}</h3>
                 <p>{s.description}</p>
-                <Link href={s.ctaLink || "#"} className="m-cta">
+                <Link href={s.ctaLink || "#"} className="m-cta" tabIndex={s._clone ? -1 : undefined}>
                   {s.ctaLabel || "اكتشف المزيد"} ←
                 </Link>
               </div>
