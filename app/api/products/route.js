@@ -25,6 +25,7 @@ function toClient(row) {
     colorName: row.color_name || null, // اسم لون هذا المنتج
     stock: row.stock && typeof row.stock === "object" ? row.stock : null,
     views: typeof row.views === "number" ? row.views : 0,
+    createdAt: row.created_at || null,
   };
 }
 

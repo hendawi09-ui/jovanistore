@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useStore } from "@/lib/StoreContext";
-import { cats, catLabel, parseSize, matchesQuery } from "@/lib/products";
+import { cats, catLabel, parseSize, matchesQuery, hasDiscount } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import HeroSlider from "@/components/HeroSlider";
 
@@ -28,7 +29,11 @@ function HomeContent() {
   const q = query.trim();
   const list = products.filter((p) => {
     if (p.published === false) return false;
-    if (activeCat !== "all" && p.cat !== activeCat) return false;
+    if (activeCat === "sale") {
+      if (!hasDiscount(p)) return false;
+    } else if (activeCat !== "all" && p.cat !== activeCat) {
+      return false;
+    }
     if (!q) return true;
     const haystack = [
       p.name,
@@ -43,9 +48,32 @@ function HomeContent() {
     return matchesQuery(haystack, q);
   });
 
+  // أحدث 8 منتجات (حسب تاريخ الإضافة) — بتظهر بس في العرض الافتراضي من غير فلترة أو بحث
+  const newArrivals = !q && activeCat === "all"
+    ? [...products]
+        .filter((p) => p.published !== false)
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        .slice(0, 8)
+    : [];
+
   return (
     <>
       <HeroSlider />
+
+      <div className="quick-cats">
+        <Link href="/?cat=men" className="quick-cat qc-men">
+          <span className="qc-emoji">👔</span>
+          <span className="qc-label">رجالي</span>
+        </Link>
+        <Link href="/?cat=women" className="quick-cat qc-women">
+          <span className="qc-emoji">👗</span>
+          <span className="qc-label">نسائي</span>
+        </Link>
+        <Link href="/?cat=sale" className="quick-cat qc-sale">
+          <span className="qc-emoji">🔥</span>
+          <span className="qc-label">عروض وتخفيضات</span>
+        </Link>
+      </div>
 
       <div className="search-wrap" id="search">
         <div className="search-box">
@@ -66,6 +94,21 @@ function HomeContent() {
           )}
         </div>
       </div>
+
+      {newArrivals.length > 0 && (
+        <>
+          <div className="section-head" style={{ marginTop: 8 }}>
+            <h2>✨ وصل حديثًا</h2>
+          </div>
+          <div className="row-scroll">
+            {newArrivals.map((p) => (
+              <div className="row-scroll-item" key={p.id}>
+                <ProductCard p={p} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="cats">
         {cats.map((c) => (
@@ -102,6 +145,24 @@ function HomeContent() {
         ) : (
           list.map((p) => <ProductCard key={p.id} p={p} />)
         )}
+      </div>
+
+      <div className="why-us">
+        <div className="why-card">
+          <span className="why-icon">🚚</span>
+          <h3>شحن سريع</h3>
+          <p>لجميع محافظات مصر خلال أيام قليلة</p>
+        </div>
+        <div className="why-card">
+          <span className="why-icon">↩️</span>
+          <h3>إرجاع مجاني</h3>
+          <p>خلال 14 يوم من غير أي تعقيد</p>
+        </div>
+        <div className="why-card">
+          <span className="why-icon">🔒</span>
+          <h3>دفع آمن 100%</h3>
+          <p>بياناتك محمية طول الوقت</p>
+        </div>
       </div>
     </>
   );

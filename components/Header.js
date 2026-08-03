@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { handleSearchNav } from "@/lib/searchFocus";
 import Logo from "./Logo";
+import SideMenu from "./SideMenu";
 
 export default function Header({ onOpenCart, onOpenFavorites }) {
   const { cartCount, favCount, account } = useStore();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [bump, setBump] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -29,6 +31,13 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
     <>
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="nav-inner">
+          <button
+            className="hamburger-btn"
+            onClick={() => setMenuOpen(true)}
+            aria-label="فتح المنيو"
+          >
+            <span></span><span></span><span></span>
+          </button>
           <Link href="/" className="logo">
             <Logo size="compact" />
           </Link>
@@ -73,6 +82,7 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
           <span aria-hidden="true">🔒 دفع <strong>آمن 100%</strong></span>
         </div>
       </div>
+      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </>
   );
 }

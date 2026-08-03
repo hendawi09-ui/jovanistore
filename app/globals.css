@@ -39,6 +39,40 @@ body::before{
 .nav{position:sticky; top:0; z-index:50; background:rgba(252,251,255,0.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); transition:box-shadow .25s;}
 .nav.scrolled{box-shadow:0 6px 24px rgba(20,18,31,.08);}
 .nav-inner{max-width:1180px; margin:0 auto; padding:6px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px;}
+
+/* زرار الهامبرجر — ظاهر بس في الموبايل (نفس نقطة اختفاء nav-links) */
+.hamburger-btn{display:none; flex-direction:column; justify-content:center; gap:4px; width:34px; height:34px; padding:0; flex-shrink:0;}
+.hamburger-btn span{display:block; width:20px; height:2px; background:var(--ink); border-radius:2px; transition:transform .2s, opacity .2s;}
+
+/* المنيو الجانبي */
+.side-menu-overlay{
+  position:fixed; inset:0; background:rgba(13,13,13,.45); z-index:200;
+  opacity:0; visibility:hidden; transition:opacity .25s;
+  pointer-events:none;
+}
+.side-menu-overlay.open{opacity:1; visibility:visible; pointer-events:auto;}
+.side-menu{
+  position:fixed; top:0; bottom:0; right:0; width:78%; max-width:320px; z-index:201;
+  background:var(--paper); box-shadow:-8px 0 30px rgba(20,18,31,.15);
+  display:flex; flex-direction:column;
+  transform:translateX(100%); transition:transform .3s ease;
+  pointer-events:none;
+}
+.side-menu.open{transform:translateX(0); pointer-events:auto;}
+.side-menu-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 20px 16px; border-bottom:1px solid var(--line);
+  font-family:'Cairo'; font-weight:800; font-size:16px;
+}
+.side-menu-close{width:32px; height:32px; border-radius:50%; background:var(--paper-dim); font-size:15px;}
+.side-menu-links{display:flex; flex-direction:column; padding:10px 8px;}
+.side-menu-links a{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 12px; border-radius:10px; font-weight:700; font-size:14.5px; color:var(--ink-soft);
+  transition:background .2s, color .2s;
+}
+.side-menu-links a:hover, .side-menu-links a:active{background:var(--paper-dim); color:var(--red);}
+.side-menu-icon{font-size:17px; width:22px; text-align:center;}
 .logo{font-family:'Cairo'; font-weight:900; font-size:21px; display:flex; align-items:center; gap:8px; white-space:nowrap; cursor:pointer;}
 .logo-dot{width:14px; height:14px; border-radius:50%; background:conic-gradient(var(--ink),var(--red),var(--ink));}
 .nav-links{display:flex; gap:28px; font-weight:600; font-size:14.5px;}
@@ -110,6 +144,34 @@ body::before{
 .hero-art svg{width:100%; height:100%;}
 .arc-path{fill:none; stroke-linecap:round; stroke-dasharray:1000; stroke-dashoffset:1000; animation:draw 1.6s cubic-bezier(.16,.84,.44,1) forwards;}
 @keyframes draw{to{stroke-dashoffset:0;}}
+
+/* بطاقات التصنيفات السريعة تحت السلايدر */
+.quick-cats{max-width:1400px; margin:22px auto 0; padding:0 16px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+.quick-cat{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+  padding:22px 12px; border-radius:16px; font-family:'Cairo'; font-weight:800; font-size:15px;
+  color:#fff; transition:transform .2s, box-shadow .2s;
+}
+.quick-cat:hover{transform:translateY(-3px); box-shadow:0 10px 22px rgba(20,18,31,.12);}
+.qc-emoji{font-size:26px;}
+.qc-men{background:var(--ink);}
+.qc-women{background:var(--red);}
+.qc-sale{background:linear-gradient(135deg, var(--red), var(--red-dark));}
+
+/* صف "وصل حديثًا" — تمرير أفقي */
+.row-scroll{
+  max-width:1400px; margin:0 auto; padding:0 16px 8px; display:flex; gap:18px;
+  overflow-x:auto; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+}
+.row-scroll::-webkit-scrollbar{display:none;}
+.row-scroll-item{flex:0 0 230px; scroll-snap-align:start;}
+
+/* قسم "ليه تشتري من عندنا" */
+.why-us{max-width:1400px; margin:20px auto 60px; padding:0 16px; display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+.why-card{background:var(--paper-dim); border-radius:16px; padding:28px 20px; text-align:center;}
+.why-icon{font-size:30px; display:block; margin-bottom:10px;}
+.why-card h3{font-family:'Cairo'; font-size:16px; margin-bottom:6px;}
+.why-card p{font-size:13px; color:var(--muted);}
 
 /* category tabs */
 .cats{max-width:1400px; margin:10px auto 0; padding:0 16px; display:flex; gap:10px; flex-wrap:wrap;}
@@ -389,10 +451,16 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .hero-art{height:220px; order:-1;}
   .hero h1{font-size:40px;}
   .nav-links{display:none;}
+  .hamburger-btn{display:flex;}
   .grid{grid-template-columns:repeat(2,1fr);}
   .footer-inner{grid-template-columns:1fr; gap:28px;}
   .pd, .checkout-wrap{grid-template-columns:1fr;}
   .admin-grid{grid-template-columns:1fr;}
+  .quick-cats{gap:10px;}
+  .quick-cat{padding:16px 8px; font-size:13px;}
+  .qc-emoji{font-size:22px;}
+  .row-scroll-item{flex-basis:160px;}
+  .why-us{grid-template-columns:1fr; gap:12px;}
 }
 @media (prefers-reduced-motion: reduce){
   .arc-path{animation:none; stroke-dashoffset:0;}
