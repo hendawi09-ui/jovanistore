@@ -189,8 +189,6 @@ export default function HeroSlider() {
 
   return (
     <div className="hero-slider-wrap">
-      {welcome}
-
       {/* ===== الديسك توب ===== */}
       <div className="hero-desktop">
         <div className="feature-panel">

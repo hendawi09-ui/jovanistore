@@ -5,6 +5,7 @@ import { useStore } from "@/lib/StoreContext";
 import { cats, catLabel, parseSize, matchesQuery, hasDiscount } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import HeroSlider from "@/components/HeroSlider";
+import NewArrivalsRow from "@/components/NewArrivalsRow";
 
 function HomeContent() {
   const { products } = useStore();
@@ -84,13 +85,7 @@ function HomeContent() {
           <div className="section-head" style={{ marginTop: 8 }}>
             <h2>✨ وصل حديثًا</h2>
           </div>
-          <div className="row-scroll">
-            {newArrivals.map((p) => (
-              <div className="row-scroll-item" key={p.id}>
-                <ProductCard p={p} />
-              </div>
-            ))}
-          </div>
+          <NewArrivalsRow products={newArrivals} />
         </>
       )}
 

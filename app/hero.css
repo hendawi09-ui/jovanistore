@@ -10,7 +10,7 @@
   -webkit-background-clip:text; background-clip:text; color:transparent;
 }
 
-.hero-slider-wrap{max-width:1300px; margin:0 auto; padding:0 16px 10px;}
+.hero-slider-wrap{max-width:1300px; margin:20px auto 0; padding:0 16px 10px;}
 
 /* ===== الديسك توب: بانر كبير + نقاط ===== */
 .hero-desktop{display:none;}
@@ -75,11 +75,6 @@
 /* ===== الموبايل: سلايدر بعرض كامل قابل للمس + نقاط ===== */
 .hero-mobile{display:block;}
 @media (min-width:769px){ .hero-mobile{display:none;} }
-@media (max-width:768px){
-  /* بعرض كامل يخرج بره هوامش hero-slider-wrap (16px كل جنب) */
-  .hero-mobile{margin:0 -16px;}
-  .m-track{border-radius:0;}
-}
 
 .m-track{
   direction:ltr; display:flex;
@@ -90,7 +85,7 @@
 
 .m-slide{
   scroll-snap-align:center; scroll-snap-stop:always;
-  flex:0 0 100%; width:100%; position:relative; height:360px;
+  flex:0 0 100%; width:100%; position:relative; height:480px;
   display:flex; align-items:flex-end; direction:rtl;
 }
 .m-slide img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
@@ -101,6 +96,12 @@
 .m-slide-body p{font-size:13px; opacity:.9; margin-bottom:14px; max-width:280px;}
 .m-badge{position:absolute; top:16px; left:16px; z-index:2; background:#fff; color:var(--red-dark); font-weight:800; font-size:12px; padding:6px 14px; border-radius:999px;}
 .m-cta{display:inline-flex; align-items:center; gap:6px; font-weight:700; font-size:13.5px; color:var(--ink); background:var(--paper); padding:11px 20px; border-radius:999px;}
+
+/* بعرض كامل يخرج بره هوامش hero-slider-wrap (16px كل جنب)، وحواف قايمة من غير استدارة */
+@media (max-width:768px){
+  .hero-mobile{margin:0 -16px;}
+  .m-track{border-radius:0;}
+}
 
 .m-dots{display:flex; gap:7px; justify-content:center; margin-top:14px;}
 .m-dots button{width:8px; height:8px; border-radius:50%; background:var(--ink); transition:all .25s; border:none;}

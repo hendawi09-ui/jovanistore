@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useStore } from "@/lib/StoreContext";
 
 const links = [
@@ -15,12 +15,30 @@ const links = [
 
 export default function SideMenu({ open, onClose }) {
   const { account } = useStore();
+  const scrollY = useRef(0);
 
-  // نمنع سكرول الصفحة اللي وراه لما المنيو مفتوحة
+  // قفل تمرير الصفحة اللي وراه بنفس طريقة أدراج السلة والمفضلة —
+  // overflow:hidden لوحدها مش كافية على متصفحات الموبايل، فبنستخدم position:fixed
+  // مع حفظ مكان التمرير ورجوعه بعد الإغلاق عشان الصفحة ما تنطّش لفوق.
   useEffect(() => {
+    const body = document.body;
     if (open) {
-      document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = ""; };
+      scrollY.current = window.scrollY;
+      body.style.position = "fixed";
+      body.style.top = `-${scrollY.current}px`;
+      body.style.left = "0";
+      body.style.right = "0";
+      body.style.width = "100%";
+      body.style.overflow = "hidden";
+    } else if (body.style.position === "fixed") {
+      const y = scrollY.current;
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+      body.style.overflow = "";
+      window.scrollTo(0, y);
     }
   }, [open]);
 

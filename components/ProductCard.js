@@ -7,7 +7,7 @@ import { useStore } from "@/lib/StoreContext";
 import { showToast } from "./Toast";
 import QuickAddModal from "./QuickAddModal";
 
-export default function ProductCard({ p }) {
+export default function ProductCard({ p, swipeEnabled = true }) {
   const ref = useRef(null);
   const { addToCart, isFavorite, toggleFavorite } = useStore();
   const images = p.images && p.images.length > 0 ? p.images : [];
@@ -31,17 +31,17 @@ export default function ProductCard({ p }) {
   }
 
   function onTouchStart(e) {
-    if (images.length < 2) return;
+    if (!swipeEnabled || images.length < 2) return;
     touchX.current = e.touches[0].clientX;
     swiped.current = false;
   }
   function onTouchMove(e) {
-    if (touchX.current === null) return;
+    if (!swipeEnabled || touchX.current === null) return;
     const dx = e.touches[0].clientX - touchX.current;
     if (Math.abs(dx) > 10) swiped.current = true;
   }
   function onTouchEnd(e) {
-    if (touchX.current === null) return;
+    if (!swipeEnabled || touchX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchX.current;
     const threshold = 35;
     if (Math.abs(dx) > threshold) {
@@ -66,7 +66,7 @@ export default function ProductCard({ p }) {
       <Link href={`/product/${p.id}`} className="card" ref={ref} onMouseMove={onMove} onMouseLeave={onLeave}>
       <div
         className="card-media"
-        style={{ "--c": `var(${catCssVar[p.cat]})` }}
+        style={{ "--c": `var(${catCssVar[p.cat]})`, touchAction: swipeEnabled ? "pan-y" : "auto" }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}

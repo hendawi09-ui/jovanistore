@@ -13,6 +13,7 @@ export default function ClientShell({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const [panel, setPanel] = useState(null); // null | "cart" | "favorites"
+  const [floatHidden, setFloatHidden] = useState(false);
   const scrollY = useRef(0);
   const pushedState = useRef(false);
 
@@ -46,6 +47,17 @@ export default function ClientShell({ children }) {
 
   const openCart = useCallback(() => openPanel("cart"), [openPanel]);
   const openFavorites = useCallback(() => openPanel("favorites"), [openPanel]);
+
+  // نفس الفتح، لكن بيرجع يفعّل الفقاعة العائمة لو كانت متخفية —
+  // مستخدمة بس من أزرار السلة/المفضلة في الهيدر (مطلوب صراحة)
+  const openCartFromHeader = useCallback(() => {
+    setFloatHidden(false);
+    openCart();
+  }, [openCart]);
+  const openFavoritesFromHeader = useCallback(() => {
+    setFloatHidden(false);
+    openFavorites();
+  }, [openFavorites]);
 
   // القفل من زرار الإغلاق أو الخلفية
   const closePanel = useCallback(() => {
@@ -119,12 +131,17 @@ export default function ClientShell({ children }) {
 
   return (
     <>
-      <Header onOpenCart={openCart} onOpenFavorites={openFavorites} />
+      <Header onOpenCart={openCartFromHeader} onOpenFavorites={openFavoritesFromHeader} />
       <main>{children}</main>
       <Footer />
       <CartDrawer open={panel === "cart"} onClose={closePanel} onCheckout={goToCheckout} />
       <FavoritesDrawer open={panel === "favorites"} onClose={closePanel} />
-      <FloatingActions onOpenCart={openCart} onOpenFavorites={openFavorites} />
+      <FloatingActions
+        onOpenCart={openCart}
+        onOpenFavorites={openFavorites}
+        hidden={floatHidden}
+        onHide={() => setFloatHidden(true)}
+      />
       <MobileNav />
       <Toast />
     </>

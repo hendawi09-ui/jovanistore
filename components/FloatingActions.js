@@ -6,7 +6,7 @@ const SIZE = 44;        // قطر زرار السلة والمفضلة
 const CLOSE_SIZE = 30;  // قطر زرار الإخفاء
 const GAP = 8;          // المسافة بين السلة والمفضلة
 const CLOSE_GAP = 3;    // زرار الإخفاء أقرب للمفضلة
-const MARGIN = 14;      // أقل مسافة من حافة الشاشة
+const MARGIN = 6;       // أقل مسافة من حافة الشاشة — قريب جدًا زي تطبيقات المحادثة
 const BOTTOM_NAV = 66;  // ارتفاع شريط التنقل السفلي على الموبايل — الأزرار ما تنزلش تحته
 const DRAG_THRESHOLD = 6;
 // حركة زنبركية (spring) — القائد أسرع شوية والتابعين أبطأ عشان يبان التتابع
@@ -17,7 +17,7 @@ const DAMPING = 0.74;
 const FLING = 7;               // قوة الاندفاع بعد رفع الإصبع
 const REST_EPS = 0.15;         // تحت كده نعتبرها استقرت
 
-export default function FloatingActions({ onOpenCart, onOpenFavorites }) {
+export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, onHide }) {
   const { cartCount, favCount } = useStore();
   const [bump, setBump] = useState(false);
   const [collapsed, setCollapsed] = useState(true); // مخفيين افتراضيًا عشان مساحة الشاشة
@@ -245,6 +245,8 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites }) {
     );
   }
 
+  if (hidden) return null;
+
   if (collapsed) {
     const total = cartCount + favCount;
     return (
@@ -297,11 +299,11 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites }) {
         {favCount > 0 && <span className="float-count fav">{favCount}</span>}
       </button>
 
-      {/* التابع التاني: زرار الإخفاء */}
+      {/* التابع التاني: زرار الإخفاء — بيخفي الفقاعة تمامًا، وترجع تاني لو دُست على السلة أو المفضلة من الهيدر */}
       <button
         ref={(el) => (followRefs.current[1] = el)}
         className="float-btn float-close"
-        onClick={guard(() => toggleCollapsed(true))}
+        onClick={guard(() => onHide?.())}
         aria-label="إخفاء الأزرار"
         title="إخفاء الأزرار"
       >
