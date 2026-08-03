@@ -12,7 +12,10 @@ import ProductCard from "./ProductCard";
 // وبنعكس ترتيب العناصر عشان الأحدث يظهر على أقصى اليمين، متسق مع القراءة العربية.
 export default function NewArrivalsRow({ products }) {
   const trackRef = useRef(null);
-  const busy = useRef(false); // بنمنع تصحيح الموضع وهو بيصحّح بالفعل
+  const busy = useRef(false);        // بنمنع تصحيح الموضع وهو بيصحّح بالفعل أو وقت حركة الأسهم
+  const unlockTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(unlockTimer.current), []);
 
   const visualList = [...products, ...products, ...products].reverse();
 
@@ -30,7 +33,7 @@ export default function NewArrivalsRow({ products }) {
     return () => cancelAnimationFrame(id);
   }, [products.length, oneSetWidth]);
 
-  // التصحيح اللانهائي — بيشتغل مع السحب باللمس ومع الأسهم على السواء
+  // التصحيح اللانهائي للسحب باللمس — متوقف وقت حركة الأسهم عشان ما يتعارضش معاها
   function handleScroll() {
     const el = trackRef.current;
     if (!el || busy.current) return;
@@ -53,7 +56,22 @@ export default function NewArrivalsRow({ products }) {
     if (!el) return;
     const card = el.querySelector(".row-scroll-item");
     const step = card ? card.getBoundingClientRect().width + 18 : 260;
+    const set = oneSetWidth();
+
+    // بنقفل التصحيح التلقائي طول الحركة الناعمة، لأنه لو صحّح في نصها
+    // المتصفح بيكمّل ناحية هدفه القديم ويلغي التصحيح (ده كان سبب تهتهة السهم)
+    busy.current = true;
+
+    // التصحيح بيحصل قبل ما الحركة تبدأ، مش في نصها
+    if (set > 0) {
+      const nextLeft = el.scrollLeft + dir * step;
+      if (nextLeft < set * 0.5) el.scrollLeft += set;
+      else if (nextLeft > set * 1.5) el.scrollLeft -= set;
+    }
+
     el.scrollBy({ left: dir * step, behavior: "smooth" });
+    clearTimeout(unlockTimer.current);
+    unlockTimer.current = setTimeout(() => { busy.current = false; }, 450);
   }
 
   return (

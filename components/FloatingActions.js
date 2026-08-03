@@ -3,7 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "@/lib/StoreContext";
 
 const SIZE = 44;        // قطر زرار السلة والمفضلة
+const CLOSE_SIZE = 30;  // قطر زرار الطي الصغير (بيرجّعهم لدائرة الزائد)
 const GAP = 8;          // المسافة بين السلة والمفضلة
+const CLOSE_GAP = 3;    // زرار الطي أقرب للمفضلة
 const MARGIN = 6;       // أقل مسافة من حافة الشاشة — قريب جدًا زي تطبيقات المحادثة
 const DROP_SIZE = 44;   // قطر دائرة الإفلات (X) — نفس حجم الفقاعة بالظبط
 const DROP_BOTTOM = 96; // ارتفاعها من أسفل الشاشة (فوق شريط التنقل)
@@ -68,7 +70,10 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
     const init = clampPos(start.x, start.y);
     lead.current = { ...init, vx: 0, vy: 0 };
     leadTarget.current = { ...init };
-    follows.current = [{ ...lead.current, vx: 0, vy: 0 }];
+    follows.current = [
+      { ...lead.current, vx: 0, vy: 0 },
+      { ...lead.current, vx: 0, vy: 0 },
+    ];
   }, [clampPos]);
 
   const persist = useCallback((next) => {
@@ -100,10 +105,15 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
       const el = followRefs.current[i];
       const cur = follows.current[i];
 
+      // المسافة بين كل زرار واللي قبله وهما مستقرين
+      const sizePrev = i === 0 ? SIZE : CLOSE_SIZE;
+      const gap = i === 0 ? GAP : CLOSE_GAP;
+      const restOffset = i === 0 ? SIZE + gap : (SIZE + CLOSE_SIZE) / 2 + gap;
+
       // وقت السحب بتجري ورا اللي قبلها، ووهي مستقرة بتترصّ فوقه
       const target = drag.current.moved
-        ? { x: prev.x, y: prev.y }
-        : { x: prev.x, y: prev.y - (SIZE + GAP) };
+        ? { x: prev.x + (SIZE - sizePrev) / 2, y: prev.y }
+        : { x: prev.x + (SIZE - sizePrev) / 2, y: prev.y - restOffset };
 
       // فيزياء الزنبرك: تسارع ناحية الهدف مع تخفيف
       cur.vx = (cur.vx + (target.x - cur.x) * STIFFNESS) * DAMPING;
@@ -232,7 +242,10 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
   function toggleCollapsed(value) {
     setCollapsed(value);
     persist({ collapsed: value });
-    follows.current = [{ ...lead.current, vx: 0, vy: 0 }];
+    follows.current = [
+      { ...lead.current, vx: 0, vy: 0 },
+      { ...lead.current, vx: 0, vy: 0 },
+    ];
   }
 
   const dragProps = {
@@ -341,6 +354,18 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" />
         </svg>
         {favCount > 0 && <span className="float-count fav">{favCount}</span>}
+      </button>
+
+      {/* التابع التاني: زرار الطي الصغير — بيرجّعهم لدائرة الزائد.
+          الإخفاء الكامل لسه بالسحب لدائرة الإكس. */}
+      <button
+        ref={(el) => (followRefs.current[1] = el)}
+        className="float-btn float-close"
+        onClick={guard(() => toggleCollapsed(true))}
+        aria-label="طي الأزرار"
+        title="طي الأزرار"
+      >
+        ✕
       </button>
     </>
   );

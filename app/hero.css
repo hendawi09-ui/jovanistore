@@ -16,11 +16,25 @@
   .hero-slider-wrap{padding:0 16px 10px;}
 }
 
-/* ===== الديسك توب: بانر كبير + نقاط ===== */
+/* ===== الديسك توب: بانر كبير بعرض الشاشة + نقاط ===== */
 .hero-desktop{display:none;}
 @media (min-width:769px){
   .hero-desktop{display:block;}
   .hero-mobile{display:none;}
+  /* بعرض الشاشة الكامل: بنخرج بره حدود hero-slider-wrap (1300px + هوامش 16px) */
+  .hero-slider-wrap{max-width:none; padding:0 0 10px;}
+  .feature-panel{border-radius:0; box-shadow:none;}
+  /* النص والشارة بيفضلوا متحاذيين مع باقي محتوى الموقع، مش ملزوقين في حرف الشاشة */
+  .feature-text{
+    max-width:1300px; margin-inline:auto;
+    padding-inline:44px;
+  }
+  .feature-badge{
+    /* بتتحاذى مع النص، وبتفضل بهامش آمن على الشاشات الأصغر من 1300 */
+    left:max(44px, calc(50% - 606px));
+  }
+  /* النقاط بتفضل في وسط عرض المحتوى المعتاد */
+  .dots-desktop{max-width:1300px; margin-inline:auto;}
 }
 
 .feature-panel{

@@ -541,6 +541,10 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 /* الفقاعة بتصغر شوية وهي فوق دائرة الإفلات — إشارة إنها هتتقفل */
 .float-btn.over-drop{transform-origin:center; opacity:.85;}
 
+.float-close{width:30px; height:30px; background:rgba(13,13,13,.55); color:#fff;
+  font-size:11px; line-height:1; z-index:81; box-shadow:0 4px 10px rgba(20,18,31,.2);}
+.float-close:hover{background:var(--ink);}
+
 .float-count{position:absolute; top:-3px; right:-3px; background:var(--red); color:#fff;
   font-size:10px; font-weight:800; min-width:18px; height:18px; padding:0 4px; border-radius:999px;
   display:flex; align-items:center; justify-content:center; border:2px solid var(--paper); pointer-events:none;}
@@ -553,6 +557,7 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .float-btn svg{width:20px; height:20px;}
   /* دائرة الإفلات بنفس مقاس الفقاعة بالظبط */
   .float-drop{width:42px; height:42px; margin-left:-21px;}
+  .float-close{width:28px; height:28px;}
 }
 
 /* رسوم الشحن في صفحة الدفع */
