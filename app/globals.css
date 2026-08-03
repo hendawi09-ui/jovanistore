@@ -145,19 +145,6 @@ body::before{
 .arc-path{fill:none; stroke-linecap:round; stroke-dasharray:1000; stroke-dashoffset:1000; animation:draw 1.6s cubic-bezier(.16,.84,.44,1) forwards;}
 @keyframes draw{to{stroke-dashoffset:0;}}
 
-/* بطاقات التصنيفات السريعة تحت السلايدر */
-.quick-cats{max-width:1400px; margin:22px auto 0; padding:0 16px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
-.quick-cat{
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
-  padding:22px 12px; border-radius:16px; font-family:'Cairo'; font-weight:800; font-size:15px;
-  color:#fff; transition:transform .2s, box-shadow .2s;
-}
-.quick-cat:hover{transform:translateY(-3px); box-shadow:0 10px 22px rgba(20,18,31,.12);}
-.qc-emoji{font-size:26px;}
-.qc-men{background:var(--ink);}
-.qc-women{background:var(--red);}
-.qc-sale{background:linear-gradient(135deg, var(--red), var(--red-dark));}
-
 /* صف "وصل حديثًا" — تمرير أفقي */
 .row-scroll{
   max-width:1400px; margin:0 auto; padding:0 16px 8px; display:flex; gap:18px;
@@ -165,13 +152,6 @@ body::before{
 }
 .row-scroll::-webkit-scrollbar{display:none;}
 .row-scroll-item{flex:0 0 230px; scroll-snap-align:start;}
-
-/* قسم "ليه تشتري من عندنا" */
-.why-us{max-width:1400px; margin:20px auto 60px; padding:0 16px; display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
-.why-card{background:var(--paper-dim); border-radius:16px; padding:28px 20px; text-align:center;}
-.why-icon{font-size:30px; display:block; margin-bottom:10px;}
-.why-card h3{font-family:'Cairo'; font-size:16px; margin-bottom:6px;}
-.why-card p{font-size:13px; color:var(--muted);}
 
 /* category tabs */
 .cats{max-width:1400px; margin:10px auto 0; padding:0 16px; display:flex; gap:10px; flex-wrap:wrap;}
@@ -456,11 +436,7 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .footer-inner{grid-template-columns:1fr; gap:28px;}
   .pd, .checkout-wrap{grid-template-columns:1fr;}
   .admin-grid{grid-template-columns:1fr;}
-  .quick-cats{gap:10px;}
-  .quick-cat{padding:16px 8px; font-size:13px;}
-  .qc-emoji{font-size:22px;}
   .row-scroll-item{flex-basis:160px;}
-  .why-us{grid-template-columns:1fr; gap:12px;}
 }
 @media (prefers-reduced-motion: reduce){
   .arc-path{animation:none; stroke-dashoffset:0;}
@@ -560,6 +536,12 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .fav-toggle svg{width:13px; height:13px; fill:none; stroke:var(--ink-soft); transition:fill .2s, stroke .2s;}
 .fav-toggle:hover{transform:scale(1.1);}
 .fav-toggle.active svg{fill:var(--red); stroke:var(--red);}
+
+.cart-toggle{position:absolute; bottom:9px; right:9px; z-index:3; width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; transition:background .2s, transform .15s;}
+.cart-toggle svg{width:13px; height:13px; stroke:var(--ink-soft);}
+.cart-toggle:hover{background:var(--ink);}
+.cart-toggle:hover svg{stroke:#fff;}
+.cart-toggle:active{transform:scale(.9);}
 
 /* أزرار النقل داخل السلة والمفضلة */
 .item-actions{display:flex; align-items:center; gap:12px; margin-top:6px; flex-wrap:wrap;}
@@ -725,6 +707,8 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 @media (min-width:641px){
   .fav-toggle{top:13px; right:13px; width:38px; height:38px;}
   .fav-toggle svg{width:20px; height:20px;}
+  .cart-toggle{bottom:13px; right:13px; width:38px; height:38px;}
+  .cart-toggle svg{width:20px; height:20px;}
   .disc-badge{top:13px; left:13px; font-size:12.5px; padding:6px 12px;}
 }
 

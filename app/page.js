@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useStore } from "@/lib/StoreContext";
 import { cats, catLabel, parseSize, matchesQuery, hasDiscount } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
@@ -59,21 +58,6 @@ function HomeContent() {
   return (
     <>
       <HeroSlider />
-
-      <div className="quick-cats">
-        <Link href="/?cat=men" className="quick-cat qc-men">
-          <span className="qc-emoji">👔</span>
-          <span className="qc-label">رجالي</span>
-        </Link>
-        <Link href="/?cat=women" className="quick-cat qc-women">
-          <span className="qc-emoji">👗</span>
-          <span className="qc-label">نسائي</span>
-        </Link>
-        <Link href="/?cat=sale" className="quick-cat qc-sale">
-          <span className="qc-emoji">🔥</span>
-          <span className="qc-label">عروض وتخفيضات</span>
-        </Link>
-      </div>
 
       <div className="search-wrap" id="search">
         <div className="search-box">
@@ -145,24 +129,6 @@ function HomeContent() {
         ) : (
           list.map((p) => <ProductCard key={p.id} p={p} />)
         )}
-      </div>
-
-      <div className="why-us">
-        <div className="why-card">
-          <span className="why-icon">🚚</span>
-          <h3>شحن سريع</h3>
-          <p>لجميع محافظات مصر خلال أيام قليلة</p>
-        </div>
-        <div className="why-card">
-          <span className="why-icon">↩️</span>
-          <h3>إرجاع مجاني</h3>
-          <p>خلال 14 يوم من غير أي تعقيد</p>
-        </div>
-        <div className="why-card">
-          <span className="why-icon">🔒</span>
-          <h3>دفع آمن 100%</h3>
-          <p>بياناتك محمية طول الوقت</p>
-        </div>
       </div>
     </>
   );

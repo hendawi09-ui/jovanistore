@@ -93,6 +93,29 @@ export default function ProductCard({ p }) {
         </button>
         {hasDiscount(p) && !soldOut && <div className="disc-badge">-{discountPercent(p)}%</div>}
         {soldOut && <div className="soldout-overlay">نفدت الكمية</div>}
+        {!soldOut && (
+          <button
+            className="cart-toggle"
+            aria-label="أضف للسلة"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // لو المنتج عنده ألوان أو مقاسات، بنفتح نافذة سريعة للاختيار قبل الإضافة
+              if (hasVariants) {
+                setQuickOpen(true);
+              } else {
+                addToCart(p.id);
+                showToast("أُضيف المنتج إلى سلتك ✓");
+              }
+            }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M3 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6" />
+              <circle cx="9" cy="21" r="1.4" />
+              <circle cx="18" cy="21" r="1.4" />
+            </svg>
+          </button>
+        )}
         {images.length > 1 && (
           <div className="card-dots" onClick={(e) => e.preventDefault()}>
             {images.map((_, i) => (
@@ -121,26 +144,7 @@ export default function ProductCard({ p }) {
               `${p.price} ج.م`
             )}
           </div>
-          {soldOut ? (
-            <span className="add-btn add-btn-link soldout-label">نفدت الكمية</span>
-          ) : (
-            <button
-              className="add-btn"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                // لو المنتج عنده ألوان أو مقاسات، بنفتح نافذة سريعة للاختيار قبل الإضافة
-                if (hasVariants) {
-                  setQuickOpen(true);
-                } else {
-                  addToCart(p.id);
-                  showToast("أُضيف المنتج إلى سلتك ✓");
-                }
-              }}
-            >
-              أضف للسلة
-            </button>
-          )}
+          {soldOut && <span className="add-btn add-btn-link soldout-label">نفدت الكمية</span>}
         </div>
       </div>
       </Link>

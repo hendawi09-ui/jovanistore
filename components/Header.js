@@ -31,13 +31,6 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
     <>
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="nav-inner">
-          <button
-            className="hamburger-btn"
-            onClick={() => setMenuOpen(true)}
-            aria-label="فتح المنيو"
-          >
-            <span></span><span></span><span></span>
-          </button>
           <Link href="/" className="logo">
             <Logo size="compact" />
           </Link>
@@ -69,6 +62,13 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
               {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
             </button>
           </div>
+          <button
+            className="hamburger-btn"
+            onClick={() => setMenuOpen(true)}
+            aria-label="فتح المنيو"
+          >
+            <span></span><span></span><span></span>
+          </button>
         </div>
       </nav>
       <div className="trust-bar">

@@ -5,7 +5,7 @@ const LOGO_RATIO = 1829 / 1487;
 
 export default function Logo({ size = "normal" }) {
   const compact = size === "compact";
-  const h = compact ? 34 : 64; // ارتفاع اللوجو
+  const h = compact ? 44 : 64; // ارتفاع اللوجو
   const w = Math.round(h * LOGO_RATIO);
 
   return (

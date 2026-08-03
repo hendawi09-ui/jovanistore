@@ -75,6 +75,11 @@
 /* ===== الموبايل: سلايدر بعرض كامل قابل للمس + نقاط ===== */
 .hero-mobile{display:block;}
 @media (min-width:769px){ .hero-mobile{display:none;} }
+@media (max-width:768px){
+  /* بعرض كامل يخرج بره هوامش hero-slider-wrap (16px كل جنب) */
+  .hero-mobile{margin:0 -16px;}
+  .m-track{border-radius:0;}
+}
 
 .m-track{
   direction:ltr; display:flex;
