@@ -42,7 +42,7 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
           </div>
           <div className="nav-actions">
             <a href="/#search" className="nav-icon-btn" aria-label="بحث" onClick={(e) => handleSearchNav(e, router)}>
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <circle cx="11" cy="11" r="7" />
                 <path d="M20 20l-3.5-3.5" />
               </svg>

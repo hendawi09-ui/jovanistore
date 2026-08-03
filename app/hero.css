@@ -10,7 +10,11 @@
   -webkit-background-clip:text; background-clip:text; color:transparent;
 }
 
-.hero-slider-wrap{max-width:1300px; margin:20px auto 0; padding:0 16px 10px;}
+.hero-slider-wrap{max-width:1300px; margin:0 auto; padding:0 16px 10px;}
+@media (max-width:768px){
+  /* ملزوق تحت الشريط المتحرك الأسود مباشرة من غير أي فراغ */
+  .hero-slider-wrap{padding:0 16px 10px;}
+}
 
 /* ===== الديسك توب: بانر كبير + نقاط ===== */
 .hero-desktop{display:none;}

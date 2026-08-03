@@ -1,40 +1,52 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import ProductCard from "./ProductCard";
 
-// صف "وصل حديثًا": في الديسكتوب شريط لا نهائي بأسهم، وفي الموبايل تمرير باللمس عادي بـ8 منتجات بس.
-// الحاوية بتتفرض عليها direction:ltr (زي سلايدر الهيرو بالظبط) عشان يبقى scrollLeft
-// له نفس المعنى في كل المتصفحات، وكل بطاقة جواها direction:rtl عشان النص العربي يتقرأ صح.
-// وعشان الترتيب البصري يفضل صح للعربي (الأحدث على أقصى اليمين)، بنعكس ترتيب العناصر.
+// صف "وصل حديثًا": شريط لا نهائي في الديسكتوب والموبايل.
+// الفكرة: بنكرر قائمة المنتجات 3 مرات، وبنبدأ من النسخة الأوسط. أول ما المستخدم
+// (بالسحب أو بالأسهم) يقرب من أي طرف، بنرجّعه لنفس المكان في النسخة الأوسط من غير
+// أنيميشن — فبيحس إنه بيمرر لما لا نهاية في الاتجاهين.
+//
+// الحاوية عليها direction:ltr (زي سلايدر الهيرو) عشان scrollLeft يبقى له نفس المعنى
+// في كل المتصفحات، وكل بطاقة جواها direction:rtl عشان النص العربي يتقرأ صح.
+// وبنعكس ترتيب العناصر عشان الأحدث يظهر على أقصى اليمين، متسق مع القراءة العربية.
 export default function NewArrivalsRow({ products }) {
   const trackRef = useRef(null);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const n = products.length;
+  const busy = useRef(false); // بنمنع تصحيح الموضع وهو بيصحّح بالفعل
 
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 769px)");
-    const apply = () => setIsDesktop(mq.matches);
-    apply();
-    mq.addEventListener("change", apply);
-    return () => mq.removeEventListener("change", apply);
+  const visualList = [...products, ...products, ...products].reverse();
+
+  // طول النسخة الواحدة من القائمة بالبكسل
+  const oneSetWidth = useCallback(() => {
+    const el = trackRef.current;
+    return el ? el.scrollWidth / 3 : 0;
   }, []);
 
-  // في الديسكتوب بنكرر القائمة 3 مرات عشان يحس المستخدم إنه شريط لا نهائي وهو بيدوس على الأسهم
-  const visualList = isDesktop
-    ? [...products, ...products, ...products].reverse()
-    : [...products].reverse();
-
-  // نبدأ من موضع يورّي أحدث المنتجات على طول من غير ما يحتاج يمرر — في الديسكتوب من نص
-  // النسخة المكررة (عشان يفضل فيه مجال يمرر فيه في الاتجاهين)، وفي الموبايل من أقصى النهاية.
+  // نبدأ من النسخة الأوسط
   useEffect(() => {
     const el = trackRef.current;
     if (!el) return;
-    if (isDesktop) {
-      el.scrollLeft = el.scrollWidth / 3;
-    } else {
-      el.scrollLeft = el.scrollWidth - el.clientWidth;
+    const id = requestAnimationFrame(() => { el.scrollLeft = oneSetWidth(); });
+    return () => cancelAnimationFrame(id);
+  }, [products.length, oneSetWidth]);
+
+  // التصحيح اللانهائي — بيشتغل مع السحب باللمس ومع الأسهم على السواء
+  function handleScroll() {
+    const el = trackRef.current;
+    if (!el || busy.current) return;
+    const set = oneSetWidth();
+    if (set === 0) return;
+
+    if (el.scrollLeft < set * 0.5) {
+      busy.current = true;
+      el.scrollLeft += set;
+      requestAnimationFrame(() => { busy.current = false; });
+    } else if (el.scrollLeft > set * 1.5) {
+      busy.current = true;
+      el.scrollLeft -= set;
+      requestAnimationFrame(() => { busy.current = false; });
     }
-  }, [isDesktop, n]);
+  }
 
   function scrollByCard(dir) {
     const el = trackRef.current;
@@ -42,16 +54,6 @@ export default function NewArrivalsRow({ products }) {
     const card = el.querySelector(".row-scroll-item");
     const step = card ? card.getBoundingClientRect().width + 18 : 260;
     el.scrollBy({ left: dir * step, behavior: "smooth" });
-
-    // لو قربنا من أي طرف، بعد لحظة نرجّع الموضع لنص الشريط المكرر من غير أنيميشن
-    // عشان المستخدم يحس إنه بيفضل يمرر من غير ما يوصل لنهاية فعلية
-    setTimeout(() => {
-      const max = el.scrollWidth - el.clientWidth;
-      const third = el.scrollWidth / 3;
-      if (el.scrollLeft <= 4 || el.scrollLeft >= max - 4) {
-        el.scrollTo({ left: third, behavior: "auto" });
-      }
-    }, 380);
   }
 
   return (
@@ -63,7 +65,7 @@ export default function NewArrivalsRow({ products }) {
         </svg>
       </button>
 
-      <div className="row-scroll" ref={trackRef}>
+      <div className="row-scroll" ref={trackRef} onScroll={handleScroll}>
         {visualList.map((p, i) => (
           <div className="row-scroll-item" key={`${p.id}-${i}`}>
             <ProductCard p={p} swipeEnabled={false} />

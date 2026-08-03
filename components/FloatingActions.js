@@ -3,10 +3,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useStore } from "@/lib/StoreContext";
 
 const SIZE = 44;        // قطر زرار السلة والمفضلة
-const CLOSE_SIZE = 30;  // قطر زرار الإخفاء
 const GAP = 8;          // المسافة بين السلة والمفضلة
-const CLOSE_GAP = 3;    // زرار الإخفاء أقرب للمفضلة
 const MARGIN = 6;       // أقل مسافة من حافة الشاشة — قريب جدًا زي تطبيقات المحادثة
+const DROP_SIZE = 44;   // قطر دائرة الإفلات (X) — نفس حجم الفقاعة بالظبط
+const DROP_BOTTOM = 96; // ارتفاعها من أسفل الشاشة (فوق شريط التنقل)
+const SNAP_RADIUS = 70; // لو مركز الفقاعة قرب من مركزها بالمسافة دي → تتقفل
 const BOTTOM_NAV = 66;  // ارتفاع شريط التنقل السفلي على الموبايل — الأزرار ما تنزلش تحته
 const DRAG_THRESHOLD = 6;
 // حركة زنبركية (spring) — القائد أسرع شوية والتابعين أبطأ عشان يبان التتابع
@@ -22,6 +23,8 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
   const [bump, setBump] = useState(false);
   const [collapsed, setCollapsed] = useState(true); // مخفيين افتراضيًا عشان مساحة الشاشة
   const [dragging, setDragging] = useState(false);
+  const [overDrop, setOverDrop] = useState(false); // الفقاعة فوق دائرة الإفلات؟ (للشكل)
+  const overDropRef = useRef(false);               // نفس القيمة بس فورية — بنقرأها لحظة رفع الإصبع
   const [isMobile, setIsMobile] = useState(false); // السحب والإخفاء على الموبايل بس
 
   // الزرار القائد (السلة) وباقي الأزرار اللي بتجري وراه
@@ -65,10 +68,7 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
     const init = clampPos(start.x, start.y);
     lead.current = { ...init, vx: 0, vy: 0 };
     leadTarget.current = { ...init };
-    follows.current = [
-      { ...lead.current, vx: 0, vy: 0 },
-      { ...lead.current, vx: 0, vy: 0 },
-    ];
+    follows.current = [{ ...lead.current, vx: 0, vy: 0 }];
   }, [clampPos]);
 
   const persist = useCallback((next) => {
@@ -100,15 +100,10 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
       const el = followRefs.current[i];
       const cur = follows.current[i];
 
-      // المسافة بين كل زرار واللي قبله وهما مستقرين
-      const sizePrev = i === 0 ? SIZE : CLOSE_SIZE;
-      const gap = i === 0 ? GAP : CLOSE_GAP;
-      const restOffset = i === 0 ? SIZE + gap : (SIZE + CLOSE_SIZE) / 2 + gap;
-
       // وقت السحب بتجري ورا اللي قبلها، ووهي مستقرة بتترصّ فوقه
       const target = drag.current.moved
-        ? { x: prev.x + (SIZE - sizePrev) / 2, y: prev.y }
-        : { x: prev.x + (SIZE - sizePrev) / 2, y: prev.y - restOffset };
+        ? { x: prev.x, y: prev.y }
+        : { x: prev.x, y: prev.y - (SIZE + GAP) };
 
       // فيزياء الزنبرك: تسارع ناحية الهدف مع تخفيف
       cur.vx = (cur.vx + (target.x - cur.x) * STIFFNESS) * DAMPING;
@@ -148,6 +143,22 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
     e.currentTarget.setPointerCapture?.(e.pointerId);
   }
 
+  // مركز دائرة الإفلات (X) — أسفل نص الشاشة
+  function dropCenter() {
+    return {
+      x: window.innerWidth / 2,
+      y: window.innerHeight - DROP_BOTTOM - DROP_SIZE / 2,
+    };
+  }
+
+  // هل مركز الفقاعة قريب كفاية من دائرة الإفلات؟
+  function isOverDrop(x, y) {
+    const c = dropCenter();
+    const bx = x + SIZE / 2;
+    const by = y + SIZE / 2;
+    return Math.hypot(bx - c.x, by - c.y) < SNAP_RADIUS;
+  }
+
   function onPointerMove(e) {
     if (!drag.current.active) return;
     const nx = e.clientX - drag.current.dx;
@@ -158,7 +169,18 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
         setDragging(true);
       }
     }
-    if (drag.current.moved) leadTarget.current = clampPos(nx, ny);
+    if (drag.current.moved) {
+      const pos = clampPos(nx, ny);
+      leadTarget.current = pos;
+      // لو قربت من دائرة الإفلات، بتتلزق في مركزها بالظبط زي الماسنجر
+      const over = isOverDrop(pos.x, pos.y);
+      overDropRef.current = over;
+      setOverDrop(over);
+      if (over) {
+        const c = dropCenter();
+        leadTarget.current = { x: c.x - SIZE / 2, y: c.y - SIZE / 2 };
+      }
+    }
   }
 
   function onPointerUp() {
@@ -166,6 +188,17 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
     const wasMoved = drag.current.moved;
     drag.current.active = false;
     setDragging(false);
+
+    // اتفلتت فوق دائرة الإكس → تتخفي (زي الماسنجر)
+    if (wasMoved && overDropRef.current) {
+      overDropRef.current = false;
+      setOverDrop(false);
+      drag.current.moved = false;
+      onHide?.();
+      return;
+    }
+    overDropRef.current = false;
+    setOverDrop(false);
 
     if (wasMoved) {
       // اندفاع بسيط باتجاه سرعة الإصبع، وبعدين لزوق بأقرب حافة (زي ماسنجر)
@@ -199,10 +232,7 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
   function toggleCollapsed(value) {
     setCollapsed(value);
     persist({ collapsed: value });
-    follows.current = [
-      { ...lead.current, vx: 0, vy: 0 },
-      { ...lead.current, vx: 0, vy: 0 },
-    ];
+    follows.current = [{ ...lead.current, vx: 0, vy: 0 }];
   }
 
   const dragProps = {
@@ -247,31 +277,45 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
 
   if (hidden) return null;
 
+  // دائرة الإفلات (X) — بتظهر وسط أسفل الشاشة وقت السحب بس
+  const dropZone = (
+    <div className={`float-drop ${dragging ? "show" : ""} ${overDrop ? "over" : ""}`} aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </div>
+  );
+
   if (collapsed) {
     const total = cartCount + favCount;
     return (
-      <button
-        ref={leadRef}
-        className={`float-btn float-show ${dragging ? "dragging" : ""}`}
-        {...dragProps}
-        onClick={guard(() => toggleCollapsed(false))}
-        aria-label="إظهار الأزرار"
-        title="إظهار الأزرار"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-          <path d="M12 5v14M5 12h14" />
-        </svg>
-        {total > 0 && <span className="float-count">{total}</span>}
-      </button>
+      <>
+        {dropZone}
+        <button
+          ref={leadRef}
+          className={`float-btn float-show ${dragging ? "dragging" : ""} ${overDrop ? "over-drop" : ""}`}
+          {...dragProps}
+          onClick={guard(() => toggleCollapsed(false))}
+          aria-label="إظهار الأزرار"
+          title="إظهار الأزرار"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          {total > 0 && <span className="float-count">{total}</span>}
+        </button>
+      </>
     );
   }
 
   return (
     <>
+      {dropZone}
+
       {/* القائد: السلة — هو اللي بيتسحب */}
       <button
         ref={leadRef}
-        className={`float-btn float-cart ${bump ? "bump" : ""} ${dragging ? "dragging" : ""}`}
+        className={`float-btn float-cart ${bump ? "bump" : ""} ${dragging ? "dragging" : ""} ${overDrop ? "over-drop" : ""}`}
         {...dragProps}
         onClick={guard(onOpenCart)}
         aria-label="سلة المشتريات"
@@ -297,17 +341,6 @@ export default function FloatingActions({ onOpenCart, onOpenFavorites, hidden, o
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" />
         </svg>
         {favCount > 0 && <span className="float-count fav">{favCount}</span>}
-      </button>
-
-      {/* التابع التاني: زرار الإخفاء — بيخفي الفقاعة تمامًا، وترجع تاني لو دُست على السلة أو المفضلة من الهيدر */}
-      <button
-        ref={(el) => (followRefs.current[1] = el)}
-        className="float-btn float-close"
-        onClick={guard(() => onHide?.())}
-        aria-label="إخفاء الأزرار"
-        title="إخفاء الأزرار"
-      >
-        ✕
       </button>
     </>
   );
