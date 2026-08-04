@@ -158,10 +158,10 @@ body::before{
 .row-scroll-item .card{height:100%;}
 .row-scroll-item .card-body{height:132px; overflow:hidden;}
 .row-scroll-item .card h3{
-  display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;
+  display:-webkit-box; -webkit-line-clamp:1; line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;
 }
 .row-scroll-item .card .desc{
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 
 /* أسهم التمرير — ديسكتوب بس، بنفس شكل أسهم سلايدر الهيرو */
