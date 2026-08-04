@@ -1,7 +1,7 @@
 import Image from "next/image";
 
-// نسبة أبعاد اللوجو الجديد (عرض/ارتفاع) — عشان العرض يتحسب تلقائيًا وميتشوهش
-const LOGO_RATIO = 1829 / 1487;
+// نسبة أبعاد اللوجو (عرض/ارتفاع) — عشان العرض يتحسب تلقائيًا وميتشوهش
+const LOGO_RATIO = 400 / 325;
 
 export default function Logo({ size = "normal" }) {
   const compact = size === "compact";

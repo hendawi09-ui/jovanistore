@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { IconSvg } from "@/lib/icons";
 import { catCssVar, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { useStore } from "@/lib/StoreContext";
@@ -77,7 +78,14 @@ export default function ProductCard({ p, swipeEnabled = true }) {
         onClick={onMediaClick}
       >
         {images.length > 0 ? (
-          <img src={images[active]} alt={p.name} loading="lazy" />
+          <Image
+            src={images[active]}
+            alt={p.name}
+            fill
+            // البطاقات: عمودين على الموبايل، وحتى 5 أعمدة على الشاشات الكبيرة
+            sizes="(max-width:920px) 50vw, (max-width:1050px) 33vw, (max-width:1280px) 25vw, 20vw"
+            style={{ objectFit: "cover" }}
+          />
         ) : (
           <div className="icon-box"><IconSvg name={p.icon} /></div>
         )}

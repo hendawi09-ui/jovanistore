@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function HeroSlider() {
   const [slides, setSlides] = useState([]);
@@ -203,7 +204,19 @@ export default function HeroSlider() {
                 </Link>
               </div>
               <div className="feature-img">
-                {s.image ? <img src={s.image} alt={s.title} /> : <div className="feature-img-empty" />}
+                {s.image ? (
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    sizes="100vw"
+                    // أول سلايدة هي أول حاجة الزائر بيشوفها، فبتتحمّل بأولوية
+                    priority={i === 0}
+                    style={{ objectFit: "cover" }}
+                  />
+                ) : (
+                  <div className="feature-img-empty" />
+                )}
               </div>
             </div>
           ))}
@@ -250,7 +263,18 @@ export default function HeroSlider() {
             const mImg = s.imageMobile || s.image; // لو مفيش صورة موبايل مخصوصة، بتتظهر صورة الديسكتوب بدالها
             return (
               <div key={`${s.id}-${i}`} className="m-slide" aria-hidden={s._clone || undefined}>
-                {mImg ? <img src={mImg} alt={s.title} /> : <div className="m-slide-empty" />}
+                {mImg ? (
+                  <Image
+                    src={mImg}
+                    alt={s.title}
+                    fill
+                    sizes="100vw"
+                    priority={i === 0}
+                    style={{ objectFit: "cover" }}
+                  />
+                ) : (
+                  <div className="m-slide-empty" />
+                )}
                 {s.badge && <span className="m-badge">{s.badge}</span>}
                 <div className="m-slide-body">
                   <h3>{s.title}</h3>
