@@ -2,13 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    // بنسمح لـ Next.js يحسّن الصور اللي متخزنة في Supabase Storage.
-    // النتيجة: بيبعت الصورة بصيغة أحدث وأصغر (WebP/AVIF) وبمقاس مناسب لكل شاشة.
+    // بنسمح بتحسين الصور من أي نطاق آمن (https) — عشان الصور القديمة اللي
+    // اتضافت من مصادر بره Supabase تفضل شغالة زي ما هي.
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*.supabase.co",
-        pathname: "/storage/v1/object/public/**",
+        hostname: "**",
       },
     ],
     // المقاسات اللي الموقع بيحتاجها فعلًا — بطاقات المنتجات وصور السلايدر

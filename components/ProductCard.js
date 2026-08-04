@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { IconSvg } from "@/lib/icons";
@@ -14,6 +14,10 @@ export default function ProductCard({ p, swipeEnabled = true }) {
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
   const [quickOpen, setQuickOpen] = useState(false);
+  const [imgFailed, setImgFailed] = useState(false); // لو الصورة مش راضية تحمّل
+
+  // لو المستخدم بدّل لصورة تانية، بندي الفرصة للصورة الجديدة تحمّل من أول وجديد
+  useEffect(() => { setImgFailed(false); }, [active]);
   const hasVariants = p.sizes?.length > 0; // اللون بقى منتج مستقل، فالاختيار السريع للمقاسات بس
   const soldOut = getTotalStock(p) === 0;
 
@@ -77,7 +81,7 @@ export default function ProductCard({ p, swipeEnabled = true }) {
         {...touchHandlers}
         onClick={onMediaClick}
       >
-        {images.length > 0 ? (
+        {images.length > 0 && !imgFailed ? (
           <Image
             src={images[active]}
             alt={p.name}
@@ -85,6 +89,8 @@ export default function ProductCard({ p, swipeEnabled = true }) {
             // البطاقات: عمودين على الموبايل، وحتى 5 أعمدة على الشاشات الكبيرة
             sizes="(max-width:920px) 50vw, (max-width:1050px) 33vw, (max-width:1280px) 25vw, 20vw"
             style={{ objectFit: "cover" }}
+            // لو الرابط باظ أو الصورة مش موجودة، بنرجع للأيقونة التوضيحية بدل مربع فاضي
+            onError={() => setImgFailed(true)}
           />
         ) : (
           <div className="icon-box"><IconSvg name={p.icon} /></div>

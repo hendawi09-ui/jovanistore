@@ -213,6 +213,7 @@ export default function HeroSlider() {
                     // أول سلايدة هي أول حاجة الزائر بيشوفها، فبتتحمّل بأولوية
                     priority={i === 0}
                     style={{ objectFit: "cover" }}
+                    onError={(e) => { e.currentTarget.style.display = "none"; }}
                   />
                 ) : (
                   <div className="feature-img-empty" />
@@ -271,6 +272,7 @@ export default function HeroSlider() {
                     sizes="100vw"
                     priority={i === 0}
                     style={{ objectFit: "cover" }}
+                    onError={(e) => { e.currentTarget.style.display = "none"; }}
                   />
                 ) : (
                   <div className="m-slide-empty" />
