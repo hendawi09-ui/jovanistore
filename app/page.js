@@ -12,6 +12,15 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const [activeCat, setActiveCat] = useState("all");
   const [query, setQuery] = useState("");
+  const [bestIds, setBestIds] = useState([]);
+
+  // بنجيب ترتيب الأكثر مبيعًا (محسوب من الطلبات الفعلية على السيرفر)
+  useEffect(() => {
+    fetch("/api/best-sellers")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => setBestIds(Array.isArray(d) ? d.map((x) => x.id) : []))
+      .catch(() => setBestIds([]));
+  }, []);
 
   useEffect(() => {
     const c = searchParams.get("cat");
@@ -56,6 +65,13 @@ function HomeContent() {
         .slice(0, 8)
     : [];
 
+  // الأكثر مبيعًا — بترتيب المبيعات الفعلية الجاي من السيرفر
+  const bestSellers = !q && activeCat === "all"
+    ? bestIds
+        .map((id) => products.find((p) => p.id === id))
+        .filter((p) => p && p.published !== false)
+    : [];
+
   return (
     <>
       <HeroSlider />
@@ -86,6 +102,15 @@ function HomeContent() {
             <h2>✨ وصل حديثًا</h2>
           </div>
           <NewArrivalsRow products={newArrivals} />
+        </>
+      )}
+
+      {bestSellers.length > 0 && (
+        <>
+          <div className="section-head" style={{ marginTop: 8 }}>
+            <h2>⭐ الأكثر مبيعًا</h2>
+          </div>
+          <NewArrivalsRow products={bestSellers} />
         </>
       )}
 

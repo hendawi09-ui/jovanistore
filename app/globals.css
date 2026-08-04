@@ -84,6 +84,26 @@ body::before{
 .nav-icon-btn:hover{background:var(--ink); color:#fff;}
 
 /* شريط البحث */
+/* شريط البحث في منتصف الهيدر — ديسك توب بس */
+.nav-search{display:none;}
+@media (min-width:921px){
+  .nav-search{
+    display:flex; align-items:center; gap:9px; flex:1; max-width:440px;
+    margin-inline:auto; background:#fff; border:1.5px solid var(--line);
+    border-radius:999px; padding:0 16px; transition:border-color .2s, box-shadow .2s;
+  }
+  .nav-search:focus-within{border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,13,13,.05);}
+  .nav-search svg{width:17px; height:17px; color:var(--muted); flex-shrink:0;}
+  .nav-search input{
+    flex:1; min-width:0; border:none; outline:none; background:none;
+    padding:9px 0; font-size:13.5px; font-family:inherit; color:var(--ink);
+  }
+  .nav-search input::placeholder{color:var(--muted);}
+  .nav-search input::-webkit-search-cancel-button{display:none;}
+  /* البحث اتنقل للهيدر، فنسخة تحت السلايدر مش محتاجينها على الديسك توب */
+  .search-wrap{display:none;}
+}
+
 .search-wrap{max-width:1400px; margin:0 auto; padding:0 16px 4px; scroll-margin-top:110px;}
 .search-box{position:relative; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:0 18px; transition:border-color .2s, box-shadow .2s;}
 .search-box:focus-within{border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,13,13,.05);}
@@ -151,6 +171,11 @@ body::before{
 .row-scroll{
   direction:ltr; display:flex; gap:18px; align-items:stretch;
   overflow-x:auto; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+}
+@media (max-width:768px){
+  /* الشريط بيستقر عند كل بطاقة بدل ما ينطلق بسرعة — تمرير أهدأ وأسهل في التحكم */
+  .row-scroll{scroll-snap-type:x mandatory;}
+  .row-scroll-item{scroll-snap-stop:always;}
 }
 .row-scroll::-webkit-scrollbar{display:none;}
 .row-scroll-item{direction:rtl; flex:0 0 230px; scroll-snap-align:start;}
@@ -503,10 +528,6 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .ship-price{font-weight:800; color:var(--ink); white-space:nowrap;}
 
 /* نسخة الديسكتوب: أزرار ثابتة في الركن (بدون سحب ولا إخفاء) */
-.float-static{position:fixed; bottom:22px; left:22px; z-index:80; display:flex; flex-direction:column; gap:10px;}
-.float-static .float-btn{position:static; width:48px; height:48px;}
-.float-static .float-btn svg{width:23px; height:23px;}
-.float-static .float-btn:hover{transform:scale(1.06);}
 
 /* الأزرار العائمة على الموبايل: بتجري ورا بعض زي رؤوس ماسنجر */
 /* كل زرار عنصر مستقل بيتحرك بـ transform، والمكان بيتحسب في الجافاسكريبت */
@@ -880,7 +901,6 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   /* مساحة إضافية تحت الفوتر عشان الشريط ما يغطيش على آخر المحتوى */
   footer{padding-bottom:calc(28px + 52px + env(safe-area-inset-bottom));}
   /* رفع الأزرار العائمة والتنبيهات فوق الشريط */
-  .float-static{bottom:calc(22px + 52px + env(safe-area-inset-bottom));}
   .toast{bottom:calc(24px + 52px + env(safe-area-inset-bottom));}
   /* أسفل درج السلة/المفضلة — يحمي زرار "إتمام الطلب" من إن الشريط يغطي عليه */
   .drawer-foot{padding-bottom:calc(20px + 56px + env(safe-area-inset-bottom));}

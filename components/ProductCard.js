@@ -61,15 +61,19 @@ export default function ProductCard({ p, swipeEnabled = true }) {
     }
   }
 
+  // لما تبديل الصور باللمس يكون متعطّل (جوه الصفوف المتمررة أفقيًا)، مابنربطش
+  // معالجات اللمس أصلًا وبنسيب المتصفح يتصرف — ده بيمنع أي تداخل مع تمرير الشريط
+  const touchHandlers = swipeEnabled
+    ? { onTouchStart, onTouchMove, onTouchEnd }
+    : {};
+
   return (
     <>
       <Link href={`/product/${p.id}`} className="card" ref={ref} onMouseMove={onMove} onMouseLeave={onLeave}>
       <div
         className="card-media"
-        style={{ "--c": `var(${catCssVar[p.cat]})`, touchAction: swipeEnabled ? "pan-y" : "auto" }}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
+        style={{ "--c": `var(${catCssVar[p.cat]})`, touchAction: swipeEnabled ? "pan-y" : "pan-x pan-y" }}
+        {...touchHandlers}
         onClick={onMediaClick}
       >
         {images.length > 0 ? (

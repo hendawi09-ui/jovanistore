@@ -23,7 +23,6 @@
   .hero-mobile{display:none;}
   /* بعرض الشاشة الكامل: بنخرج بره حدود hero-slider-wrap (1300px + هوامش 16px) */
   .hero-slider-wrap{max-width:none; padding:0 0 10px;}
-  .feature-panel{border-radius:0; box-shadow:none;}
   /* النص والشارة بيفضلوا متحاذيين مع باقي محتوى الموقع، مش ملزوقين في حرف الشاشة */
   .feature-text{
     max-width:1300px; margin-inline:auto;
@@ -38,8 +37,7 @@
 }
 
 .feature-panel{
-  position:relative; height:560px; border-radius:28px; overflow:hidden;
-  box-shadow:0 30px 60px -20px rgba(13,13,13,.25);
+  position:relative; height:560px; border-radius:0; overflow:hidden;
 }
 .feature-slide{
   position:absolute; inset:0;

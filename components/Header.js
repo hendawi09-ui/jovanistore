@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
-import { handleSearchNav } from "@/lib/searchFocus";
 import Logo from "./Logo";
 import SideMenu from "./SideMenu";
 
@@ -13,6 +12,7 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
   const [scrolled, setScrolled] = useState(false);
   const [bump, setBump] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerQuery, setHeaderQuery] = useState("");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -27,6 +27,12 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
     return () => clearTimeout(t);
   }, [cartCount]);
 
+  function submitSearch(e) {
+    e.preventDefault();
+    const q = headerQuery.trim();
+    router.push(q ? `/?q=${encodeURIComponent(q)}` : "/");
+  }
+
   return (
     <>
       <nav className={`nav ${scrolled ? "scrolled" : ""}`}>
@@ -34,19 +40,35 @@ export default function Header({ onOpenCart, onOpenFavorites }) {
           <Link href="/" className="logo">
             <Logo size="compact" />
           </Link>
-          <div className="nav-links">
-            <Link href="/">الرئيسية</Link>
-            <Link href="/orders">
-              {account?.name ? `أهلًا ${account.name.trim().split(/\s+/)[0]}` : "حسابي"}
-            </Link>
-          </div>
+
+          {/* شريط البحث — في منتصف الهيدر على الديسك توب */}
+          <form className="nav-search" onSubmit={submitSearch} role="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.5-3.5" />
+            </svg>
+            <input
+              type="search"
+              value={headerQuery}
+              onChange={(e) => setHeaderQuery(e.target.value)}
+              placeholder="ابحث عن منتج، لون، أو مقاس..."
+              aria-label="بحث في المنتجات"
+            />
+          </form>
+
           <div className="nav-actions">
-            <a href="/#search" className="nav-icon-btn" aria-label="بحث" onClick={(e) => handleSearchNav(e, router)}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20l-3.5-3.5" />
+            {/* أيقونة حسابي — مكان زرار البحث القديم */}
+            <Link
+              href="/orders"
+              className="nav-icon-btn"
+              aria-label={account?.name ? `حساب ${account.name}` : "حسابي"}
+              title={account?.name ? `أهلًا ${account.name.trim().split(/\s+/)[0]}` : "حسابي"}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21c0-4 3.6-6.5 8-6.5S20 17 20 21" />
               </svg>
-            </a>
+            </Link>
             <button className="fav-btn" onClick={onOpenFavorites} aria-label="المفضلة">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1L12 21l7.7-7.6 1.1-1a5.5 5.5 0 0 0 0-7.8z" />

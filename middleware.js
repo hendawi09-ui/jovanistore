@@ -59,6 +59,8 @@ function isPublicApi(pathname, method) {
   // تسجيل زيارة منتج — بينادى من صفحة المنتج نفسها للزوار العاديين
   if (/^\/api\/products\/[^/]+\/view$/.test(pathname) && method === "POST") return true;
   if (pathname.startsWith("/api/hero") && method === "GET") return true;
+  // الأكثر مبيعًا — قراءة فقط، بيرجع أرقام مبيعات مجمّعة من غير أي بيانات عملاء
+  if (pathname.startsWith("/api/best-sellers") && method === "GET") return true;
   if (pathname.startsWith("/api/coupons/validate")) return true;
   if (pathname.startsWith("/api/orders/mine") && method === "POST") return true;
   // متابعة الطلب برقم الموبايل — محمي جوه المسار نفسه بالرقم
