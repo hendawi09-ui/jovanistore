@@ -29,15 +29,30 @@ async function readHeroEnabled() {
 
 // عام — بتستخدمها الصفحة الرئيسية لعرض السلايدر
 export async function GET() {
-  const { data, error } = await supabase
-    .from("hero_slides")
-    .select("*")
-    .order("sort_order", { ascending: true, nullsFirst: false })
-    .order("id", { ascending: true });
+  // الاستعلامين بيشتغلوا مع بعض في نفس الوقت بدل واحد ورا التاني
+  const [slidesRes, enabled] = await Promise.all([
+    supabase
+      .from("hero_slides")
+      .select("*")
+      .order("sort_order", { ascending: true, nullsFirst: false })
+      .order("id", { ascending: true }),
+    readHeroEnabled(),
+  ]);
+
+  const { data, error } = slidesRes;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const enabled = await readHeroEnabled();
-  return NextResponse.json({ enabled, slides: data.map(toClient) });
+  return NextResponse.json(
+    { enabled, slides: data.map(toClient) },
+    {
+      headers: {
+        // السلايدات بتتغير نادرًا، فبنخزّنها مؤقتًا:
+        // الزوار بياخدوها فورًا من الكاش لمدة دقيقة، وبعدها بتتحدّث في الخلفية
+        // من غير ما حد يستنى. أي تعديل من لوحة التحكم بيبان خلال دقيقة على الأكثر.
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    }
+  );
 }
 
 // محمي — تشغيل/إلغاء السلايدر كله من لوحة التحكم
