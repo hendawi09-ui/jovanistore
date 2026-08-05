@@ -114,8 +114,9 @@ body::before{
 .search-box input::-webkit-search-cancel-button{display:none;}
 .search-clear{background:var(--paper-dim); color:var(--ink-soft); width:24px; height:24px; border-radius:50%; font-size:11px; line-height:1; flex-shrink:0; display:flex; align-items:center; justify-content:center;}
 .search-clear:hover{background:var(--ink); color:#fff;}
-.cart-btn{position:relative; background:var(--ink); color:#fff; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:transform .2s;}
-.cart-btn:hover{transform:scale(1.08);}
+/* السلة بنفس شكل المفضلة بالظبط */
+.cart-btn{position:relative; background:#fff; color:var(--ink); width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid var(--line); transition:background .2s, color .2s, transform .2s;}
+.cart-btn:hover{background:var(--ink); color:#fff;}
 .cart-count{position:absolute; top:-4px; left:-4px; background:var(--red); color:#fff; font-size:11px; font-weight:700; width:19px; height:19px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid var(--paper);}
 @keyframes bump{0%{transform:scale(1);} 35%{transform:scale(1.35);} 60%{transform:scale(.9);} 100%{transform:scale(1);}}
 .cart-btn.bump{animation:bump .45s cubic-bezier(.34,1.56,.64,1);}
@@ -557,10 +558,11 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .float-btn.dragging::after{content:""; position:absolute; inset:0; border-radius:50%; box-shadow:0 10px 26px rgba(13,13,13,.4);}
 .float-cart.dragging{filter:brightness(1.08);}
 
-.float-cart{background:var(--ink); color:#fff; box-shadow:0 7px 18px rgba(13,13,13,.34); z-index:83;}
-.float-fav{background:#fff; color:var(--red); border:1.5px solid var(--line); box-shadow:0 5px 15px rgba(20,18,31,.16); z-index:82;}
+/* الفقاعة العائمة: خلفية شفافة بإطار أسود واضح */
+.float-cart{background:rgba(255,255,255,.55); backdrop-filter:blur(6px); color:var(--ink); border:1.5px solid var(--ink); box-shadow:0 5px 15px rgba(20,18,31,.16); z-index:83;}
+.float-fav{background:rgba(255,255,255,.55); backdrop-filter:blur(6px); color:var(--red); border:1.5px solid var(--ink); box-shadow:0 5px 15px rgba(20,18,31,.16); z-index:82;}
 .float-fav:hover{background:var(--red); color:#fff; border-color:var(--red);}
-.float-show{background:var(--ink); color:#fff; box-shadow:0 7px 18px rgba(13,13,13,.34);}
+.float-show{background:rgba(255,255,255,.55); backdrop-filter:blur(6px); color:var(--ink); border:1.5px solid var(--ink); box-shadow:0 5px 15px rgba(20,18,31,.16);}
 
 /* زرار الإخفاء أصغر شوية */
 /* دائرة الإفلات (X) — بتظهر وسط أسفل الشاشة وقت السحب، وتكبر لما الفقاعة تقرب منها */

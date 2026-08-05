@@ -80,7 +80,12 @@ export default function AdminInventoryPage() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return rows.filter((r) => {
-      if (q && !r.product.name.toLowerCase().includes(q)) return false;
+      if (q) {
+        // البحث بيشمل اسم المنتج وكود القطعة مع بعض
+        const name = (r.product.name || "").toLowerCase();
+        const code = (r.product.groupKey || "").toLowerCase();
+        if (!name.includes(q) && !code.includes(q)) return false;
+      }
       if (filter === "out") return r.qty === 0;
       if (filter === "low") return r.qty > 0 && r.qty <= lowThreshold;
       if (filter === "ok") return r.qty > lowThreshold;
@@ -165,7 +170,7 @@ export default function AdminInventoryPage() {
       <div className="inv-controls">
         <input
           className="field-input"
-          placeholder="ابحث باسم المنتج..."
+          placeholder="ابحث باسم المنتج أو كود القطعة..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -197,6 +202,7 @@ export default function AdminInventoryPage() {
           <table className="inv-table">
             <thead>
               <tr>
+                <th>كود القطعة</th>
                 <th>المنتج</th>
                 <th>القسم</th>
                 <th>اللون</th>
@@ -210,6 +216,11 @@ export default function AdminInventoryPage() {
                 const state = r.qty === 0 ? "out" : r.qty <= lowThreshold ? "low" : "ok";
                 return (
                   <tr key={id} className={`inv-row inv-row-${state}`}>
+                    <td>
+                      {r.product.groupKey
+                        ? <span className="inv-code">{r.product.groupKey}</span>
+                        : <span className="inv-code-none">—</span>}
+                    </td>
                     <td className="inv-name">{r.product.name}</td>
                     <td>{catLabel[r.product.cat] || "—"}</td>
                     <td>{r.color || "—"}</td>
