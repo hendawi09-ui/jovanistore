@@ -41,7 +41,8 @@ body::before{
 .nav-inner{max-width:1180px; margin:0 auto; padding:6px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px;}
 
 /* زرار الهامبرجر — ظاهر بس في الموبايل (نفس نقطة اختفاء nav-links) */
-.hamburger-btn{display:none; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:34px; height:34px; padding:0; flex-shrink:0;}
+.hamburger-btn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; width:34px; height:34px; padding:0; flex-shrink:0; transition:opacity .2s;}
+.hamburger-btn:hover{opacity:.6;}
 .hamburger-btn span{display:block; width:21px; height:2px; background:var(--ink); border-radius:2px; transition:transform .2s, opacity .2s;}
 
 /* المنيو الجانبي */
@@ -232,6 +233,22 @@ body::before{
 .card-body h3{font-weight:600; font-size:15px;}
 .card-body .desc{font-size:12.5px; color:var(--muted);}
 .card-foot{display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:14px;}
+
+/* ===== بطاقات التحميل (Skeleton) — بتحجز مساحة المنتجات لحد ما توصل ===== */
+.card-skeleton{cursor:default; pointer-events:none;}
+.skeleton-media{aspect-ratio:3/4; background:var(--paper-dim); border-radius:14px;}
+.skeleton-line{background:var(--paper-dim); border-radius:6px; height:12px;}
+.skeleton-title{width:65%; height:15px;}
+.skeleton-desc{width:88%;}
+.skeleton-price{width:38%; height:16px;}
+.skeleton-media, .skeleton-line{animation:skeleton-pulse 1.4s ease-in-out infinite;}
+@keyframes skeleton-pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.55;}
+}
+@media (prefers-reduced-motion: reduce){
+  .skeleton-media, .skeleton-line{animation:none;}
+}
 .price{font-family:'Cairo'; font-weight:800; font-size:17px;}
 .add-btn{background:transparent; color:var(--ink); border:1.5px solid var(--ink); padding:6px 12px; border-radius:999px; font-weight:700; font-size:12px; transition:background .2s, color .2s, transform .15s;}
 .add-btn-link{display:inline-block;}
@@ -481,7 +498,6 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .hero-art{height:220px; order:-1;}
   .hero h1{font-size:40px;}
   .nav-links{display:none;}
-  .hamburger-btn{display:flex;}
   .nav-inner{position:relative; padding:6px 12px;}
   .nav-actions{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); gap:10px;}
   .grid{grid-template-columns:repeat(2,1fr);}

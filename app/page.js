@@ -6,9 +6,10 @@ import { cats, catLabel, parseSize, matchesQuery, hasDiscount } from "@/lib/prod
 import ProductCard from "@/components/ProductCard";
 import HeroSlider from "@/components/HeroSlider";
 import NewArrivalsRow from "@/components/NewArrivalsRow";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 
 function HomeContent() {
-  const { products } = useStore();
+  const { products, productsLoaded } = useStore();
   const searchParams = useSearchParams();
   const [activeCat, setActiveCat] = useState("all");
   const [query, setQuery] = useState("");
@@ -96,13 +97,31 @@ function HomeContent() {
         </div>
       </div>
 
-      {newArrivals.length > 0 && (
+      {!productsLoaded ? (
+        // بنحجز مساحة صف "وصل حديثًا" وهو بيحمّل عشان الصفحة ما تقفزش
         <>
           <div className="section-head" style={{ marginTop: 8 }}>
             <h2>✨ وصل حديثًا</h2>
           </div>
-          <NewArrivalsRow products={newArrivals} />
+          <div className="row-scroll-wrap">
+            <div className="row-scroll">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div className="row-scroll-item" key={i}>
+                  <ProductCardSkeleton />
+                </div>
+              ))}
+            </div>
+          </div>
         </>
+      ) : (
+        newArrivals.length > 0 && (
+          <>
+            <div className="section-head" style={{ marginTop: 8 }}>
+              <h2>✨ وصل حديثًا</h2>
+            </div>
+            <NewArrivalsRow products={newArrivals} />
+          </>
+        )
       )}
 
       {bestSellers.length > 0 && (
@@ -130,10 +149,13 @@ function HomeContent() {
 
       <div className="section-head" id="products">
         <h2>{q ? "نتائج البحث" : "الأحدث في المتجر"}</h2>
-        <span>{list.length} منتج</span>
+        {productsLoaded && <span>{list.length} منتج</span>}
       </div>
       <div className="grid">
-        {list.length === 0 ? (
+        {!productsLoaded ? (
+          // لسه بنحمّل — بنحجز مساحة البطاقات بدل ما نقول "لا توجد منتجات" بالغلط
+          Array.from({ length: 10 }).map((_, i) => <ProductCardSkeleton key={i} />)
+        ) : list.length === 0 ? (
           <div className="empty-state" style={{ gridColumn: "1/-1" }}>
             {q ? (
               <>

@@ -172,7 +172,15 @@ export default function HeroSlider() {
       ]
     : slides;
 
-  if (!loaded) return null;
+  // وهو بيحمّل، بنحجز نفس مساحته بالظبط بدل ما نسيبها فاضية —
+  // كده الصفحة ما تتبنيش من غيره وبعدين تقفز لما يظهر
+  if (!loaded) {
+    return (
+      <div className="hero-slider-wrap">
+        <div className="hero-skeleton" aria-hidden="true" />
+      </div>
+    );
+  }
 
   const welcome = (
     <div className="hero-welcome">

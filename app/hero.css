@@ -36,6 +36,25 @@
   .dots-desktop{max-width:1300px; margin-inline:auto;}
 }
 
+/* مساحة محجوزة وقت تحميل السلايدر — بنفس ارتفاعه بالظبط عشان الصفحة ما تقفزش */
+.hero-skeleton{
+  height:480px; background:var(--paper-dim);
+  animation:hero-skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes hero-skeleton-pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.6;}
+}
+@media (min-width:769px){
+  .hero-skeleton{height:560px;}
+}
+@media (max-width:768px){
+  .hero-skeleton{margin:0 -16px;}
+}
+@media (prefers-reduced-motion: reduce){
+  .hero-skeleton{animation:none;}
+}
+
 .feature-panel{
   position:relative; height:560px; border-radius:0; overflow:hidden;
 }

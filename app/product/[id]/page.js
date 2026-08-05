@@ -12,7 +12,7 @@ import SuggestedProducts from "@/components/SuggestedProducts";
 export default function ProductDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { products, addToCart, startBuyNow } = useStore();
+  const { products, productsLoaded, addToCart, startBuyNow } = useStore();
   const [qty, setQty] = useState(1);
   const [active, setActive] = useState(0);
   const [size, setSize] = useState("");
@@ -72,6 +72,11 @@ export default function ProductDetailPage() {
       }
     }
     touchX.current = null;
+  }
+
+  // لسه بنحمّل المنتجات — منقولش "غير موجود" غير لما نتأكد فعلًا
+  if (!productsLoaded) {
+    return <div className="empty-state">جارِ التحميل...</div>;
   }
 
   if (!p) {
