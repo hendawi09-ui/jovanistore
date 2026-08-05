@@ -84,6 +84,7 @@ function needsAdminAuth(pathname, method) {
     pathname.startsWith("/api/upload") ||
     pathname.startsWith("/api/orders") ||
     pathname.startsWith("/api/coupons") ||
+    pathname.startsWith("/api/inventory") ||
     pathname.startsWith("/api/returns");
   return guarded && !isPublicApi(pathname, method);
 }

@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { notifyNewOrder } from "@/lib/notify";
 import { stockKey } from "@/lib/products";
 import { validateCoupon } from "@/lib/coupons";
+import { logStockMoves } from "@/lib/stockLog";
 
 export async function GET() {
   const { data, error } = await supabase
@@ -14,12 +15,14 @@ export async function GET() {
 }
 
 // بينقص الكمية من المخزون لكل منتج في الطلب
-async function decrementStock(items) {
+async function decrementStock(items, orderId) {
   const ids = [...new Set((items || []).map((i) => i.productId).filter(Boolean))];
   if (ids.length === 0) return;
 
-  const { data: rows, error } = await supabase.from("products").select("id, stock").in("id", ids);
+  const { data: rows, error } = await supabase.from("products").select("id, name, stock").in("id", ids);
   if (error || !rows) return;
+
+  const moves = [];
 
   for (const row of rows) {
     if (!row.stock || typeof row.stock !== "object") continue; // المخزون غير مُفعّل لهذا المنتج
@@ -30,8 +33,19 @@ async function decrementStock(items) {
       if (item.productId !== row.id) continue;
       const key = stockKey(item.color || "", item.size || "");
       if (typeof next[key] === "number") {
-        next[key] = Math.max(0, next[key] - (item.qty || 0));
+        const before = next[key];
+        next[key] = Math.max(0, before - (item.qty || 0));
         changed = true;
+        moves.push({
+          productId: row.id,
+          productName: row.name,
+          variantKey: key,
+          change: next[key] - before,
+          before,
+          after: next[key],
+          type: "sale",
+          orderId: orderId || null,
+        });
       }
     }
 
@@ -39,6 +53,8 @@ async function decrementStock(items) {
       await supabase.from("products").update({ stock: next }).eq("id", row.id);
     }
   }
+
+  await logStockMoves(moves);
 }
 
 export async function POST(req) {
@@ -74,7 +90,7 @@ export async function POST(req) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   try {
-    await decrementStock(order.items);
+    await decrementStock(order.items, data?.[0]?.id);
   } catch (e) {
     console.error("decrementStock failed:", e);
   }

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 const TABS = [
   { href: "/admin/dashboard", label: "لوحة المعلومات" },
   { href: "/admin", label: "المنتجات" },
+  { href: "/admin/inventory", label: "المخزون", badge: "stock" },
   { href: "/admin/orders", label: "طلبات الشراء", badge: "orders" },
   { href: "/admin/returns", label: "الاسترجاع والاستبدال", badge: "returns" },
   { href: "/admin/archive", label: "الأرشيف" },
@@ -16,7 +17,7 @@ const TABS = [
 
 export default function AdminTabs({ active }) {
   const router = useRouter();
-  const [counts, setCounts] = useState({ orders: 0, returns: 0 });
+  const [counts, setCounts] = useState({ orders: 0, returns: 0, stock: 0 });
 
   async function handleLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -27,14 +28,27 @@ export default function AdminTabs({ active }) {
     let alive = true;
     (async () => {
       try {
-        const [o, r] = await Promise.all([
+        const [o, r, prods] = await Promise.all([
           fetch("/api/orders").then((x) => (x.ok ? x.json() : [])),
           fetch("/api/returns").then((x) => (x.ok ? x.json() : [])),
+          fetch("/api/products").then((x) => (x.ok ? x.json() : [])),
         ]);
         if (!alive) return;
+
+        // حد التنبيه اللي المستخدم ظابطه في صفحة المخزون
+        const low = Number(localStorage.getItem("jv_low_stock_threshold")) || 3;
+        let needAttention = 0;
+        for (const p of Array.isArray(prods) ? prods : []) {
+          if (!p.stock || typeof p.stock !== "object") continue;
+          for (const qty of Object.values(p.stock)) {
+            if (typeof qty === "number" && qty <= low) needAttention++;
+          }
+        }
+
         setCounts({
           orders: Array.isArray(o) ? o.filter((x) => (x.status || "pending") === "pending").length : 0,
           returns: Array.isArray(r) ? r.filter((x) => (x.status || "new") === "new").length : 0,
+          stock: needAttention,
         });
       } catch {
         /* العدّادات مش حرجة — لو فشلت الصفحة بتشتغل عادي */
