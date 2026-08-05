@@ -1,7 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 export default function HeroSlider() {
   const [slides, setSlides] = useState([]);
@@ -205,15 +204,12 @@ export default function HeroSlider() {
               </div>
               <div className="feature-img">
                 {s.image ? (
-                  <Image
+                  <img
                     src={s.image}
                     alt={s.title}
-                    fill
-                    sizes="100vw"
-                    // أول سلايدة هي أول حاجة الزائر بيشوفها، فبتتحمّل بأولوية
-                    priority={i === 0}
-                    style={{ objectFit: "cover" }}
-                    onError={(e) => { e.currentTarget.style.display = "none"; }}
+                    // أول سلايدة هي أول حاجة الزائر بيشوفها، فبتتحمّل فورًا
+                    loading={i === 0 ? "eager" : "lazy"}
+                    fetchPriority={i === 0 ? "high" : undefined}
                   />
                 ) : (
                   <div className="feature-img-empty" />
@@ -265,14 +261,11 @@ export default function HeroSlider() {
             return (
               <div key={`${s.id}-${i}`} className="m-slide" aria-hidden={s._clone || undefined}>
                 {mImg ? (
-                  <Image
+                  <img
                     src={mImg}
                     alt={s.title}
-                    fill
-                    sizes="100vw"
-                    priority={i === 0}
-                    style={{ objectFit: "cover" }}
-                    onError={(e) => { e.currentTarget.style.display = "none"; }}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    fetchPriority={i === 0 ? "high" : undefined}
                   />
                 ) : (
                   <div className="m-slide-empty" />
