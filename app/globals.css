@@ -89,10 +89,10 @@ body::before{
 @media (min-width:921px){
   .nav-search{
     display:flex; align-items:center; gap:9px; flex:1; max-width:440px;
-    margin-inline:auto; background:#fff; border:1.5px solid var(--line);
+    margin-inline:auto; background:#fff; border:1px solid var(--ink);
     border-radius:999px; padding:0 16px; transition:border-color .2s, box-shadow .2s;
   }
-  .nav-search:focus-within{border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,13,13,.05);}
+  .nav-search:focus-within{box-shadow:0 0 0 3px rgba(13,13,13,.12);}
   .nav-search svg{width:17px; height:17px; color:var(--muted); flex-shrink:0;}
   .nav-search input{
     flex:1; min-width:0; border:none; outline:none; background:none;
@@ -105,8 +105,8 @@ body::before{
 }
 
 .search-wrap{max-width:1400px; margin:0 auto; padding:0 16px 4px; scroll-margin-top:110px;}
-.search-box{position:relative; display:flex; align-items:center; gap:10px; background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:0 18px; transition:border-color .2s, box-shadow .2s;}
-.search-box:focus-within{border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,13,13,.05);}
+.search-box{position:relative; display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--ink); border-radius:999px; padding:0 18px; transition:border-color .2s, box-shadow .2s;}
+.search-box:focus-within{box-shadow:0 0 0 3px rgba(13,13,13,.12);}
 .search-box > svg{width:19px; height:19px; color:var(--muted); flex-shrink:0;}
 .search-box input{flex:1; border:none; outline:none; background:none; padding:15px 0; font-size:14.5px; font-family:inherit; color:var(--ink);}
 .search-box input::placeholder{color:var(--muted);}
@@ -907,11 +907,11 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 }
 
 /* ===== زرار كشف كلمة السر ===== */
-.password-field{position:relative; display:flex;}
-.password-field input{flex:1; padding-left:46px;}
-.password-toggle{position:absolute; left:6px; top:50%; transform:translateY(-50%); width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:none; color:var(--muted); border-radius:8px; transition:color .2s, background .2s;}
-.password-toggle:hover{color:var(--ink); background:var(--paper-dim);}
-.password-toggle svg{width:19px; height:19px;}
+.password-field{position:relative; display:flex; align-items:center;}
+.password-field input{flex:1; width:100%; padding-left:48px;}
+.password-toggle{position:absolute; left:8px; top:50%; transform:translateY(-50%); width:32px; height:32px; display:flex; align-items:center; justify-content:center; background:none; color:var(--muted); border-radius:8px; transition:color .2s, background .2s;}
+.password-toggle:hover, .password-toggle:active{color:var(--ink); background:var(--paper-dim);}
+.password-toggle svg{width:18px; height:18px;}
 
 /* ===== تأكيد تغيير كلمة السر ===== */
 .pwd-confirm{background:#FFF9E5; border:1px solid #FFE9A0; color:#7A5D00; font-size:13.5px; line-height:1.9; padding:14px 18px; border-radius:14px; margin-top:6px;}
