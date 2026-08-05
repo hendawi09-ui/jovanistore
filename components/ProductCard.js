@@ -9,7 +9,7 @@ import QuickAddModal from "./QuickAddModal";
 
 export default function ProductCard({ p, swipeEnabled = true }) {
   const ref = useRef(null);
-  const { addToCart, isFavorite, toggleFavorite } = useStore();
+  const { addToCart, isFavorite, toggleFavorite, isInCart } = useStore();
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
   const [quickOpen, setQuickOpen] = useState(false);
@@ -19,6 +19,7 @@ export default function ProductCard({ p, swipeEnabled = true }) {
   useEffect(() => { setImgFailed(false); }, [active]);
   const hasVariants = p.sizes?.length > 0; // اللون بقى منتج مستقل، فالاختيار السريع للمقاسات بس
   const soldOut = getTotalStock(p) === 0;
+  const inCart = isInCart(p.id); // بنظلّل البطاقة لو المنتج في السلة
 
   const touchX = useRef(null);
   const swiped = useRef(false);
@@ -73,7 +74,7 @@ export default function ProductCard({ p, swipeEnabled = true }) {
 
   return (
     <>
-      <Link href={`/product/${p.id}`} className="card" ref={ref} onMouseMove={onMove} onMouseLeave={onLeave}>
+      <Link href={`/product/${p.id}`} className={`card ${inCart ? "in-cart" : ""}`} ref={ref} onMouseMove={onMove} onMouseLeave={onLeave}>
       <div
         className="card-media"
         style={{ "--c": `var(${catCssVar[p.cat]})`, touchAction: swipeEnabled ? "pan-y" : "pan-x pan-y" }}
@@ -109,8 +110,8 @@ export default function ProductCard({ p, swipeEnabled = true }) {
         {soldOut && <div className="soldout-overlay">نفدت الكمية</div>}
         {!soldOut && (
           <button
-            className="cart-toggle"
-            aria-label="أضف للسلة"
+            className={`cart-toggle ${inCart ? "active" : ""}`}
+            aria-label={inCart ? "المنتج في السلة — أضف واحد كمان" : "أضف للسلة"}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();

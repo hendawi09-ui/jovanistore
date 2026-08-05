@@ -14,8 +14,12 @@ export default function NewArrivalsRow({ products }) {
   const trackRef = useRef(null);
   const busy = useRef(false);        // بنمنع تصحيح الموضع وهو بيصحّح بالفعل أو وقت حركة الأسهم
   const unlockTimer = useRef(null);
+  const settleTimer = useRef(null);
 
-  useEffect(() => () => clearTimeout(unlockTimer.current), []);
+  useEffect(() => () => {
+    clearTimeout(unlockTimer.current);
+    clearTimeout(settleTimer.current);
+  }, []);
 
   const visualList = [...products, ...products, ...products].reverse();
 
@@ -33,22 +37,25 @@ export default function NewArrivalsRow({ products }) {
     return () => cancelAnimationFrame(id);
   }, [products.length, oneSetWidth]);
 
-  // التصحيح اللانهائي للسحب باللمس — متوقف وقت حركة الأسهم عشان ما يتعارضش معاها
+  // التصحيح اللانهائي — بيستنى لحد ما التمرير يهدأ خالص قبل ما يحرّك الشريط.
+  // لو صحّحنا والمستخدم لسه بيمرر (أو الشاشة لسه فيها اندفاع)، هيحس إن الشريط
+  // بيتشد من إيده — عشان كده بنأجّل التصحيح لحظة سكون.
   function handleScroll() {
     const el = trackRef.current;
-    if (!el || busy.current) return;
-    const set = oneSetWidth();
-    if (set === 0) return;
+    if (!el) return;
 
-    if (el.scrollLeft < set * 0.5) {
-      busy.current = true;
-      el.scrollLeft += set;
-      requestAnimationFrame(() => { busy.current = false; });
-    } else if (el.scrollLeft > set * 1.5) {
-      busy.current = true;
-      el.scrollLeft -= set;
-      requestAnimationFrame(() => { busy.current = false; });
-    }
+    clearTimeout(settleTimer.current);
+    settleTimer.current = setTimeout(() => {
+      if (busy.current) return;
+      const set = oneSetWidth();
+      if (set === 0) return;
+
+      if (el.scrollLeft < set * 0.5) {
+        el.scrollLeft += set;
+      } else if (el.scrollLeft > set * 1.5) {
+        el.scrollLeft -= set;
+      }
+    }, 140);
   }
 
   function scrollByCard(dir) {
