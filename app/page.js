@@ -9,7 +9,7 @@ import NewArrivalsRow from "@/components/NewArrivalsRow";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 
 function HomeContent() {
-  const { products, productsLoaded } = useStore();
+  const { products: allProducts, productsLoaded, storeMode } = useStore();
   const searchParams = useSearchParams();
   const [activeCat, setActiveCat] = useState("all");
   const [query, setQuery] = useState("");
@@ -26,7 +26,11 @@ function HomeContent() {
   useEffect(() => {
     const c = searchParams.get("cat");
     if (c) {
-      setActiveCat(c);
+      // في وضع القسم الواحد، أي رابط قديم لقسم مخفي بيرجّعنا لـ"الكل"
+      // بدل ما نوري الزائر صفحة فاضية
+      const hiddenCat =
+        (storeMode === "women" && c === "men") || (storeMode === "men" && c === "women");
+      setActiveCat(hiddenCat ? "all" : c);
       // النزول التلقائي لقسم المنتجات لو المستخدم جاي من رابط فيه قسم محدد (زي زرار السلايدر)
       setTimeout(() => {
         document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -34,7 +38,17 @@ function HomeContent() {
     }
     const q = searchParams.get("q");
     if (q) setQuery(q);
-  }, [searchParams]);
+  }, [searchParams, storeMode]);
+
+  // وضع المتجر: لو متظبط على قسم واحد، بنستبعد الباقي من كل حتة في الصفحة
+  const products = storeMode === "all"
+    ? allProducts
+    : allProducts.filter((p) => p.cat === storeMode);
+
+  // في وضع القسم الواحد، تبويبات الأقسام التانية مالهاش لازمة
+  const visibleCats = storeMode === "all"
+    ? cats
+    : cats.filter((c) => c.id === "all" || c.id === "sale");
 
   const q = query.trim();
   const list = products.filter((p) => {
@@ -134,7 +148,7 @@ function HomeContent() {
       )}
 
       <div className="cats">
-        {cats.map((c) => (
+        {visibleCats.map((c) => (
           <button
             key={c.id}
             className={`cat-tab ${activeCat === c.id ? "active" : ""}`}

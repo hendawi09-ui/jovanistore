@@ -1,8 +1,10 @@
 "use client";
 import Link from "next/link";
 import { contact, hasWhatsApp } from "@/lib/siteConfig";
+import { useStore } from "@/lib/StoreContext";
 
 export default function Footer() {
+  const { storeMode } = useStore();
   return (
     <footer id="about">
       <div className="footer-inner">
@@ -42,8 +44,9 @@ export default function Footer() {
         </div>
         <div className="footer-col">
           <h4>تسوّق</h4>
-          <Link href="/?cat=men">رجالي</Link>
-          <Link href="/?cat=women">نسائي</Link>
+          {/* في وضع القسم الواحد بنخفي رابط القسم التاني */}
+          {storeMode !== "women" && <Link href="/?cat=men">رجالي</Link>}
+          {storeMode !== "men" && <Link href="/?cat=women">نسائي</Link>}
         </div>
         <div className="footer-col">
           <h4>الدعم</h4>

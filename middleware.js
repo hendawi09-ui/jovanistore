@@ -61,6 +61,8 @@ function isPublicApi(pathname, method) {
   if (pathname.startsWith("/api/hero") && method === "GET") return true;
   // الأكثر مبيعًا — قراءة فقط، بيرجع أرقام مبيعات مجمّعة من غير أي بيانات عملاء
   if (pathname.startsWith("/api/best-sellers") && method === "GET") return true;
+  // وضع عرض المتجر — القراءة عامة (الواجهة محتاجاها)، والتبديل محمي تحت
+  if (pathname.startsWith("/api/store-mode") && method === "GET") return true;
   if (pathname.startsWith("/api/coupons/validate")) return true;
   if (pathname.startsWith("/api/orders/mine") && method === "POST") return true;
   // متابعة الطلب برقم الموبايل — محمي جوه المسار نفسه بالرقم
@@ -85,6 +87,7 @@ function needsAdminAuth(pathname, method) {
     pathname.startsWith("/api/orders") ||
     pathname.startsWith("/api/coupons") ||
     pathname.startsWith("/api/inventory") ||
+    pathname.startsWith("/api/store-mode") ||
     pathname.startsWith("/api/returns");
   return guarded && !isPublicApi(pathname, method);
 }

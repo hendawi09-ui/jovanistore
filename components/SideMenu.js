@@ -14,7 +14,7 @@ const links = [
 ];
 
 export default function SideMenu({ open, onClose }) {
-  const { account } = useStore();
+  const { account, storeMode } = useStore();
   const scrollY = useRef(0);
 
   // قفل تمرير الصفحة اللي وراه بنفس طريقة أدراج السلة والمفضلة —
@@ -55,7 +55,14 @@ export default function SideMenu({ open, onClose }) {
           <button className="side-menu-close" onClick={onClose} aria-label="إغلاق المنيو" tabIndex={open ? 0 : -1}>✕</button>
         </div>
         <nav className="side-menu-links">
-          {links.map((l) => (
+          {links
+            .filter((l) => {
+              // في وضع القسم الواحد، بنخفي رابط القسم التاني
+              if (storeMode === "women" && l.href === "/?cat=men") return false;
+              if (storeMode === "men" && l.href === "/?cat=women") return false;
+              return true;
+            })
+            .map((l) => (
             <Link key={l.href} href={l.href} onClick={onClose} tabIndex={open ? 0 : -1}>
               <span className="side-menu-icon" aria-hidden="true">{l.icon}</span>
               {l.label}
