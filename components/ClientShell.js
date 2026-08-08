@@ -19,6 +19,7 @@ export default function ClientShell({ children }) {
   const hideFloating =
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/account") ||
+    pathname?.startsWith("/orders") ||
     pathname === "/checkout";
   const scrollY = useRef(0);
   const pushedState = useRef(false);

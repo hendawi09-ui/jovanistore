@@ -620,13 +620,19 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 /* أيقونة القلب على بطاقة المنتج */
 .fav-toggle{position:absolute; top:9px; right:9px; z-index:3; width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; transition:background .2s, transform .15s;}
 .fav-toggle svg{width:13px; height:13px; fill:none; stroke:var(--ink-soft); transition:fill .2s, stroke .2s;}
-.fav-toggle:hover{transform:scale(1.1);}
+@media (hover:hover) and (pointer:fine){
+  .fav-toggle:hover{transform:scale(1.1);}
+}
 .fav-toggle.active svg{fill:var(--red); stroke:var(--red);}
 
 .cart-toggle{position:absolute; bottom:9px; right:9px; z-index:3; width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; transition:background .2s, transform .15s;}
 .cart-toggle svg{width:13px; height:13px; stroke:var(--ink-soft);}
-.cart-toggle:hover{background:var(--ink);}
-.cart-toggle:hover svg{stroke:#fff;}
+/* تأثير المرور للماوس بس — على الموبايل حالة hover بتفضل عالقة بعد اللمس،
+   وده كان بيخلي الدايرة سودا حتى بعد ما المنتج يتشال من السلة */
+@media (hover:hover) and (pointer:fine){
+  .cart-toggle:hover{background:var(--ink);}
+  .cart-toggle:hover svg{stroke:#fff;}
+}
 .cart-toggle:active{transform:scale(.9);}
 
 /* المنتج موجود في السلة — تظليل واضح على البطاقة */
