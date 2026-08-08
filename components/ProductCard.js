@@ -9,7 +9,7 @@ import QuickAddModal from "./QuickAddModal";
 
 export default function ProductCard({ p, swipeEnabled = true }) {
   const ref = useRef(null);
-  const { addToCart, isFavorite, toggleFavorite, isInCart } = useStore();
+  const { addToCart, isFavorite, toggleFavorite, isInCart, removeProductFromCart } = useStore();
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
   const [quickOpen, setQuickOpen] = useState(false);
@@ -111,12 +111,17 @@ export default function ProductCard({ p, swipeEnabled = true }) {
         {!soldOut && (
           <button
             className={`cart-toggle ${inCart ? "active" : ""}`}
-            aria-label={inCart ? "المنتج في السلة — أضف واحد كمان" : "أضف للسلة"}
+            aria-label={inCart ? "شيل المنتج من السلة" : "أضف للسلة"}
+            title={inCart ? "شيل من السلة" : "أضف للسلة"}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              // لو المنتج عنده ألوان أو مقاسات، بنفتح نافذة سريعة للاختيار قبل الإضافة
-              if (hasVariants) {
+              // لو المنتج في السلة بالفعل، الضغطة التانية بتشيله
+              if (inCart) {
+                removeProductFromCart(p.id);
+                showToast("اتشال المنتج من سلتك");
+              } else if (hasVariants) {
+                // عنده ألوان أو مقاسات → نافذة سريعة للاختيار قبل الإضافة
                 setQuickOpen(true);
               } else {
                 addToCart(p.id);
@@ -124,11 +129,18 @@ export default function ProductCard({ p, swipeEnabled = true }) {
               }
             }}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M3 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6" />
-              <circle cx="9" cy="21" r="1.4" />
-              <circle cx="18" cy="21" r="1.4" />
-            </svg>
+            {inCart ? (
+              // علامة صح = المنتج في السلة (والضغط بيشيله)
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12.5l4.5 4.5L19 7.5" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 3h2l2.4 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6" />
+                <circle cx="9" cy="21" r="1.4" />
+                <circle cx="18" cy="21" r="1.4" />
+              </svg>
+            )}
           </button>
         )}
         {images.length > 1 && (

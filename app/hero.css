@@ -430,49 +430,53 @@
   .inv-controls > .field-input{min-width:140px;}
 }
 
-/* ===== عرض المخزون مجمّعًا بكود القطعة ===== */
-.inv-groups{display:flex; flex-direction:column; gap:14px;}
-.inv-group{
-  background:#fff; border:1px solid var(--line); border-radius:14px;
-  overflow:hidden; border-right:3px solid var(--line);
+/* ===== عرض المخزون: كل منتج في سطر واحد شامل ألوانه ومقاساته ===== */
+.inv-groups{display:flex; flex-direction:column; gap:10px;}
+.inv-line{
+  display:flex; align-items:center; gap:14px;
+  background:#fff; border:1px solid var(--line); border-radius:12px;
+  border-right:3px solid var(--line); padding:11px 14px;
 }
-.inv-group-out{border-right-color:var(--red);}
-.inv-group-low{border-right-color:#B7791F;}
-.inv-group-ok{border-right-color:#1A8A47;}
+.inv-line-out{border-right-color:var(--red); background:rgba(227,27,35,.025);}
+.inv-line-low{border-right-color:#B7791F; background:rgba(183,121,31,.04);}
+.inv-line-ok{border-right-color:#1A8A47;}
 
-.inv-group-head{
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  padding:12px 14px; background:var(--paper-dim); border-bottom:1px solid var(--line);
-}
-.inv-group-name{font-weight:800; font-size:14px;}
-.inv-group-cat{font-size:12px; color:var(--muted); font-weight:700;}
-.inv-group-total{margin-inline-start:auto; font-size:12.5px; font-weight:800; color:var(--ink-soft); white-space:nowrap;}
+/* عمود التعريف على اليمين */
+.inv-line-id{display:flex; flex-direction:column; gap:3px; flex-shrink:0; min-width:150px; max-width:190px;}
+.inv-group-name{font-weight:800; font-size:13.5px; line-height:1.35;}
+.inv-group-cat{font-size:11.5px; color:var(--muted); font-weight:700;}
 
-.inv-color-row{display:flex; align-items:flex-start; gap:12px; padding:12px 14px; border-bottom:1px solid var(--line);}
-.inv-color-row:last-child{border-bottom:none;}
+/* الألوان والمقاسات كلها على نفس السطر، وبتلف لو ضاقت المساحة */
+.inv-line-variants{display:flex; flex-wrap:wrap; align-items:center; gap:10px; flex:1; min-width:0;}
+.inv-color-block{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
 .inv-color-link{
   display:inline-flex; align-items:center; gap:5px; flex-shrink:0;
-  font-weight:700; font-size:13px; color:var(--ink);
-  background:var(--paper-dim); padding:7px 11px; border-radius:9px;
-  min-width:96px; transition:background .2s, color .2s;
+  font-weight:700; font-size:12.5px; color:var(--ink);
+  background:var(--paper-dim); padding:6px 10px; border-radius:8px;
+  transition:background .2s, color .2s;
 }
 .inv-color-link:hover{background:var(--ink); color:#fff;}
-.inv-color-link svg{width:13px; height:13px; opacity:.65; flex-shrink:0;}
+.inv-color-link svg{width:12px; height:12px; opacity:.6; flex-shrink:0;}
 
-.inv-sizes{display:flex; flex-wrap:wrap; gap:8px; flex:1;}
 .inv-size-chip{
-  display:flex; align-items:center; gap:8px;
-  border:1.5px solid var(--line); border-radius:10px; padding:5px 8px 5px 5px;
-  background:#fff;
+  display:flex; align-items:center; gap:6px;
+  border:1.5px solid var(--line); border-radius:9px; padding:4px 7px 4px 4px;
+  background:#fff; flex-shrink:0;
 }
-.inv-chip-out{border-color:var(--red); background:rgba(227,27,35,.04);}
-.inv-chip-low{border-color:#B7791F; background:rgba(183,121,31,.06);}
-.inv-size-label{font-size:12.5px; font-weight:700; color:var(--ink-soft); min-width:34px; text-align:center;}
+.inv-chip-out{border-color:var(--red); background:rgba(227,27,35,.05);}
+.inv-chip-low{border-color:#B7791F; background:rgba(183,121,31,.07);}
+.inv-size-label{font-size:12px; font-weight:800; color:var(--ink-soft); min-width:26px; text-align:center;}
 
-@media (max-width:640px){
-  .inv-color-row{flex-direction:column; gap:9px;}
-  .inv-color-link{width:100%; justify-content:space-between;}
-  .inv-sizes{width:100%;}
-  .inv-size-chip{flex:1; min-width:calc(50% - 4px); justify-content:space-between;}
-  .inv-group-total{margin-inline-start:0; width:100%;}
+/* الإجمالي على الشمال */
+.inv-line-total{
+  flex-shrink:0; font-family:'Cairo'; font-weight:900; font-size:17px;
+  min-width:40px; text-align:center; color:var(--ink-soft);
 }
+
+@media (max-width:768px){
+  .inv-line{flex-direction:column; align-items:stretch; gap:10px; position:relative;}
+  .inv-line-id{max-width:none; padding-inline-end:46px;}
+  .inv-line-total{position:absolute; top:11px; left:14px; text-align:left;}
+  .inv-size-chip{flex:1; min-width:calc(50% - 3px); justify-content:space-between;}
+}
+

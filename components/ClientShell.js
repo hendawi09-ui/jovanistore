@@ -14,6 +14,12 @@ export default function ClientShell({ children }) {
   const pathname = usePathname();
   const [panel, setPanel] = useState(null); // null | "cart" | "favorites"
   const [floatHidden, setFloatHidden] = useState(false);
+
+  // صفحات مالهاش علاقة بالتسوّق — الفقاعة العائمة بتتشال منها
+  const hideFloating =
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/account") ||
+    pathname === "/checkout";
   const scrollY = useRef(0);
   const pushedState = useRef(false);
 
@@ -136,12 +142,15 @@ export default function ClientShell({ children }) {
       <Footer />
       <CartDrawer open={panel === "cart"} onClose={closePanel} onCheckout={goToCheckout} />
       <FavoritesDrawer open={panel === "favorites"} onClose={closePanel} />
-      <FloatingActions
-        onOpenCart={openCart}
-        onOpenFavorites={openFavorites}
-        hidden={floatHidden}
-        onHide={() => setFloatHidden(true)}
-      />
+      {/* الفقاعة العائمة للمتجر بس — مالهاش لازمة في لوحة التحكم ولا صفحات الدخول */}
+      {!hideFloating && (
+        <FloatingActions
+          onOpenCart={openCart}
+          onOpenFavorites={openFavorites}
+          hidden={floatHidden}
+          onHide={() => setFloatHidden(true)}
+        />
+      )}
       <MobileNav />
       <Toast />
     </>

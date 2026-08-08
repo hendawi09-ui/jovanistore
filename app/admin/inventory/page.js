@@ -242,8 +242,9 @@ export default function AdminInventoryPage() {
             }
 
             return (
-              <div key={g.code || g.label} className={`inv-group inv-group-${worst}`}>
-                <div className="inv-group-head">
+              <div key={g.code || g.label} className={`inv-line inv-line-${worst}`}>
+                {/* عمود التعريف: الكود والاسم */}
+                <div className="inv-line-id">
                   {g.code ? (
                     <span className="inv-code">{g.code}</span>
                   ) : (
@@ -251,32 +252,32 @@ export default function AdminInventoryPage() {
                   )}
                   <span className="inv-group-name">{g.label}</span>
                   <span className="inv-group-cat">{catLabel[g.cat] || "—"}</span>
-                  <span className="inv-group-total">الإجمالي: {total}</span>
                 </div>
 
-                {[...byColor.entries()].map(([color, items]) => (
-                  <div className="inv-color-row" key={color || "__none"}>
-                    <a
-                      className="inv-color-link"
-                      href={`/product/${items[0].product.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title="افتح صفحة المنتج بهذا اللون"
-                    >
-                      {color || "بدون لون"}
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14 4h6v6" /><path d="M20 4L10 14" />
-                        <path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" />
-                      </svg>
-                    </a>
+                {/* كل الألوان والمقاسات على نفس السطر */}
+                <div className="inv-line-variants">
+                  {[...byColor.entries()].map(([color, items]) => (
+                    <div className="inv-color-block" key={color || "__none"}>
+                      <a
+                        className="inv-color-link"
+                        href={`/product/${items[0].product.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="افتح صفحة المنتج بهذا اللون"
+                      >
+                        {color || "بدون لون"}
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 4h6v6" /><path d="M20 4L10 14" />
+                          <path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" />
+                        </svg>
+                      </a>
 
-                    <div className="inv-sizes">
                       {items.map((r) => {
                         const id = `${r.product.id}:${r.key}`;
                         const state = r.qty === 0 ? "out" : r.qty <= lowThreshold ? "low" : "ok";
                         return (
                           <div key={id} className={`inv-size-chip inv-chip-${state}`}>
-                            <span className="inv-size-label">{r.size || "مقاس واحد"}</span>
+                            <span className="inv-size-label">{r.size || "—"}</span>
                             <div className="inv-qty">
                               <button
                                 className="inv-step"
@@ -303,8 +304,10 @@ export default function AdminInventoryPage() {
                         );
                       })}
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+
+                <span className="inv-line-total">{total}</span>
               </div>
             );
           })}
