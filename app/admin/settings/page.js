@@ -53,11 +53,13 @@ export default function AdminSettingsPage() {
       body: JSON.stringify({ mode: next }),
     });
 
+    const data = await res.json().catch(() => ({}));
     setSaving(false);
 
-    if (!res.ok) {
+    if (!res.ok || !data.ok) {
       setMode(prev);
-      showToast("فشل الحفظ — رجعنا الوضع القديم");
+      // بنعرض السبب الحقيقي بدل رسالة عامة — بيسهّل معرفة المشكلة
+      showToast(data.error ? `فشل الحفظ: ${data.error}` : "فشل الحفظ");
       return;
     }
     showToast("اتحفظ ✓ التغيير شغّال على الموقع فورًا");
