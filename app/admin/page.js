@@ -11,6 +11,7 @@ import { compressImage, compressionLabel } from "@/lib/compressImage";
 const emptyForm = { name: "", price: "", salePrice: "", cat: "men", icon: "shirt", desc: "", groupKey: "", colorName: "", sizes: "" };
 
 export default function AdminPage() {
+  const { cat: catFilter, setCat: setCatFilter } = useAdminCatFilter();
   const { products, addProduct, updateProduct, deleteProduct, togglePublish, reorderProducts } = useStore();
   const [form, setForm] = useState(emptyForm);
   const [images, setImages] = useState([]); // uploaded image URLs for the product being added/edited
@@ -157,7 +158,8 @@ export default function AdminPage() {
     e.preventDefault();
     const sizes = form.sizes.split(",").map((s) => s.trim()).filter(Boolean);
     const payload = {
-      cat: form.cat,
+      // لو الصفحة مفلترة على قسم، المنتج بيتسجّل فيه تلقائيًا من غير ما نسأل
+      cat: catFilter === "all" ? form.cat : catFilter,
       icon: form.icon,
       name: form.name,
       desc: form.desc || "منتج جديد من Jovani Store.",
@@ -359,8 +361,6 @@ export default function AdminPage() {
 
   // بحث في الاسم، الوصف، اسم اللون، كود المجموعة، والمقاسات
   const q = query.trim();
-  const { cat: catFilter, setCat: setCatFilter } = useAdminCatFilter();
-
   function matches(p) {
     // فلتر القسم مشترك مع باقي صفحات لوحة التحكم
     if (catFilter !== "all" && p.cat !== catFilter) return false;
@@ -373,12 +373,47 @@ export default function AdminPage() {
 
   const publishedList = products.filter((p) => p.published !== false && matches(p));
   const unpublishedList = products.filter((p) => p.published === false && matches(p));
+  // أعداد المنتجات في القسم المختار — بتظهر على الأزرار عشان التأثير يبان
+  const catOnly = products.filter((p) => catFilter === "all" || p.cat === catFilter);
+  const statusCounts = {
+    all: catOnly.length,
+    published: catOnly.filter((p) => p.published !== false).length,
+    unpublished: catOnly.filter((p) => p.published === false).length,
+  };
+  // أعداد كل قسم — بتظهر على أزرار الكل/رجالي/نسائي
+  const catCounts = {
+    all: products.length,
+    men: products.filter((p) => p.cat === "men").length,
+    women: products.filter((p) => p.cat === "women").length,
+  };
+
   const showPublished = filter === "all" || filter === "published";
   const showUnpublished = filter === "all" || filter === "unpublished";
 
   return (
     <div className="admin-wrap">
       <AdminTabs active="/admin" />
+
+      {/* الفلاتر فوق الصفحة: القسم أولًا، وبعده حالة النشر */}
+      <div className="admin-top-filters">
+        <AdminCatFilter cat={catFilter} setCat={setCatFilter} counts={catCounts} />
+        <div className="admin-filter">
+          {[
+            { k: "all", label: "الكل" },
+            { k: "published", label: "منشور" },
+            { k: "unpublished", label: "غير منشور" },
+          ].map((f) => (
+            <button
+              key={f.k}
+              className={`filter-tab ${filter === f.k ? "active" : ""}`}
+              onClick={() => setFilter(f.k)}
+            >
+              {f.label}
+              <span className="ft-count">{statusCounts[f.k]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="section-head" style={{ margin: "0 0 12px", padding: 0 }} ref={formTopRef}>
         <h2>{editingId ? "تعديل منتج" : "إضافة منتج جديد"}</h2>
         {editingId && (
@@ -396,13 +431,16 @@ export default function AdminPage() {
             <label>السعر بعد الخصم (اختياري)</label>
             <input type="number" min="1" name="salePrice" value={form.salePrice} onChange={handleChange} placeholder="اتركه فارغًا لو مفيش خصم" />
           </div>
-          <div className="field">
-            <label>القسم</label>
-            <select className="admin-select" name="cat" value={form.cat} onChange={handleChange}>
-              <option value="men">رجالي</option>
-              <option value="women">نسائي</option>
-            </select>
-          </div>
+          {/* القسم بيظهر بس في وضع "الكل" — لو مفلتر على قسم، المنتج بيتسجّل فيه تلقائيًا */}
+          {catFilter === "all" && (
+            <div className="field">
+              <label>القسم</label>
+              <select className="admin-select" name="cat" value={form.cat} onChange={handleChange}>
+                <option value="men">رجالي</option>
+                <option value="women">نسائي</option>
+              </select>
+            </div>
+          )}
           <div className="field">
             <label>الأيقونة (تظهر لو مفيش صور)</label>
             <select className="admin-select" name="icon" value={form.icon} onChange={handleChange}>
@@ -486,8 +524,6 @@ export default function AdminPage() {
         </button>
       </form>
 
-      <AdminCatFilter cat={catFilter} setCat={setCatFilter} />
-
       <div className="admin-search">
         <div className="admin-search-box">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -503,21 +539,6 @@ export default function AdminPage() {
           {query && (
             <button className="search-clear" onClick={() => setQuery("")} aria-label="مسح">✕</button>
           )}
-        </div>
-        <div className="admin-filter">
-          {[
-            { k: "all", label: "الكل" },
-            { k: "published", label: "منشور" },
-            { k: "unpublished", label: "غير منشور" },
-          ].map((f) => (
-            <button
-              key={f.k}
-              className={`filter-tab ${filter === f.k ? "active" : ""}`}
-              onClick={() => setFilter(f.k)}
-            >
-              {f.label}
-            </button>
-          ))}
         </div>
       </div>
 

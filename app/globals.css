@@ -679,8 +679,10 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
 .admin-search-box input{flex:1; border:none; outline:none; background:none; padding:11px 0; font-size:13.5px; font-family:inherit;}
 .admin-search-box input::-webkit-search-cancel-button{display:none;}
 .admin-filter{display:flex; gap:6px; background:var(--paper-dim); padding:4px; border-radius:999px;}
-.filter-tab{padding:8px 16px; border-radius:999px; font-size:12.5px; font-weight:700; color:var(--ink-soft); transition:background .2s, color .2s;}
+.filter-tab{display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:999px; font-size:12.5px; font-weight:700; color:var(--ink-soft); transition:background .2s, color .2s;}
 .filter-tab.active{background:var(--ink); color:#fff;}
+.ft-count{background:rgba(0,0,0,.10); font-size:11px; font-weight:800; padding:1px 7px; border-radius:999px;}
+.filter-tab.active .ft-count{background:rgba(255,255,255,.25);}
 
 /* زرار النقل لأول الترتيب */
 .admin-pcard-top{display:flex; align-items:center; justify-content:space-between; gap:6px;}

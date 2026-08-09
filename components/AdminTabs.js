@@ -8,12 +8,12 @@ const TABS = [
   { href: "/admin/dashboard", label: "لوحة المعلومات" },
   { href: "/admin", label: "المنتجات" },
   { href: "/admin/inventory", label: "المخزون", badge: "stock" },
-  { href: "/admin/settings", label: "الإعدادات" },
   { href: "/admin/orders", label: "طلبات الشراء", badge: "orders" },
   { href: "/admin/returns", label: "الاسترجاع والاستبدال", badge: "returns" },
   { href: "/admin/archive", label: "الأرشيف" },
   { href: "/admin/coupons", label: "كوبونات الخصم" },
   { href: "/admin/hero", label: "هيرو الرئيسية" },
+  { href: "/admin/settings", label: "الإعدادات" },
 ];
 
 export default function AdminTabs({ active }) {

@@ -300,14 +300,9 @@ export default function AdminInventoryPage() {
                     const state = r.qty === 0 ? "out" : r.qty <= lowThreshold ? "low" : "ok";
                     return (
                       <div key={id} className={`inv-size-box inv-chip-${state}`}>
-                        <span className="inv-size-label">{r.size || "مقاس واحد"}</span>
+                        <span className="inv-size-label">{r.size || "مقاس"}</span>
                         <div className="inv-qty">
-                          <button
-                            className="inv-step"
-                            onClick={() => setQty(r, r.qty - 1)}
-                            disabled={r.qty === 0 || savingKey === id}
-                            aria-label="نقص واحد"
-                          >−</button>
+                          {/* الكمية: اكتبها مباشرة أو استخدم السهمين */}
                           <input
                             type="number"
                             min="0"
@@ -316,12 +311,24 @@ export default function AdminInventoryPage() {
                             onChange={(e) => setQty(r, Number(e.target.value))}
                             disabled={savingKey === id}
                           />
-                          <button
-                            className="inv-step"
-                            onClick={() => setQty(r, r.qty + 1)}
-                            disabled={savingKey === id}
-                            aria-label="زود واحد"
-                          >+</button>
+                          <div className="inv-arrows">
+                            <button
+                              className="inv-arrow"
+                              onClick={() => setQty(r, r.qty + 1)}
+                              disabled={savingKey === id}
+                              aria-label="زود واحد"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 15l6-6 6 6" /></svg>
+                            </button>
+                            <button
+                              className="inv-arrow"
+                              onClick={() => setQty(r, r.qty - 1)}
+                              disabled={r.qty === 0 || savingKey === id}
+                              aria-label="نقص واحد"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );
