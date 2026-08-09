@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminTabs from "@/components/AdminTabs";
 import { showToast } from "@/components/Toast";
+import AdminCatFilter, { useAdminCatFilter } from "@/components/AdminCatFilter";
 import { stockKey, catLabel } from "@/lib/products";
 
 const LOW_KEY = "jv_low_stock_threshold";
@@ -33,6 +34,7 @@ function variantRows(p) {
 
 export default function AdminInventoryPage() {
   const [products, setProducts] = useState([]);
+  const { cat: catFilter, setCat: setCatFilter } = useAdminCatFilter();
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all"); // all | out | low | ok
   const [query, setQuery] = useState("");
@@ -40,6 +42,8 @@ export default function AdminInventoryPage() {
   const [savingKey, setSavingKey] = useState(null);
   const [moves, setMoves] = useState([]);
   const [showLog, setShowLog] = useState(false);
+  // اللون المختار لكل كود — عشان السطر يعرض مقاسات لون واحد في المرة
+  const [pickedColor, setPickedColor] = useState({});
 
   useEffect(() => {
     const saved = Number(localStorage.getItem(LOW_KEY));
@@ -70,12 +74,13 @@ export default function AdminInventoryPage() {
   const rows = useMemo(() => {
     const out = [];
     for (const p of products) {
+      if (catFilter !== "all" && p.cat !== catFilter) continue;
       for (const v of variantRows(p)) {
         out.push({ product: p, ...v });
       }
     }
     return out;
-  }, [products]);
+  }, [products, catFilter]);
 
   // بنجمّع الصفوف حسب كود القطعة: كل كود بيبقى سطر واحد فيه كل ألوانه ومقاساته.
   // المنتجات اللي مالهاش كود بتتعامل كل واحدة لوحدها (بنستخدم معرّفها كمفتاح مؤقت).
@@ -193,6 +198,8 @@ export default function AdminInventoryPage() {
         </button>
       </div>
 
+      <AdminCatFilter cat={catFilter} setCat={setCatFilter} />
+
       <div className="inv-controls">
         <input
           className="field-input"
@@ -233,7 +240,7 @@ export default function AdminInventoryPage() {
               ? "low"
               : "ok";
 
-            // بنجمّع تركيبات كل لون تحت بعض، عشان اللون يبقى سطر واحد بمقاساته
+            // بنجمّع تركيبات كل لون مع بعض
             const byColor = new Map();
             for (const r of g.items) {
               const c = r.color || "";
@@ -241,73 +248,85 @@ export default function AdminInventoryPage() {
               byColor.get(c).push(r);
             }
 
+            const groupId = g.code || g.label;
+            const colorKeys = [...byColor.keys()];
+            // اللون المختار، أو أول لون لو المستخدم ماختارش
+            const shownColor = colorKeys.includes(pickedColor[groupId])
+              ? pickedColor[groupId]
+              : colorKeys[0];
+            const shownItems = byColor.get(shownColor) || [];
+
             return (
-              <div key={g.code || g.label} className={`inv-line inv-line-${worst}`}>
-                {/* عمود التعريف: الكود والاسم */}
-                <div className="inv-line-id">
-                  {g.code ? (
-                    <span className="inv-code">{g.code}</span>
-                  ) : (
-                    <span className="inv-code-none">بدون كود</span>
-                  )}
-                  <span className="inv-group-name">{g.label}</span>
-                  <span className="inv-group-cat">{catLabel[g.cat] || "—"}</span>
+              <div key={g.code || g.label} className={`inv-row2 inv-row2-${worst}`}>
+                {/* الكود */}
+                {g.code ? (
+                  <span className="inv-code">{g.code}</span>
+                ) : (
+                  <span className="inv-code-none">بدون كود</span>
+                )}
+
+                {/* الاسم — رابط لصفحة المنتج باللون المعروض */}
+                <a
+                  className="inv-row2-name"
+                  href={`/product/${shownItems[0].product.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="افتح صفحة المنتج"
+                >
+                  {shownItems[0].product.name}
+                </a>
+
+                {/* اللون — قائمة منسدلة */}
+                {colorKeys.length > 1 ? (
+                  <select
+                    className="inv-color-select"
+                    value={shownColor}
+                    onChange={(e) =>
+                      setPickedColor((prev) => ({ ...prev, [groupId]: e.target.value }))
+                    }
+                  >
+                    {colorKeys.map((c) => (
+                      <option key={c || "__none"} value={c}>{c || "بدون لون"}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="inv-color-single">{shownColor || "بدون لون"}</span>
+                )}
+
+                {/* المقاسات وكمياتها */}
+                <div className="inv-row2-sizes">
+                  {shownItems.map((r) => {
+                    const id = `${r.product.id}:${r.key}`;
+                    const state = r.qty === 0 ? "out" : r.qty <= lowThreshold ? "low" : "ok";
+                    return (
+                      <div key={id} className={`inv-size-box inv-chip-${state}`}>
+                        <span className="inv-size-label">{r.size || "مقاس واحد"}</span>
+                        <div className="inv-qty">
+                          <button
+                            className="inv-step"
+                            onClick={() => setQty(r, r.qty - 1)}
+                            disabled={r.qty === 0 || savingKey === id}
+                            aria-label="نقص واحد"
+                          >−</button>
+                          <input
+                            type="number"
+                            min="0"
+                            className="inv-qty-input"
+                            value={r.qty}
+                            onChange={(e) => setQty(r, Number(e.target.value))}
+                            disabled={savingKey === id}
+                          />
+                          <button
+                            className="inv-step"
+                            onClick={() => setQty(r, r.qty + 1)}
+                            disabled={savingKey === id}
+                            aria-label="زود واحد"
+                          >+</button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-
-                {/* كل الألوان والمقاسات على نفس السطر */}
-                <div className="inv-line-variants">
-                  {[...byColor.entries()].map(([color, items]) => (
-                    <div className="inv-color-block" key={color || "__none"}>
-                      <a
-                        className="inv-color-link"
-                        href={`/product/${items[0].product.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="افتح صفحة المنتج بهذا اللون"
-                      >
-                        {color || "بدون لون"}
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M14 4h6v6" /><path d="M20 4L10 14" />
-                          <path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5" />
-                        </svg>
-                      </a>
-
-                      {items.map((r) => {
-                        const id = `${r.product.id}:${r.key}`;
-                        const state = r.qty === 0 ? "out" : r.qty <= lowThreshold ? "low" : "ok";
-                        return (
-                          <div key={id} className={`inv-size-chip inv-chip-${state}`}>
-                            <span className="inv-size-label">{r.size || "—"}</span>
-                            <div className="inv-qty">
-                              <button
-                                className="inv-step"
-                                onClick={() => setQty(r, r.qty - 1)}
-                                disabled={r.qty === 0 || savingKey === id}
-                                aria-label="نقص واحد"
-                              >−</button>
-                              <input
-                                type="number"
-                                min="0"
-                                className="inv-qty-input"
-                                value={r.qty}
-                                onChange={(e) => setQty(r, Number(e.target.value))}
-                                disabled={savingKey === id}
-                              />
-                              <button
-                                className="inv-step"
-                                onClick={() => setQty(r, r.qty + 1)}
-                                disabled={savingKey === id}
-                                aria-label="زود واحد"
-                              >+</button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-
-                <span className="inv-line-total">{total}</span>
               </div>
             );
           })}

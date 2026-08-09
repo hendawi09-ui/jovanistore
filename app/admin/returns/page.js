@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminTabs from "@/components/AdminTabs";
 import { showToast } from "@/components/Toast";
+import AdminCatFilter, { useAdminCatFilter, buildCatMap, orderMatchesCat } from "@/components/AdminCatFilter";
 
 const KIND_LABELS = { return: "استرجاع", exchange: "استبدال" };
 
@@ -25,10 +26,31 @@ export default function AdminReturnsPage() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  // طلب الاسترجاع مش بيخزّن قسم القطعة، فبنوصل له عن طريق الطلب الأصلي
+  const [orderCats, setOrderCats] = useState(new Map());
+  const { cat: catFilter, setCat: setCatFilter } = useAdminCatFilter();
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/returns");
+    const [res, oRes, pRes] = await Promise.all([
+      fetch("/api/returns"),
+      fetch("/api/orders"),
+      fetch("/api/products"),
+    ]);
     if (res.ok) setRows(await res.json());
+
+    if (oRes.ok && pRes.ok) {
+      const orders = await oRes.json();
+      const catMap = buildCatMap(await pRes.json());
+      // خريطة: رقم الطلب ← الأقسام اللي فيه
+      const m = new Map();
+      for (const o of orders || []) {
+        const cats = new Set(
+          (o.items || []).map((it) => catMap.get(String(it.productId))).filter(Boolean)
+        );
+        m.set(String(o.id), cats);
+      }
+      setOrderCats(m);
+    }
     setLoading(false);
   }, []);
 
@@ -44,10 +66,11 @@ export default function AdminReturnsPage() {
     return c;
   }, [rows]);
 
-  const visible = useMemo(
-    () => (filter === "all" ? rows : rows.filter((r) => (r.status || "new") === filter)),
-    [rows, filter]
-  );
+  const visible = useMemo(() => {
+    const byStatus = filter === "all" ? rows : rows.filter((r) => (r.status || "new") === filter);
+    if (catFilter === "all") return byStatus;
+    return byStatus.filter((r) => orderCats.get(String(r.order_id))?.has(catFilter));
+  }, [rows, filter, catFilter, orderCats]);
 
   async function setStatus(id, status) {
     const res = await fetch(`/api/returns/${id}`, {
@@ -66,7 +89,10 @@ export default function AdminReturnsPage() {
   }
 
   const tabs = (
-    <AdminTabs active="/admin/returns" />
+    <>
+      <AdminTabs active="/admin/returns" />
+      <AdminCatFilter cat={catFilter} setCat={setCatFilter} />
+    </>
   );
 
   if (loading) {

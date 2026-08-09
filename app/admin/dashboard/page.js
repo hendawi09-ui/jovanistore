@@ -4,6 +4,7 @@ import AdminTabs from "@/components/AdminTabs";
 import { useStore } from "@/lib/StoreContext";
 import { getTotalStock, stockKey, parseSize, effectivePrice } from "@/lib/products";
 import { IconSvg } from "@/lib/icons";
+import AdminCatFilter, { useAdminCatFilter, buildCatMap, orderMatchesCat } from "@/components/AdminCatFilter";
 
 const NON_REVENUE = ["cancelled", "returned"]; // حالات لا تُحتسب ضمن المبيعات
 
@@ -20,13 +21,25 @@ function egp(n) {
 }
 
 export default function AdminDashboardPage() {
-  const { products } = useStore();
-  const [orders, setOrders] = useState([]);
+  const { products: allProducts } = useStore();
+  const [allOrders, setAllOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { cat: catFilter, setCat: setCatFilter } = useAdminCatFilter();
+
+  // فلتر القسم: بيأثر على الأرقام كلها في الصفحة
+  const catMap = useMemo(() => buildCatMap(allProducts), [allProducts]);
+  const products = useMemo(
+    () => (catFilter === "all" ? allProducts : allProducts.filter((p) => p.cat === catFilter)),
+    [allProducts, catFilter]
+  );
+  const orders = useMemo(
+    () => allOrders.filter((o) => orderMatchesCat(o, catFilter, catMap)),
+    [allOrders, catFilter, catMap]
+  );
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/orders");
-    if (res.ok) setOrders(await res.json());
+    if (res.ok) setAllOrders(await res.json());
     setLoading(false);
   }, []);
 
@@ -128,7 +141,10 @@ export default function AdminDashboardPage() {
   const maxDaily = Math.max(...stats.daily.map(([, v]) => v), 1);
 
   const tabs = (
-    <AdminTabs active="/admin/dashboard" />
+    <>
+      <AdminTabs active="/admin/dashboard" />
+      <AdminCatFilter cat={catFilter} setCat={setCatFilter} />
+    </>
   );
 
   if (loading) {

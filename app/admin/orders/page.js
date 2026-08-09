@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminTabs from "@/components/AdminTabs";
 import { showToast } from "@/components/Toast";
 import { printShippingLabel } from "@/lib/shippingLabel";
+import AdminCatFilter, { useAdminCatFilter, buildCatMap, orderMatchesCat } from "@/components/AdminCatFilter";
 
 const STATUS_LABELS = {
   pending: "قيد الانتظار",
@@ -67,10 +68,17 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [catMap, setCatMap] = useState(new Map());
+  const { cat: catFilter, setCat: setCatFilter } = useAdminCatFilter();
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/orders");
+    // بنجيب المنتجات كمان عشان نعرف كل طلب فيه قطع من أي قسم
+    const [res, pRes] = await Promise.all([
+      fetch("/api/orders"),
+      fetch("/api/products"),
+    ]);
     if (res.ok) setOrders(await res.json());
+    if (pRes.ok) setCatMap(buildCatMap(await pRes.json()));
     setLoading(false);
   }, []);
 
@@ -103,9 +111,11 @@ export default function AdminOrdersPage() {
   }, [orders]);
 
   const visibleOrders = useMemo(() => {
-    const active = orders.filter((o) => !isArchived(o));
+    const active = orders
+      .filter((o) => !isArchived(o))
+      .filter((o) => orderMatchesCat(o, catFilter, catMap));
     return filter === "all" ? active : active.filter((o) => (o.status || "pending") === filter);
-  }, [orders, filter]);
+  }, [orders, filter, catFilter, catMap]);
 
   // في "الكل" بنستبعد الملغي من الإجمالي عشان الرقم يعبّر عن مبيعات حقيقية.
   // في أي فلتر تاني بنجمع كل اللي ظاهر (بما فيه فلتر "ملغي" نفسه).
@@ -155,7 +165,10 @@ export default function AdminOrdersPage() {
   );
 
   const tabs = (
-    <AdminTabs active="/admin/orders" />
+    <>
+      <AdminTabs active="/admin/orders" />
+      <AdminCatFilter cat={catFilter} setCat={setCatFilter} />
+    </>
   );
 
   if (loading) {

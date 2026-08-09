@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { showToast } from "@/components/Toast";
 import AdminTabs from "@/components/AdminTabs";
 import { printShippingLabel } from "@/lib/shippingLabel";
+import AdminCatFilter, { useAdminCatFilter, buildCatMap, orderMatchesCat } from "@/components/AdminCatFilter";
 
 const STATUS_LABELS = {
   pending: "قيد الانتظار",
@@ -44,10 +45,16 @@ function timeLabel(iso) {
 export default function AdminArchivePage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [catMap, setCatMap] = useState(new Map());
+  const { cat: catFilter, setCat: setCatFilter } = useAdminCatFilter();
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/orders");
+    const [res, pRes] = await Promise.all([
+      fetch("/api/orders"),
+      fetch("/api/products"),
+    ]);
     if (res.ok) setOrders(await res.json());
+    if (pRes.ok) setCatMap(buildCatMap(await pRes.json()));
     setLoading(false);
   }, []);
 
@@ -56,10 +63,12 @@ export default function AdminArchivePage() {
   // الأرشيف: طلبات اتسلّمت وعدّى عليها أكتر من مدة الاسترجاع
   const archived = useMemo(
     () =>
-      orders.filter(
-        (o) => (o.status || "pending") === "delivered" && daysSinceDelivery(o) > ARCHIVE_AFTER_DAYS
-      ),
-    [orders]
+      orders
+        .filter(
+          (o) => (o.status || "pending") === "delivered" && daysSinceDelivery(o) > ARCHIVE_AFTER_DAYS
+        )
+        .filter((o) => orderMatchesCat(o, catFilter, catMap)),
+    [orders, catFilter, catMap]
   );
 
   const total = useMemo(
@@ -103,6 +112,7 @@ export default function AdminArchivePage() {
   return (
     <div className="admin-wrap">
       <AdminTabs active="/admin/archive" />
+      <AdminCatFilter cat={catFilter} setCat={setCatFilter} />
 
       <div className="section-head" style={{ margin: "0 0 16px", padding: 0 }}>
         <h2>الأرشيف ({archived.length})</h2>

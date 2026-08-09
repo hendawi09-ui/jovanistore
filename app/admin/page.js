@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import AdminTabs from "@/components/AdminTabs";
+import AdminCatFilter, { useAdminCatFilter } from "@/components/AdminCatFilter";
 import { useStore } from "@/lib/StoreContext";
 import { icons } from "@/lib/icons";
 import { catCssVar, catLabel, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent, matchesQuery } from "@/lib/products";
@@ -358,7 +359,11 @@ export default function AdminPage() {
 
   // بحث في الاسم، الوصف، اسم اللون، كود المجموعة، والمقاسات
   const q = query.trim();
+  const { cat: catFilter, setCat: setCatFilter } = useAdminCatFilter();
+
   function matches(p) {
+    // فلتر القسم مشترك مع باقي صفحات لوحة التحكم
+    if (catFilter !== "all" && p.cat !== catFilter) return false;
     if (!q) return true;
     const hay = [p.name, p.desc, p.colorName, p.groupKey, ...(p.sizes || [])]
       .filter(Boolean)
@@ -480,6 +485,8 @@ export default function AdminPage() {
           {editingId ? "حفظ التعديلات" : "إضافة المنتج"}
         </button>
       </form>
+
+      <AdminCatFilter cat={catFilter} setCat={setCatFilter} />
 
       <div className="admin-search">
         <div className="admin-search-box">
