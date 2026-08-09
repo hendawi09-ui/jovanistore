@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import AdminTabs from "@/components/AdminTabs";
 import { useStore } from "@/lib/StoreContext";
-import { IconSvg, icons } from "@/lib/icons";
+import { icons } from "@/lib/icons";
 import { catCssVar, catLabel, parseSize, stockKey, getTotalStock, hasDiscount, discountPercent, matchesQuery } from "@/lib/products";
 import { showToast } from "@/components/Toast";
 import { compressImage, compressionLabel } from "@/lib/compressImage";
@@ -290,7 +290,7 @@ export default function AdminPage() {
           {p.images && p.images[0] ? (
             <img src={p.images[0]} alt="" />
           ) : (
-            <div className="icon-box"><IconSvg name={p.icon} /></div>
+            <div className="admin-pcard-noimg">لا توجد صورة</div>
           )}
           <span className="admin-pcard-tag">{catLabel[p.cat]}</span>
           <span className={`pub-badge ${isPublished ? "pub-yes" : "pub-no"}`}>

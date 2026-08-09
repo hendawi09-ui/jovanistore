@@ -69,6 +69,7 @@ export default function AdminHeroPage() {
         badge: s.badge,
         image: s.image,
         imageMobile: s.imageMobile,
+        cat: s.cat || "all",
       }),
     });
     showToast(res.ok ? "تم الحفظ" : "حدث خطأ أثناء الحفظ");
@@ -312,10 +313,24 @@ export default function AdminHeroPage() {
                       onChange={(e) => updateLocal(s.id, { ctaLink: e.target.value })} />
                   </div>
                 </div>
-                <div>
-                  <span className="field-label">شارة اختيارية (زي: خصم 30%)</span>
-                  <input className="field-input" value={s.badge || ""} placeholder="سيبها فاضية لو مفيش"
-                    onChange={(e) => updateLocal(s.id, { badge: e.target.value })} />
+                <div className="field-row">
+                  <div>
+                    <span className="field-label">شارة اختيارية (زي: خصم 30%)</span>
+                    <input className="field-input" value={s.badge || ""} placeholder="سيبها فاضية لو مفيش"
+                      onChange={(e) => updateLocal(s.id, { badge: e.target.value })} />
+                  </div>
+                  <div>
+                    <span className="field-label">تظهر في</span>
+                    <select
+                      className="field-input"
+                      value={s.cat || "all"}
+                      onChange={(e) => updateLocal(s.id, { cat: e.target.value })}
+                    >
+                      <option value="all">كل الأوضاع</option>
+                      <option value="women">النسائي فقط</option>
+                      <option value="men">الرجالي فقط</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="hcard-actions">
                   <button className="save-btn" onClick={() => handleSave(s)}>حفظ التعديل</button>

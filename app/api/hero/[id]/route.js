@@ -6,6 +6,7 @@ export async function PATCH(req, { params }) {
   const body = await req.json();
   const update = {};
   if ("image" in body) update.image_url = body.image || null;
+  if ("cat" in body) update.cat = body.cat || "all";
   if ("imageMobile" in body) update.image_mobile_url = body.imageMobile || null;
   if ("title" in body) update.title = body.title || "";
   if ("description" in body) update.description = body.description || "";

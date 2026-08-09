@@ -1,9 +1,11 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useStore } from "@/lib/StoreContext";
 
 export default function HeroSlider() {
-  const [slides, setSlides] = useState([]);
+  const { storeMode } = useStore();
+  const [allSlides, setAllSlides] = useState([]);
   const [enabled, setEnabled] = useState(true);
   const [loaded, setLoaded] = useState(false);
 
@@ -13,11 +15,16 @@ export default function HeroSlider() {
       .then((data) => {
         setEnabled(data?.enabled !== false);
         const list = Array.isArray(data?.slides) ? data.slides : [];
-        setSlides(list.filter((s) => s.published));
+        setAllSlides(list.filter((s) => s.published));
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
   }, []);
+
+  // في وضع القسم الواحد، بنعرض السلايدات المخصّصة للقسم ده أو العامة بس
+  const slides = storeMode === "all"
+    ? allSlides
+    : allSlides.filter((s) => !s.cat || s.cat === "all" || s.cat === storeMode);
 
   // ---------- الديسك توب: بانر كبير + نقاط ----------
   const [dIdx, setDIdx] = useState(0);

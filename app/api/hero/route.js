@@ -12,6 +12,8 @@ function toClient(row) {
     ctaLabel: row.cta_label || "",
     ctaLink: row.cta_link || "#",
     badge: row.badge || null,
+    // القسم اللي السلايدة تخصّه: all | men | women — بيتحكم في ظهورها حسب وضع المتجر
+    cat: row.cat || "all",
     sortOrder: row.sort_order,
     published: row.published !== false,
   };
@@ -86,6 +88,7 @@ export async function POST(req) {
       {
         image_url: body.image || null,
         image_mobile_url: body.imageMobile || null,
+        cat: body.cat || "all",
         title: body.title || "",
         description: body.description || "",
         cta_label: body.ctaLabel || "",
