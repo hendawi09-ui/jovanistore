@@ -13,12 +13,9 @@ const noCache = {
   "Vercel-CDN-Cache-Control": "no-store",
 };
 
-// عام — الواجهة بتقراها عشان تعرف تعرض إيه.
-// لو ضفت ?debug=1 بترجع تفاصيل تشخيصية تساعدنا نعرف مصدر أي مشكلة.
-export async function GET(req) {
-  const debug = new URL(req.url).searchParams.get("debug") === "1";
-
-  const { data, error } = await supabase
+// عام — الواجهة بتقراها عشان تعرف تعرض إيه
+export async function GET() {
+  const { data } = await supabase
     .from("site_settings")
     .select("key, value")
     .eq("key", KEY)
@@ -26,23 +23,6 @@ export async function GET(req) {
 
   const raw = data?.value ?? null;
   const mode = VALID.includes(raw) ? raw : "all";
-
-  if (debug) {
-    return NextResponse.json(
-      {
-        mode,
-        _debug: {
-          rawValue: raw,
-          rowFound: !!data,
-          dbError: error ? error.message : null,
-          hasUrl: !!process.env.SUPABASE_URL,
-          hasKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-          time: new Date().toISOString(),
-        },
-      },
-      { headers: noCache }
-    );
-  }
 
   return NextResponse.json({ mode }, { headers: noCache });
 }

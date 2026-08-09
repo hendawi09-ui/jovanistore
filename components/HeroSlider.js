@@ -10,7 +10,7 @@ export default function HeroSlider() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    fetch("/api/hero")
+    fetch("/api/hero", { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         setEnabled(data?.enabled !== false);
