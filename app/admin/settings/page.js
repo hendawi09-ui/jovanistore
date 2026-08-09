@@ -30,7 +30,7 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/store-mode");
+    const res = await fetch("/api/store-mode", { cache: "no-store" });
     if (res.ok) {
       const d = await res.json();
       if (d?.mode) setMode(d.mode);
