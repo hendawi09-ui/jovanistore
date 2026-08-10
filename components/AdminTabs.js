@@ -10,6 +10,7 @@ const TABS = [
   { href: "/admin/inventory", label: "المخزون", badge: "stock" },
   { href: "/admin/orders", label: "طلبات الشراء", badge: "orders" },
   { href: "/admin/returns", label: "الاسترجاع والاستبدال", badge: "returns" },
+  { href: "/admin/alerts", label: "تنبيهات التوفر", badge: "alerts" },
   { href: "/admin/archive", label: "الأرشيف" },
   { href: "/admin/coupons", label: "كوبونات الخصم" },
   { href: "/admin/hero", label: "هيرو الرئيسية" },
@@ -18,7 +19,7 @@ const TABS = [
 
 export default function AdminTabs({ active }) {
   const router = useRouter();
-  const [counts, setCounts] = useState({ orders: 0, returns: 0, stock: 0 });
+  const [counts, setCounts] = useState({ orders: 0, returns: 0, stock: 0, alerts: 0 });
 
   async function handleLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -29,10 +30,11 @@ export default function AdminTabs({ active }) {
     let alive = true;
     (async () => {
       try {
-        const [o, r, prods] = await Promise.all([
+        const [o, r, prods, alerts] = await Promise.all([
           fetch("/api/orders").then((x) => (x.ok ? x.json() : [])),
           fetch("/api/returns").then((x) => (x.ok ? x.json() : [])),
           fetch("/api/products").then((x) => (x.ok ? x.json() : [])),
+          fetch("/api/stock-alerts").then((x) => (x.ok ? x.json() : [])),
         ]);
         if (!alive) return;
 
@@ -50,6 +52,7 @@ export default function AdminTabs({ active }) {
           orders: Array.isArray(o) ? o.filter((x) => (x.status || "pending") === "pending").length : 0,
           returns: Array.isArray(r) ? r.filter((x) => (x.status || "new") === "new").length : 0,
           stock: needAttention,
+          alerts: Array.isArray(alerts) ? alerts.filter((x) => !x.notified).length : 0,
         });
       } catch {
         /* العدّادات مش حرجة — لو فشلت الصفحة بتشتغل عادي */

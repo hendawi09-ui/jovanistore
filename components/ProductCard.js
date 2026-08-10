@@ -9,7 +9,7 @@ import QuickAddModal from "./QuickAddModal";
 
 export default function ProductCard({ p, swipeEnabled = true }) {
   const ref = useRef(null);
-  const { addToCart, isFavorite, toggleFavorite, isInCart, removeProductFromCart } = useStore();
+  const { products, addToCart, isFavorite, toggleFavorite, isInCart, removeProductFromCart } = useStore();
   const images = p.images && p.images.length > 0 ? p.images : [];
   const [active, setActive] = useState(0);
   const [quickOpen, setQuickOpen] = useState(false);
@@ -20,6 +20,11 @@ export default function ProductCard({ p, swipeEnabled = true }) {
   const hasVariants = p.sizes?.length > 0; // اللون بقى منتج مستقل، فالاختيار السريع للمقاسات بس
   const soldOut = getTotalStock(p) === 0;
   const inCart = isInCart(p.id); // بنظلّل البطاقة لو المنتج في السلة
+
+  // ألوان نفس القطعة — كل لون منتج مستقل بيربطه كود المجموعة
+  const siblings = p.groupKey
+    ? products.filter((x) => x.groupKey === p.groupKey && x.published !== false)
+    : [];
 
   const touchX = useRef(null);
   const swiped = useRef(false);
@@ -160,6 +165,28 @@ export default function ProductCard({ p, swipeEnabled = true }) {
       <div className="card-body" style={{ "--c": `var(${catCssVar[p.cat]})` }}>
         <h3>{p.name}</h3>
         <div className="desc">{p.desc}</div>
+
+        {/* ألوان نفس القطعة — الزائر يشوف بنظرة إن فيه ألوان تانية */}
+        {siblings.length > 1 && (
+          <div className="card-swatches">
+            {siblings.slice(0, 5).map((sib) => (
+              <span
+                key={sib.id}
+                className={`card-swatch ${sib.id === p.id ? "active" : ""}`}
+                title={sib.colorName || sib.name}
+              >
+                {sib.images && sib.images[0] ? (
+                  <img src={sib.images[0]} alt="" loading="lazy" />
+                ) : (
+                  <span className="card-swatch-fill" />
+                )}
+              </span>
+            ))}
+            {siblings.length > 5 && (
+              <span className="card-swatch-more">+{siblings.length - 5}</span>
+            )}
+          </div>
+        )}
         <div className="card-foot">
           <div className="price">
             {hasDiscount(p) ? (

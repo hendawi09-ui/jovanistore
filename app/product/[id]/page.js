@@ -6,6 +6,7 @@ import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
 import { catCssVar, catLabel, parseSize, getStock, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { addRecent } from "@/lib/recentViews";
+import NotifyMeButton from "@/components/NotifyMeButton";
 import { showToast } from "@/components/Toast";
 import ShareButton from "@/components/ShareButton";
 import SuggestedProducts from "@/components/SuggestedProducts";
@@ -240,14 +241,19 @@ export default function ProductDetailPage() {
             +
           </button>
         </div>
-        <div className="pd-actions">
-          <button className="btn-primary" onClick={handleBuyNow} disabled={soldOut || currentStock === 0}>
-            اشترِ الآن
-          </button>
-          <button className="btn-outline" onClick={handleAddToCart} disabled={soldOut || currentStock === 0}>
-            أضف إلى السلة
-          </button>
-        </div>
+        {/* لو المقاس نافد، بنعرض تسجيل التنبيه بدل أزرار الشراء المعطّلة */}
+        {soldOut || currentStock === 0 ? (
+          <NotifyMeButton product={p} size={size} color={productColor} />
+        ) : (
+          <div className="pd-actions">
+            <button className="btn-primary" onClick={handleBuyNow}>
+              اشترِ الآن
+            </button>
+            <button className="btn-outline" onClick={handleAddToCart}>
+              أضف إلى السلة
+            </button>
+          </div>
+        )}
 
         <ShareButton title={p.name} text={`${hasDiscount(p) ? p.salePrice : p.price} ج.م — Jovani Store`} />
       </div>

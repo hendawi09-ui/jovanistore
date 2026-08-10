@@ -354,6 +354,7 @@
 .tab-count.tc-orders{background:#1A8A47;}
 .tab-count.tc-returns{background:var(--red);}
 .tab-count.tc-stock{background:#B7791F;}
+.tab-count.tc-alerts{background:#5B4FBF;}
 
 /* ===================== إدارة المخزون ===================== */
 .inv-summary{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px;}
