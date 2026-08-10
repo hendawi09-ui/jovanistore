@@ -131,7 +131,7 @@ function HomeContent() {
         .slice(0, 8)
     : [];
 
-  // شوهدت مؤخرًا — بترتيب آخر مشاهدة
+  // شاهدت مؤخرًا — بترتيب آخر مشاهدة
   const recentlyViewed = !q && activeCat === "all"
     ? recentIds
         .map((id) => products.find((p) => String(p.id) === id))
@@ -209,7 +209,7 @@ function HomeContent() {
       {recentlyViewed.length > 0 && (
         <>
           <div className="section-head" style={{ marginTop: 8 }}>
-            <h2>👀 شوهدت مؤخرًا</h2>
+            <h2>👀 شاهدت مؤخرًا</h2>
           </div>
           <NewArrivalsRow products={recentlyViewed} />
         </>

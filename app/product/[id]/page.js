@@ -42,7 +42,7 @@ export default function ProductDetailPage() {
     if (!p || viewedRef.current === p.id) return;
     viewedRef.current = p.id;
     fetch(`/api/products/${p.id}/view`, { method: "POST" }).catch(() => {});
-    addRecent(p.id); // بنسجّلها كمان في متصفح الزائر لصف "شوهدت مؤخرًا"
+    addRecent(p.id); // بنسجّلها كمان في متصفح الزائر لصف "شاهدت مؤخرًا"
   }, [p?.id]);
 
   // لما اللون يتغيّر، نختار أول مقاس متاح فعليًا لهذا اللون
