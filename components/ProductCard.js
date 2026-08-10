@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { IconSvg } from "@/lib/icons";
 import { catCssVar, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
 import { useStore } from "@/lib/StoreContext";
@@ -8,6 +9,7 @@ import { showToast } from "./Toast";
 import QuickAddModal from "./QuickAddModal";
 
 export default function ProductCard({ p, swipeEnabled = true }) {
+  const router = useRouter();
   const ref = useRef(null);
   const { products, addToCart, isFavorite, toggleFavorite, isInCart, removeProductFromCart } = useStore();
   const images = p.images && p.images.length > 0 ? p.images : [];
@@ -170,17 +172,25 @@ export default function ProductCard({ p, swipeEnabled = true }) {
         {siblings.length > 1 && (
           <div className="card-swatches">
             {siblings.slice(0, 5).map((sib) => (
-              <span
+              <button
+                type="button"
                 key={sib.id}
                 className={`card-swatch ${sib.id === p.id ? "active" : ""}`}
                 title={sib.colorName || sib.name}
+                aria-label={sib.colorName || sib.name}
+                onClick={(e) => {
+                  // البطاقة كلها رابط، فبنمنع فتحها ونروح لصفحة اللون ده بدالها
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (sib.id !== p.id) router.push(`/product/${sib.id}`);
+                }}
               >
                 {sib.images && sib.images[0] ? (
                   <img src={sib.images[0]} alt="" loading="lazy" />
                 ) : (
                   <span className="card-swatch-fill" />
                 )}
-              </span>
+              </button>
             ))}
             {siblings.length > 5 && (
               <span className="card-swatch-more">+{siblings.length - 5}</span>

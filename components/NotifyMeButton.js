@@ -1,17 +1,21 @@
 "use client";
 import { useState } from "react";
+import { useStore } from "@/lib/StoreContext";
 import { showToast } from "./Toast";
 
 // زرار "عرّفني لما يتوفر" — بيظهر مكان زرار الشراء لما المقاس يكون نافد.
-// بناخد رقم الواتساب (إجباري) والإيميل (اختياري) عشان نقدر نتواصل بالطريقتين.
+// لو الزبون مسجّل دخول، بناخد بياناته على طول من غير ما نسأله تاني.
 export default function NotifyMeButton({ product, size, color }) {
+  const { account } = useStore();
   const [open, setOpen] = useState(false);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
+  const [done, setDone] = useState(false);
 
-  async function submit(e) {
-    e.preventDefault();
+  const signedIn = Boolean(account?.phone);
+
+  async function register(usePhone, useEmail) {
     if (sending) return;
     setSending(true);
 
@@ -21,8 +25,8 @@ export default function NotifyMeButton({ product, size, color }) {
       body: JSON.stringify({
         productId: product.id,
         productName: product.name,
-        phone,
-        email,
+        phone: usePhone,
+        email: useEmail,
         size: size || "",
         color: color || product.colorName || "",
       }),
@@ -38,12 +42,34 @@ export default function NotifyMeButton({ product, size, color }) {
 
     showToast(
       data.already
-        ? "رقمك مسجّل بالفعل — هنبعتلك أول ما يتوفر"
+        ? "إنت مسجّل بالفعل — هنبعتلك أول ما يتوفر"
         : "تمام ✓ هنبعتلك رسالة أول ما المقاس يتوفر"
     );
+    setDone(true);
     setOpen(false);
     setPhone("");
     setEmail("");
+  }
+
+  if (done) {
+    return (
+      <div className="notify-done">
+        ✓ سجّلناك — هنبعتلك أول ما {size ? `مقاس ${size}` : "المنتج"} يتوفر
+      </div>
+    );
+  }
+
+  // الزبون مسجّل دخول → تسجيل مباشر بضغطة واحدة
+  if (signedIn) {
+    return (
+      <button
+        className="notify-btn"
+        disabled={sending}
+        onClick={() => register(account.phone, account.email || "")}
+      >
+        {sending ? "جارٍ التسجيل..." : "🔔 عرّفني لما يتوفر"}
+      </button>
+    );
   }
 
   if (!open) {
@@ -55,7 +81,13 @@ export default function NotifyMeButton({ product, size, color }) {
   }
 
   return (
-    <form className="notify-form" onSubmit={submit}>
+    <form
+      className="notify-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        register(phone, email);
+      }}
+    >
       <p className="notify-hint">
         سيب بياناتك وهنبعتلك رسالة واتساب أول ما {size ? `مقاس ${size}` : "المنتج"} يرجع يتوفر.
       </p>
