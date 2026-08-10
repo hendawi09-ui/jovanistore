@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
 import { IconSvg } from "@/lib/icons";
 import { catCssVar, catLabel, parseSize, getStock, getTotalStock, hasDiscount, discountPercent } from "@/lib/products";
+import { addRecent } from "@/lib/recentViews";
 import { showToast } from "@/components/Toast";
 import ShareButton from "@/components/ShareButton";
 import SuggestedProducts from "@/components/SuggestedProducts";
@@ -41,6 +42,7 @@ export default function ProductDetailPage() {
     if (!p || viewedRef.current === p.id) return;
     viewedRef.current = p.id;
     fetch(`/api/products/${p.id}/view`, { method: "POST" }).catch(() => {});
+    addRecent(p.id); // بنسجّلها كمان في متصفح الزائر لصف "شوهدت مؤخرًا"
   }, [p?.id]);
 
   // لما اللون يتغيّر، نختار أول مقاس متاح فعليًا لهذا اللون

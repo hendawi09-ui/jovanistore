@@ -1002,3 +1002,61 @@ footer p{color:#B9B6CC; font-size:14px; max-width:320px;}
   .suggest{padding:0 18px 40px;}
   .suggest-grid{grid-template-columns:repeat(2,1fr); gap:13px;}
 }
+
+/* ===== شريط فلاتر المتجر (مقاس · سعر · ترتيب) ===== */
+.shop-filters{
+  max-width:1400px; margin:0 auto 4px; padding:14px 16px;
+  display:flex; align-items:center; gap:22px; flex-wrap:wrap;
+}
+.sf-group{display:flex; align-items:center; gap:9px;}
+.sf-label{font-size:12.5px; font-weight:700; color:var(--muted); white-space:nowrap;}
+.sf-label strong{color:var(--ink); font-weight:800;}
+
+.sf-sizes{display:flex; gap:6px; flex-wrap:wrap;}
+.sf-size{
+  min-width:38px; padding:6px 11px; border-radius:9px;
+  border:1.5px solid var(--line); background:#fff;
+  font-size:12.5px; font-weight:700; color:var(--ink-soft);
+  transition:background .2s, color .2s, border-color .2s;
+}
+.sf-size:hover{border-color:var(--ink);}
+.sf-size.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+.sf-price-group{flex:1; min-width:210px; max-width:320px;}
+.sf-range{
+  flex:1; height:4px; border-radius:999px; background:var(--line);
+  -webkit-appearance:none; appearance:none; cursor:pointer;
+}
+.sf-range::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:16px; height:16px; border-radius:50%; background:var(--ink);
+  border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.25); cursor:pointer;
+}
+.sf-range::-moz-range-thumb{
+  width:16px; height:16px; border-radius:50%; background:var(--ink);
+  border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.25); cursor:pointer;
+}
+
+.sf-sort{
+  border:1.5px solid var(--line); border-radius:9px; padding:7px 11px;
+  font-family:inherit; font-size:12.5px; font-weight:700; color:var(--ink-soft);
+  background:#fff; cursor:pointer;
+}
+.sf-sort:focus{outline:none; border-color:var(--ink);}
+
+.sf-reset{
+  background:var(--paper-dim); color:var(--ink-soft); border-radius:999px;
+  padding:7px 15px; font-size:12.5px; font-weight:700; white-space:nowrap;
+  transition:background .2s, color .2s;
+}
+.sf-reset:hover{background:var(--red); color:#fff;}
+
+@media (max-width:768px){
+  .shop-filters{gap:14px; padding:12px 16px;}
+  .sf-group{width:100%;}
+  .sf-price-group{max-width:none;}
+  .sf-sizes{flex:1;}
+  .sf-size{flex:1; min-width:44px;}
+  .sf-sort{flex:1;}
+  .sf-reset{width:100%;}
+}

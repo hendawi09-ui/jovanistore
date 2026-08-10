@@ -2,10 +2,12 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useStore } from "@/lib/StoreContext";
-import { cats, catLabel, parseSize, matchesQuery, hasDiscount } from "@/lib/products";
+import { cats, catLabel, parseSize, matchesQuery, hasDiscount, effectivePrice } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import HeroSlider from "@/components/HeroSlider";
 import NewArrivalsRow from "@/components/NewArrivalsRow";
+import ShopFilters from "@/components/ShopFilters";
+import { readRecent } from "@/lib/recentViews";
 import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 
 function HomeContent() {
@@ -14,6 +16,11 @@ function HomeContent() {
   const [activeCat, setActiveCat] = useState("all");
   const [query, setQuery] = useState("");
   const [bestIds, setBestIds] = useState([]);
+  const [recentIds, setRecentIds] = useState([]);
+  // فلاتر المتجر
+  const [activeSizes, setActiveSizes] = useState([]);
+  const [price, setPrice] = useState(0);
+  const [sort, setSort] = useState("default");
 
   // بنجيب ترتيب الأكثر مبيعًا (محسوب من الطلبات الفعلية على السيرفر)
   useEffect(() => {
@@ -22,6 +29,9 @@ function HomeContent() {
       .then((d) => setBestIds(Array.isArray(d) ? d.map((x) => x.id) : []))
       .catch(() => setBestIds([]));
   }, []);
+
+  // المنتجات اللي الزائر بصّ عليها (من متصفحه)
+  useEffect(() => { setRecentIds(readRecent()); }, []);
 
   useEffect(() => {
     const c = searchParams.get("cat");
@@ -50,8 +60,33 @@ function HomeContent() {
     ? cats
     : cats.filter((c) => c.id === "all" || c.id === "sale");
 
+  // كل المقاسات وأعلى سعر في المنتجات المعروضة — بنبني منهم الفلاتر
+  const publishedProducts = products.filter((p) => p.published !== false);
+  const allSizes = [
+    ...new Set(
+      publishedProducts.flatMap((p) => (p.sizes || []).map((sz) => parseSize(sz).name))
+    ),
+  ];
+  const priceMax = Math.max(0, ...publishedProducts.map((p) => effectivePrice(p)));
+
+  // أول ما نعرف أعلى سعر، بنخلي السقف عنده (يعني مفيش فلتر شغّال)
+  useEffect(() => {
+    if (priceMax > 0) setPrice(priceMax);
+  }, [priceMax]);
+
+  function toggleSize(sz) {
+    setActiveSizes((prev) =>
+      prev.includes(sz) ? prev.filter((x) => x !== sz) : [...prev, sz]
+    );
+  }
+
+  function resetFilters() {
+    setActiveSizes([]);
+    setPrice(priceMax);
+  }
+
   const q = query.trim();
-  const list = products.filter((p) => {
+  const listUnsorted = products.filter((p) => {
     if (p.published === false) return false;
     if (activeCat === "sale") {
       if (!hasDiscount(p)) return false;
@@ -70,6 +105,22 @@ function HomeContent() {
       .join(" ");
     // كل كلمات البحث لازم تظهر (أي عدد كلمات)، مع تجاهل اختلاف شكل الحروف العربية
     return matchesQuery(haystack, q);
+  })
+  // فلتر المقاس: المنتج يظهر لو عنده أي مقاس من المختارين
+  .filter((p) => {
+    if (activeSizes.length === 0) return true;
+    const names = (p.sizes || []).map((sz) => parseSize(sz).name);
+    return activeSizes.some((sz) => names.includes(sz));
+  })
+  // فلتر السعر
+  .filter((p) => priceMax === 0 || effectivePrice(p) <= price);
+
+  // الترتيب
+  const list = [...listUnsorted].sort((a, b) => {
+    if (sort === "price-asc") return effectivePrice(a) - effectivePrice(b);
+    if (sort === "price-desc") return effectivePrice(b) - effectivePrice(a);
+    if (sort === "newest") return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    return 0; // الترتيب الافتراضي زي ما هو جاي من لوحة التحكم
   });
 
   // أحدث 8 منتجات (حسب تاريخ الإضافة) — بتظهر بس في العرض الافتراضي من غير فلترة أو بحث
@@ -77,6 +128,14 @@ function HomeContent() {
     ? [...products]
         .filter((p) => p.published !== false)
         .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        .slice(0, 8)
+    : [];
+
+  // شوهدت مؤخرًا — بترتيب آخر مشاهدة
+  const recentlyViewed = !q && activeCat === "all"
+    ? recentIds
+        .map((id) => products.find((p) => String(p.id) === id))
+        .filter((p) => p && p.published !== false)
         .slice(0, 8)
     : [];
 
@@ -147,6 +206,15 @@ function HomeContent() {
         </>
       )}
 
+      {recentlyViewed.length > 0 && (
+        <>
+          <div className="section-head" style={{ marginTop: 8 }}>
+            <h2>👀 شوهدت مؤخرًا</h2>
+          </div>
+          <NewArrivalsRow products={recentlyViewed} />
+        </>
+      )}
+
       <div className="cats">
         {visibleCats.map((c) => (
           <button
@@ -160,6 +228,19 @@ function HomeContent() {
           </button>
         ))}
       </div>
+
+      <ShopFilters
+        sizes={allSizes}
+        activeSizes={activeSizes}
+        toggleSize={toggleSize}
+        priceMax={priceMax}
+        price={price}
+        setPrice={setPrice}
+        sort={sort}
+        setSort={setSort}
+        onReset={resetFilters}
+        resultCount={list.length}
+      />
 
       <div className="section-head" id="products">
         <h2>{q ? "نتائج البحث" : "الأحدث في المتجر"}</h2>
