@@ -9,6 +9,7 @@ export async function POST(req) {
   const productId = body.productId;
   const phone = String(body.phone || "").replace(/\D/g, "");
   const size = String(body.size || "").trim();
+  const email = String(body.email || "").trim();
 
   if (!productId) {
     return NextResponse.json({ error: "المنتج غير محدد" }, { status: 400 });
@@ -36,6 +37,7 @@ export async function POST(req) {
       product_id: productId,
       product_name: body.productName || null,
       phone,
+      email: email || null,
       size: size || "",
       color: body.color || null,
     },

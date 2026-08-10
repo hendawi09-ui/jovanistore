@@ -7,6 +7,7 @@ export default function AdminAlertsPage() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("waiting"); // waiting | done | all
+  const [sendingId, setSendingId] = useState(null);
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/stock-alerts", { cache: "no-store" });
@@ -15,6 +16,40 @@ export default function AdminAlertsPage() {
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
+
+  // رسالة الواتساب الجاهزة — بتفتح واتساب برقم الزبون والنص مكتوب
+  function waLink(r) {
+    let n = String(r.phone || "").replace(/\D/g, "");
+    if (n.startsWith("0")) n = "20" + n.slice(1);      // 01xxx → 201xxx
+    else if (!n.startsWith("20")) n = "20" + n;
+    const details = [r.color, r.size].filter(Boolean).join(" · ");
+    const link = `https://www.jovani-store.com/product/${r.product_id}`;
+    const msg =
+      `أهلًا! 👋\n\n` +
+      `المنتج اللي كنت مستنيه رجع متوفر:\n` +
+      `*${r.product_name || "المنتج"}*` + (details ? `\n${details}` : "") + `\n\n` +
+      `تقدر تطلبه من هنا:\n${link}\n\n` +
+      `الكميات محدودة 🌟\nJovani Store`;
+    return `https://wa.me/${n}?text=${encodeURIComponent(msg)}`;
+  }
+
+  async function sendEmail(r) {
+    if (!r.email) return showToast("الزبون ما سابش إيميل — استخدم الواتساب");
+    setSendingId(r.id);
+    const res = await fetch("/api/stock-alerts/notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: r.id }),
+    });
+    const data = await res.json().catch(() => ({}));
+    setSendingId(null);
+    if (res.ok) {
+      showToast("الإيميل اتبعت ✓");
+      refresh();
+    } else {
+      showToast(data.error || "فشل الإرسال");
+    }
+  }
 
   async function markDone(id) {
     const res = await fetch("/api/stock-alerts", {
@@ -81,8 +116,9 @@ export default function AdminAlertsPage() {
                 <th>المنتج</th>
                 <th>المقاس</th>
                 <th>اللون</th>
-                <th>رقم الموبايل</th>
-                <th></th>
+                <th>الواتساب</th>
+                <th>الإيميل</th>
+                <th>التواصل</th>
               </tr>
             </thead>
             <tbody>
@@ -97,16 +133,32 @@ export default function AdminAlertsPage() {
                   <td className="inv-name">{r.product_name || `#${r.product_id}`}</td>
                   <td>{r.size || "—"}</td>
                   <td>{r.color || "—"}</td>
-                  <td>
-                    <a className="alert-phone" href={`tel:${r.phone}`}>{r.phone}</a>
-                  </td>
+                  <td><span className="alert-phone">{r.phone}</span></td>
+                  <td className="alert-email">{r.email || "—"}</td>
                   <td>
                     {r.notified ? (
                       <span className="alert-badge">تم ✓</span>
                     ) : (
-                      <button className="pub-btn" onClick={() => markDone(r.id)}>
-                        كلّمته
-                      </button>
+                      <div className="alert-actions">
+                        <a
+                          className="alert-wa"
+                          href={waLink(r)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => markDone(r.id)}
+                          title="ابعت رسالة واتساب"
+                        >
+                          واتساب
+                        </a>
+                        <button
+                          className="alert-mail"
+                          onClick={() => sendEmail(r)}
+                          disabled={!r.email || sendingId === r.id}
+                          title={r.email ? "ابعت إيميل" : "مفيش إيميل"}
+                        >
+                          {sendingId === r.id ? "..." : "إيميل"}
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
